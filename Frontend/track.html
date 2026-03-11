@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YUbus | Live Tracking</title>
+    <link rel="stylesheet" href="track.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+</head>
+<body>
+    <div class="track-page">
+        <div class="track-topbar">
+            <a href="index.html" class="track-back"><i class="fa-solid fa-arrow-left"></i> Back</a>
+            <span class="track-live-pill"><span class="pulse-dot"></span> Live Route View</span>
+        </div>
+
+        <div class="track-grid">
+            <section class="track-panel route-panel">
+                <span class="track-kicker">Route Tracking</span>
+                <h1 id="trackRouteTitle">Source to Destination</h1>
+                <p id="trackRouteCopy">Track your current YUbus journey with route, departure time, and live progress details.</p>
+
+                <div class="route-stats">
+                    <div class="route-stat">
+                        <span>Departure</span>
+                        <strong id="trackDepartureTime">-</strong>
+                    </div>
+                    <div class="route-stat">
+                        <span>Travel Date</span>
+                        <strong id="trackJourneyDate">-</strong>
+                    </div>
+                    <div class="route-stat">
+                        <span>Bus</span>
+                        <strong id="trackBusName">-</strong>
+                    </div>
+                </div>
+
+                <div class="map-card">
+                    <div class="map-main">
+                        <div class="map-sidebar">
+                            <div class="map-sidebar-head">
+                                <span id="mapRouteName">Your Bus: Route 25A</span>
+                                <i class="fa-solid fa-bus"></i>
+                            </div>
+
+                            <div class="map-select-row">
+                                <label>From:</label>
+                                <div class="map-select-value">
+                                    <span id="trackSource">-</span>
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </div>
+                            </div>
+
+                            <div class="map-select-row">
+                                <label>To:</label>
+                                <div class="map-select-value">
+                                    <span id="trackDestination">-</span>
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </div>
+                            </div>
+
+                            <div class="map-status-row">
+                                <span>Status:</span>
+                                <strong id="trackStatusInline">On the Way</strong>
+                                <span class="status-live-dot"></span>
+                            </div>
+
+                            <div class="map-summary-grid">
+                                <div class="map-summary-item">
+                                    <i class="fa-regular fa-clock"></i>
+                                    <div>
+                                        <span>ETA:</span>
+                                        <strong id="mapEta">8 mins</strong>
+                                    </div>
+                                </div>
+                                <div class="map-summary-item">
+                                    <i class="fa-solid fa-bus-simple"></i>
+                                    <div>
+                                        <span>Next Stop:</span>
+                                        <strong id="mapNextStop">Mid Route</strong>
+                                    </div>
+                                </div>
+                                <div class="map-summary-item full">
+                                    <i class="fa-solid fa-hashtag"></i>
+                                    <div>
+                                        <span>Bus Number:</span>
+                                        <strong id="mapBusNumber">#1085</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="map-refresh-btn" id="mapRefreshBtn" type="button">
+                                <i class="fa-solid fa-rotate-right"></i>
+                                Refresh Location
+                            </button>
+                        </div>
+
+                        <div class="map-canvas">
+                            <div class="map-grid"></div>
+                            <div class="map-water"></div>
+                            <span class="road road-1"></span>
+                            <span class="road road-2"></span>
+                            <span class="road road-3"></span>
+                            <span class="road road-4"></span>
+                            <span class="road road-5"></span>
+                            <span class="road road-6"></span>
+                            <span class="road road-7"></span>
+                            <span class="road road-8"></span>
+                            <span class="road road-9"></span>
+                            <span class="road road-10"></span>
+                            <span class="road-label label-1">NH 44</span>
+                            <span class="road-label label-2">ORR</span>
+                            <span class="map-town town-1">Source Point</span>
+                            <span class="map-town town-2">Mid Route</span>
+                            <span class="map-town town-3">Next Stop</span>
+                            <span class="map-town town-4">Destination</span>
+                            <span class="river-label">Route View</span>
+
+                            <svg class="route-svg" viewBox="0 0 1000 520" preserveAspectRatio="none" aria-hidden="true">
+                                <path
+                                    id="routeBasePath"
+                                    d="M92 348 C164 322, 232 286, 314 242 S470 180, 570 194 S728 258, 842 174"
+                                ></path>
+                                <path
+                                    id="routeProgressPath"
+                                    d="M92 348 C164 322, 232 286, 314 242 S470 180, 570 194 S728 258, 842 174"
+                                ></path>
+                            </svg>
+
+                            <div class="route-blue route-blue-one"></div>
+                            <div class="route-blue route-blue-two"></div>
+                            <div class="bus-marker" id="busMarker">
+                                <i class="fa-solid fa-bus"></i>
+                            </div>
+                            <div class="eta-chip" id="mapEtaChip">ETA: 12 mins</div>
+                            <div class="next-stop-pill" id="stopChip">Next Stop</div>
+
+                            <div class="map-legend">
+                                <div class="legend-item">
+                                    <span class="legend-dot legend-bus"></span>
+                                    <span>Your Bus</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-dot legend-stop"></span>
+                                    <span>Bus Stop</span>
+                                </div>
+                            </div>
+
+                            <div class="source-pin"></div>
+                            <div class="mini-stop stop-one"></div>
+                            <div class="mini-stop stop-two"></div>
+                            <div class="source-text" id="mapSourceLabel">Bangalore</div>
+                            <div class="destination-pin"></div>
+                            <div class="destination-text" id="mapDestinationLabel">Hyderabad</div>
+                            <div class="map-controls" aria-hidden="true">
+                                <button type="button">+</button>
+                                <button type="button">-</button>
+                                <button type="button"><i class="fa-solid fa-rotate-right"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="map-status-strip">
+                        <div class="status-strip-item active">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span id="trackStatus">On the Way</span>
+                        </div>
+                        <div class="status-strip-item">
+                            <i class="fa-solid fa-bus"></i>
+                            <span>Arriving Soon</span>
+                        </div>
+                        <div class="status-strip-item">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <span>At the Stop</span>
+                        </div>
+                    </div>
+
+                    <div class="map-footer-strip">
+                        <div class="footer-live">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>Live Tracking Enabled</span>
+                        </div>
+                        <div class="footer-updated">
+                            <span>Last Updated:</span>
+                            <strong id="mapUpdatedAt">2 mins ago</strong>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="track-panel details-panel">
+                <span class="track-kicker">Journey Details</span>
+                <h2>Live Bus Summary</h2>
+                <div class="details-list">
+                    <div class="detail-item">
+                        <span>Current Route</span>
+                        <strong id="detailRoute">-</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span>Boarding Time</span>
+                        <strong id="detailDeparture">-</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span>Booking ID</span>
+                        <strong id="detailBookingId">-</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span>Tracking Mode</span>
+                        <strong id="detailMode">Saved route</strong>
+                    </div>
+                </div>
+
+                <div class="tips-card">
+                    <h3>Travel Tip</h3>
+                    <p id="trackTip">Arrive at your boarding point a little early and keep your booking details ready for quick boarding.</p>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script src="track.js"></script>
+</body>
+</html>

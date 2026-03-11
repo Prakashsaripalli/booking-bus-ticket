@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Yubus - Bus Results</title>
+    <link rel="stylesheet" href="result.css">
+    <link rel="stylesheet" href="search.css">
+</head>
+<body>
+<main class="results-page">
+    <section class="results-hero">
+        <div class="hero-copy">
+            <p class="hero-kicker">Available Buses</p>
+            <h1 class="page-title">
+                <span id="routeFrom">From</span>
+                <span class="route-arrow">to</span>
+                <span id="routeTo">To</span>
+            </h1>
+            <p id="routeSubtitle" class="route-subtitle">Select a bus and continue to seat selection.</p>
+
+            <div class="hero-chips">
+                <span class="hero-chip">Journey <strong id="routeDate">Flexible</strong></span>
+                <span class="hero-chip">Buses <strong id="routeCount">0</strong></span>
+            </div>
+        </div>
+
+        <div class="hero-actions">
+            <button class="back-btn" type="button" onclick="window.history.back()">Back</button>
+            <div id="routeVisual" class="route-visual" aria-hidden="true"></div>
+        </div>
+    </section>
+
+    <section class="results-panel">
+        <div class="panel-head">
+            <div>
+                <h2 class="panel-title">Choose your ride</h2>
+                <p class="panel-copy">Compare timings, coach type, and fare before booking.</p>
+            </div>
+            <div id="resultsStatus" class="results-status">Loading buses...</div>
+        </div>
+
+        <div id="results" class="results-container"></div>
+    </section>
+</main>
+
+<script src="busData.js"></script>
+<script src="result.js"></script>
+</body>
+</html>

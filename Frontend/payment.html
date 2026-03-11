@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Yubus - Seat Selection</title>
+    <link rel="stylesheet" href="payment.css">
+</head>
+<body>
+<div class="payment-container">
+
+    <!-- LEFT SIDE -->
+    <div class="left-panel">
+
+        <div class="card">
+            <h2>Fare Summary</h2>
+            <div class="row">
+                <span>Amount To Be Paid</span>
+                <span>&#8377;<span id="finalAmount"></span></span>
+            </div>
+            <div class="saved-box">
+                You saved &#8377;<span id="discountAmount"></span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Offers For You</h3>
+            <input type="text" id="couponCode" placeholder="Have a coupon?">
+            <button id="applyCoupon">Apply</button>
+        </div>
+
+        <div class="card">
+            <h3 id="routeDetails"></h3>
+            <p id="busDetails"></p>
+            <p>Seats: <span id="seatNumbers"></span></p>
+            <h3>Passenger Details</h3>
+            <input type="text" id="passengerName" placeholder="Enter passenger name">
+            <input type="text" id="passengerMobile" placeholder="Enter mobile number" maxlength="10">
+            <input type="email" id="passengerEmail" placeholder="Enter email address">
+            <button id="submitPassenger">Submit</button>
+        </div>
+
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="right-panel">
+
+        <div class="payment-methods">
+            <div class="method active" data-method="upi">UPI</div>
+            <div class="method" data-method="card">Card</div>
+            <div class="method" data-method="wallet">Wallet</div>
+            <div class="method" data-method="netbank">Net Banking</div>
+        </div>
+
+        <div class="payment-details">
+
+            <!-- UPI -->
+            <div class="payment-section" id="upiSection">
+                <h3>Scan & Pay with UPI</h3>
+                <div class="upi-mode-switch" role="tablist" aria-label="UPI payment mode">
+                    <button type="button" id="upiIdModeBtn" class="upi-mode-btn active">Use UPI ID</button>
+                    <button type="button" id="qrModeBtn" class="upi-mode-btn">Scan QR</button>
+                </div>
+                <div id="qrPanel" class="upi-qr-panel hidden">
+                    <button type="button" id="generateQrBtn">Generate QR</button>
+                    <img id="qrImage" class="qr-blur" src="Assets/qr.jpeg" width="200" alt="UPI QR Code">
+                </div>
+                <input type="text" id="upiIdInput" placeholder="Enter UPI ID">
+                <input type="text" id="transactionIdInput" class="hidden" placeholder="Enter Transaction ID" maxlength="26">
+            </div>
+
+            <!-- CARD -->
+            <div class="payment-section hidden" id="cardSection">
+                <h3>Card Details</h3>
+                <input type="text" id="cardNumberInput" placeholder="Card Number" inputmode="numeric" maxlength="16">
+                <input type="text" id="cardHolderNameInput" placeholder="Card Holder Name" maxlength="60">
+                <input type="text" id="cardExpiryInput" placeholder="MM/YY" inputmode="numeric" maxlength="5">
+                <input type="text" id="cardCvvInput" placeholder="CVV" inputmode="numeric" maxlength="3">
+            </div>
+
+            <!-- WALLET -->
+            <div class="payment-section hidden" id="walletSection">
+                <h3>Wallet Payment</h3>
+                <input type="text" id="walletMobileInput" placeholder="Enter wallet mobile number" inputmode="numeric" maxlength="10">
+                <div class="wallet-otp-row">
+                    <input type="text" id="walletOtpInput" placeholder="Enter OTP" inputmode="numeric" maxlength="6">
+                    <button type="button" id="sendWalletOtpBtn" class="wallet-action-btn">Get OTP</button>
+                </div>
+                <button type="button" id="verifyWalletOtpBtn" class="wallet-action-btn wallet-verify-btn">Verify OTP</button>
+                <button type="button" id="resendWalletOtpBtn" class="wallet-action-btn wallet-resend-btn hidden">Resend OTP</button>
+                <p id="walletOtpStatus" class="wallet-status">Enter mobile number and request OTP.</p>
+            </div>
+
+            <!-- NETBANK -->
+            <div class="payment-section hidden" id="netbankSection">
+                <h3>Select Bank</h3>
+                <select>
+                    <option>SBI</option>
+                    <option>HDFC</option>
+                    <option>ICICI</option>
+                </select>
+            </div>
+
+            <button class="pay-btn" id="payBtn">
+                Pay Now &#8377;<span id="btnAmount"></span>
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div id="paymentSuccessOverlay" class="success-overlay hidden">
+    <div class="success-box">
+        <div class="coin-lane" id="coinLane"></div>
+        <div class="success-check">✓</div>
+        <h2>Booking Successful</h2>
+        <button id="goHomeBtn" class="go-home-btn">Click Here To Go Home</button>
+    </div>
+</div>
+
+<script src="payment.js"></script>
+</body>
+</html>

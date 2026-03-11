@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yubus | Profile</title>
+    <link rel="stylesheet" href="profile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+</head>
+<body>
+<div class="profile-page">
+    <header class="profile-header">
+        <h1><i class="fa-solid fa-circle-user"></i> My Profile</h1>
+        <div class="profile-actions">
+            <button id="backBtn" class="btn btn-back"><i class="fa-solid fa-arrow-left"></i> Back</button>
+            <button id="logoutBtn" class="btn btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+        </div>
+    </header>
+
+    <section class="card">
+        <h2>User Details</h2>
+        <div class="details-grid">
+            <div class="detail-row"><span class="label">Role</span><span id="profileRole">-</span></div>
+            <div class="detail-row"><span class="label">Name / Email</span><span id="profileIdentity">-</span></div>
+            <div class="detail-row"><span class="label">Email</span><span id="profileEmail">-</span></div>
+            <div class="detail-row"><span class="label">Mobile</span><span id="profileMobile">-</span></div>
+        </div>
+        <div class="profile-edit-footer">
+            <button id="editProfileBtn" class="btn btn-inline" type="button">Edit Details</button>
+        </div>
+        <form id="profileEditForm" class="profile-edit-form hidden">
+            <div class="form-grid">
+                <label class="form-field">
+                    <span>Name</span>
+                    <input id="editName" type="text" maxlength="120" required>
+                </label>
+                <label class="form-field">
+                    <span>Email</span>
+                    <input id="editEmail" type="email" maxlength="255" required>
+                </label>
+                <label class="form-field">
+                    <span>Mobile</span>
+                    <input id="editMobile" type="tel" inputmode="numeric" maxlength="10" required>
+                </label>
+            </div>
+            <div class="form-actions">
+                <button id="cancelEditBtn" class="btn btn-ghost" type="button">Cancel</button>
+                <button class="btn btn-inline" type="submit">Submit Changes</button>
+            </div>
+            <p id="profileEditStatus" class="profile-edit-status" aria-live="polite"></p>
+        </form>
+    </section>
+
+    <section class="card">
+        <h2 id="bookingSectionTitle">Booking Details</h2>
+        <div id="bookingList" class="booking-list"></div>
+    </section>
+</div>
+
+<script src="profile.js"></script>
+</body>
+</html>

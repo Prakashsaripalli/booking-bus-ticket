@@ -1,0 +1,62 @@
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to right, #74ebd5, #9face6);
+    padding: 40px;
+}
+
+.search-box {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.search-box input {
+    padding: 10px;
+    width: 200px;
+    margin: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.search-box button {
+    padding: 10px 20px;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.results-container {
+    width: 80%;
+    margin: auto;
+}
+
+.bus-card {
+    background: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.bus-details h3 {
+    margin: 0;
+}
+
+.price {
+    font-size: 20px;
+    font-weight: bold;
+    color: green;
+}
+
+.book-btn {
+    background: #27ae60;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+}

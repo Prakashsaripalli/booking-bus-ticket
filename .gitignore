@@ -1,0 +1,5 @@
+Frontend/backend-java/target/
+Frontend/backend-java/*.log
+Frontend/backend-java/DebugPayment.class
+Frontend/backend-java/.env.bat
+Frontend/yubus-deploy/

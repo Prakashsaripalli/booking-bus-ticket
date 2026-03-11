@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YUbus | Need Help</title>
+    <link rel="stylesheet" href="need.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+</head>
+<body>
+    <div class="support-shell">
+        <aside class="support-aside">
+            <a class="back-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+            <div class="support-brand">
+                <span class="support-kicker">YUbus Support</span>
+                <h1>Need Help?</h1>
+                <p>Chat with the YUbus assistant for booking help, payment guidance, ticket updates, and account support.</p>
+            </div>
+
+            <div class="support-highlights">
+                <div class="support-highlight">
+                    <i class="fa-solid fa-ticket"></i>
+                    <div>
+                        <strong>Booking Help</strong>
+                        <span>Check tickets, routes, and booking flow.</span>
+                    </div>
+                </div>
+                <div class="support-highlight">
+                    <i class="fa-solid fa-credit-card"></i>
+                    <div>
+                        <strong>Payment Help</strong>
+                        <span>Get help with payment status and confirmation.</span>
+                    </div>
+                </div>
+                <div class="support-highlight">
+                    <i class="fa-solid fa-comments"></i>
+                    <div>
+                        <strong>Instant Chat</strong>
+                        <span>Ask questions and give feedback after each reply.</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="chat-card">
+            <div class="chat-header">
+                <div>
+                    <span class="chat-label">Support Chat</span>
+                    <h2>YUbus Help Assistant</h2>
+                </div>
+                <div class="chat-status">
+                    <span class="status-dot"></span>
+                    <span>Online</span>
+                </div>
+            </div>
+
+            <div class="quick-help" id="quickHelp">
+                <button class="quick-chip" type="button" data-query="Show my latest booking">Latest booking</button>
+                <button class="quick-chip" type="button" data-query="How can I cancel my ticket?">Cancel ticket</button>
+                <button class="quick-chip" type="button" data-query="Payment failed during booking">Payment help</button>
+                <button class="quick-chip" type="button" data-query="How do I edit my profile?">Edit profile</button>
+                <button class="quick-chip" type="button" data-query="How can I track my bus?">Track bus</button>
+                <div class="route-picker">
+                    <label class="route-picker-label" for="routeQuickSelect">Book Route</label>
+                    <select id="routeQuickSelect" class="route-picker-select">
+                        <option value="">Choose available route</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
+
+            <div class="feedback-panel" id="feedbackPanel">
+                <p>Was this reply helpful?</p>
+                <div class="feedback-actions">
+                    <button type="button" class="feedback-btn" data-feedback="helpful">
+                        <i class="fa-regular fa-thumbs-up"></i> Helpful
+                    </button>
+                    <button type="button" class="feedback-btn" data-feedback="not-helpful">
+                        <i class="fa-regular fa-thumbs-down"></i> Not Helpful
+                    </button>
+                </div>
+                <p class="feedback-note" id="feedbackNote">Your feedback helps improve YUbus support.</p>
+            </div>
+
+            <form class="chat-form" id="chatForm">
+                <div class="chat-form-tools">
+                    <select id="speechLanguage" class="speech-language" aria-label="Speech recognition language">
+                        <option value="auto">Auto Detect</option>
+                        <option value="en-IN">English (India)</option>
+                        <option value="en-US">English (US)</option>
+                        <option value="hi-IN">Hindi</option>
+                        <option value="te-IN">Telugu</option>
+                        <option value="ta-IN">Tamil</option>
+                        <option value="kn-IN">Kannada</option>
+                        <option value="ml-IN">Malayalam</option>
+                        <option value="mr-IN">Marathi</option>
+                        <option value="bn-IN">Bengali</option>
+                    </select>
+                    <button type="button" class="speech-btn" id="speechBtn">
+                        <i class="fa-solid fa-microphone"></i>
+                        Speak
+                    </button>
+                    <span class="speech-status" id="speechStatus">Voice ready</span>
+                </div>
+                <input
+                    type="text"
+                    id="chatInput"
+                    placeholder="Ask about booking, payment, cancellation, tracking, profile..."
+                    autocomplete="off"
+                >
+                <button type="submit" class="send-btn">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    Send
+                </button>
+            </form>
+        </main>
+    </div>
+
+    <script src="busData.js"></script>
+    <script src="need.js"></script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Yubus | Login</title>
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+<div class="login-page">
+    <section class="hero-panel">
+        <div class="hero-content">
+            <p class="hero-kicker">Yubus Premium Booking</p>
+            <h1>Welcome Yubus</h1>
+            <p class="hero-tagline">Your bus, your journey.</p>
+            <p class="hero-copy">Travel smarter with comfort, style, and on-time rides across top routes.</p>
+        </div>
+    </section>
+
+    <section class="form-panel">
+        <div id="loginCard" class="login-card">
+            <div class="role-toggle">
+                <button id="adminTab" class="role-btn active" type="button" onclick="switchRole('admin')">Admin</button>
+                <button id="userTab" class="role-btn" type="button" onclick="switchRole('user')">User</button>
+            </div>
+
+            <h2 id="roleTitle">Admin Login</h2>
+
+            <form id="adminForm" onsubmit="adminLogin(event)">
+                <label for="adminIdentity">Username or Email</label>
+                <input id="adminIdentity" type="text" placeholder="Enter username or email" required>
+
+                <label for="adminPassword">Password</label>
+                <input id="adminPassword" type="password" placeholder="Enter password" required>
+
+                <button class="login-btn" type="submit">Login</button>
+                <button class="link-btn" type="button" onclick="adminForgotPassword()">Forgot Password?</button>
+            </form>
+
+            <form id="userForm" class="hidden" onsubmit="loginUser(event)">
+                <label for="userIdentity">Email</label>
+                <input id="userIdentity" type="email" placeholder="Enter registered email" required>
+
+                <label for="userPassword">Password</label>
+                <input id="userPassword" type="password" placeholder="Enter password" required>
+
+                <button class="login-btn" type="submit">Login</button>
+                <div class="user-actions">
+                    <button class="link-btn" type="button" onclick="forgotPassword()">Forgot Password?</button>
+                    <button class="link-btn" type="button" onclick="openSignup()">New User? Sign Up</button>
+                </div>
+            </form>
+
+            <div id="statusMsg" class="status-msg">You have been logged out.</div>
+        </div>
+
+        <aside id="signupCard" class="signup-card hidden" aria-hidden="true">
+            <div class="signup-head">
+                <h3>Create New User</h3>
+                <button class="close-signup-btn" type="button" onclick="closeSignup()" aria-label="Close signup">x</button>
+            </div>
+
+            <form id="signupForm" onsubmit="signupUser(event)">
+                <label for="signupName">Full Name</label>
+                <input id="signupName" type="text" placeholder="Enter full name" required>
+
+                <label for="signupEmail">Email</label>
+                <input id="signupEmail" type="email" placeholder="Enter email address" required>
+
+                <label for="signupMobile">Mobile Number</label>
+                <input id="signupMobile" type="tel" placeholder="Enter 10-digit mobile number" maxlength="10" required>
+
+                <label for="signupPassword">Password</label>
+                <input id="signupPassword" type="password" placeholder="Create password" required>
+
+                <label for="signupConfirmPassword">Confirm Password</label>
+                <input id="signupConfirmPassword" type="password" placeholder="Confirm password" required>
+
+                <button class="login-btn" type="submit">Create Account</button>
+                <button class="link-btn" type="button" onclick="closeSignup()">Back to Login</button>
+            </form>
+        </aside>
+    </section>
+</div>
+
+<script src="login.js"></script>
+</body>
+</html>

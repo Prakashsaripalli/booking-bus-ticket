@@ -1,0 +1,18 @@
+{
+  "bookingId": "BKTEST1235",
+  "passengerName": "Test User",
+  "mobile": "9876543210",
+  "email": "test@example.com",
+  "notificationEmail": "test@example.com",
+  "from": "Hyderabad",
+  "to": "Vijayawada",
+  "busName": "Test Bus",
+  "seats": "A1",
+  "journeyDate": "2026-03-10",
+  "departureTime": "10:00 AM",
+  "originalAmount": 100,
+  "discountAmount": 0,
+  "paymentMethod": "UPI",
+  "amount": 100,
+  "transactionId": "AC1234567890123456789012"
+}

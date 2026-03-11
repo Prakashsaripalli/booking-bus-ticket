@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Yubus - Seat Selection</title>
+    <link rel="stylesheet" href="booking.css?v=20260307-seatlayout-v28">
+</head>
+<body>
+<div class="booking-wrapper">
+    <div class="seat-container">
+        <div class="seat-header">
+            <div>
+                <p class="seat-kicker">Bus Layout</p>
+                <h2>Select Your Seat</h2>
+            </div>
+            <div class="seat-header-meta">
+                <span id="busTypeBadge" class="bus-type-badge">Standard</span>
+                <span id="layoutHint" class="layout-hint">Layout will appear here.</span>
+            </div>
+        </div>
+
+        <div class="journey-meta">
+            <div><strong>Route:</strong> <span id="journeyRoute">-</span></div>
+            <div><strong>Date:</strong> <span id="journeyDate">-</span></div>
+            <p id="journeyNotice" class="journey-notice hidden"></p>
+        </div>
+
+        <div class="legend">
+            <span class="legend-item"><span class="legend-box available-box"></span>Available</span>
+            <span class="legend-item"><span class="legend-box selected-box"></span>Selected</span>
+            <span class="legend-item"><span class="legend-box booked-box"></span>Booked</span>
+        </div>
+
+        <div class="layout-shell">
+            <div class="layout-topbar">
+                <div class="layout-topcopy">
+                    <strong>Choose your preferred place</strong>
+                    <span>Prices are shown inside each seat or berth.</span>
+                </div>
+
+                <div class="driver-zone" aria-label="Driver area">
+                    <div class="driver-seat-mark">
+                        <span>Driver Seat</span>
+                    </div>
+                    <div class="steering-wheel" aria-hidden="true"></div>
+                </div>
+            </div>
+
+            <div id="seatLayout" class="seat-layout"></div>
+        </div>
+    </div>
+
+    <div class="payment-box">
+        <h3>Payment Details</h3>
+
+        <div class="price-row">
+            <span>Selected Fare</span>
+            <span>Rs <span id="seatPrice">0</span></span>
+        </div>
+
+        <div class="price-row">
+            <span>Selected Units</span>
+            <span id="selectedSeats">None</span>
+        </div>
+
+        <div class="price-row">
+            <span>GST (5%)</span>
+            <span>Rs <span id="gstAmount">0</span></span>
+        </div>
+
+        <hr>
+
+        <div class="price-row total">
+            <span>Total Amount</span>
+            <span>Rs <span id="totalAmount">0</span></span>
+        </div>
+
+        <button class="pay-btn" id="proceedBtn">Proceed</button>
+    </div>
+</div>
+
+<script src="busData.js?v=20260307-seatlayout-v28"></script>
+<script src="booking.js?v=20260307-seatlayout-v28"></script>
+</body>
+</html>
+

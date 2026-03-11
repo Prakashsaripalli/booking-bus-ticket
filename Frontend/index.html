@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yubus | Bus Ticket Booking</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-left">
+        <h1 class="logo">Yubus</h1>
+        <img src="./Assets/WhatsApp Image 2026-03-07 at 10.29.40 AM.jpeg" alt="image" width="65px" height="50px">
+    </div>
+    <div class="nav-right">
+        <a href="#offers"><i class="fa-solid fa-tags"></i> Offers</a>
+        <a href="#popular-routes"><i class="fa-solid fa-route"></i> Popular Routes</a>
+        <a href="index.html#track-bus"><i class="fa-solid fa-ticket"></i> Track Ticket</a>
+        <a href="need.html">
+    <i class="fa-solid fa-headset"></i> Need Help?
+</a>
+
+        <a id="authNavLink" href="login.html">
+    <i class="fa-solid fa-user"></i> Login / Sign Up
+</a>
+
+    </div>
+</nav>
+
+
+<section class="hero">
+    <div class="search-card">
+
+        <div class="tabs">
+            <div class="tab active"><i class="fa-solid fa-bus"></i> Buses</div>
+           <!--<div class="tab"><i class="fa-solid fa-plane"></i> Flights</div>
+            <div class="tab"><i class="fa-solid fa-train"></i> Trains</div>
+            <div class="tab"><i class="fa-solid fa-hotel"></i> Hotels</div> --> 
+            <div class="map"><h3>India's Fastest Bus Ticket Booking Platform</h3></div>
+        </div>
+
+        <div class="search-form">
+
+            <!-- Leaving From -->
+            <div class="field city-field">
+                <label>Leaving From</label>
+                <input type="text" id="from" placeholder="Enter source" readonly>
+
+                <div class="city-dropdown" id="fromDropdown">
+                    <p class="dropdown-title">POPULAR CITIES</p>
+
+                    <div class="city-item" onclick="selectCity('from','Hyderabad')"><strong>Hyderabad</strong><span>Telangana</span></div>
+                    <div class="city-item" onclick="selectCity('from','Bangalore')"><strong>Bangalore</strong><span>Karnataka</span></div>
+                    <div class="city-item" onclick="selectCity('from','Chennai')"><strong>Chennai</strong><span>Tamil Nadu</span></div>
+                    <div class="city-item" onclick="selectCity('from','Goa')"><strong>Goa</strong><span>Goa</span></div>
+                    <div class="city-item" onclick="selectCity('from','Vijayawada')"><strong>Vijayawada</strong><span>Andhra Pradesh</span></div>
+                    <div class="city-item" onclick="selectCity('from','Nellore')"><strong>Nellore</strong><span>Andhra Pradesh</span></div>
+                    <div class="city-item" onclick="selectCity('from','Jaipur')"><strong>Jaipur</strong><span>Rajasthan</span></div>
+                    <div class="city-item" onclick="selectCity('from','Mangalore')"><strong>Mangalore</strong><span>Karnataka</span></div>
+                    <div class="city-item" onclick="selectCity('from','Tirupati')"><strong>Tirupati</strong><span>Andhra Pradesh</span></div>
+                    <div class="city-item" onclick="selectCity('from','Visakhapatnam')"><strong>Visakhapatnam</strong><span>Andhra Pradesh</span></div>
+                    <div class="city-item" onclick="selectCity('from','Madurai')"><strong>Madurai</strong><span>Tamil Nadu</span></div>
+                    <div class="city-item" onclick="selectCity('from','Delhi')"><strong>Delhi</strong><span>Delhi</span></div>
+                    <div class="city-item" onclick="selectCity('from','Lucknow')"><strong>Lucknow</strong><span>Uttar Pradesh</span></div>
+                </div>
+            </div>
+
+            <!-- Swap -->
+            <div class="swap">
+                <i class="fa-solid fa-right-left"></i>
+            </div>
+
+            <!-- Going To -->
+            <div class="field city-field">
+                <label>Going To</label>
+                <input type="text" id="to" placeholder="Enter destination" readonly>
+
+                <div class="city-dropdown" id="toDropdown">
+                    <p class="dropdown-title">POPULAR CITIES</p>
+
+                    <div class="city-item" onclick="selectCity('to','Hyderabad')"><strong>Hyderabad</strong><span>Telangana</span></div>
+                    <div class="city-item" onclick="selectCity('to','Bangalore')"><strong>Bangalore</strong><span>Karnataka</span></div>
+                    <div class="city-item" onclick="selectCity('to','Chennai')"><strong>Chennai</strong><span>Tamil Nadu</span></div>
+                    <div class="city-item" onclick="selectCity('to','Goa')"><strong>Goa</strong><span>Goa</span></div>
+                    <div class="city-item" onclick="selectCity('to','Vijayawada')"><strong>Vijayawada</strong><span>Andhra Pradesh</span></div>
+                    <div class="city-item" onclick="selectCity('to','Nellore')"><strong>Nellore</strong><span>Andhra Pradesh</span></div>
+                    <div class="city-item" onclick="selectCity('to','Jaipur')"><strong>Jaipur</strong><span>Rajasthan</span></div>
+                    <div class="city-item" onclick="selectCity('to','Mangalore')"><strong>Mangalore</strong><span>Karnataka</span></div>
+                    <div class="city-item" onclick="selectCity('to','Tirupati')"><strong>Tirupati</strong><span>Andhra Pradesh</span></div>
+                    <div class="city-item" onclick="selectCity('to','Visakhapatnam')"><strong>Visakhapatnam</strong><span>Andhra Pradesh</span></div>
+                    <div class="city-item" onclick="selectCity('to','Madurai')"><strong>Madurai</strong><span>Tamil Nadu</span></div>
+                    <div class="city-item" onclick="selectCity('to','Delhi')"><strong>Delhi</strong><span>Delhi</span></div>
+                    <div class="city-item" onclick="selectCity('to','Lucknow')"><strong>Lucknow</strong><span>Uttar Pradesh</span></div>
+                </div>
+            </div>
+
+            <!-- Date -->
+            <div class="field">
+                <label>Departure</label>
+                <input type="date" id="date">
+            </div>
+
+            <div class="day-btn">Today</div>
+            <div class="day-btn">Tomorrow</div>
+
+            <!-- <button class="search-btn"> -->
+   
+                <div><button  id="searchBtn" class="search-btn"  >Search</button></div>
+                    <!-- <button id="searchBtn" class="search-btn">Search</button> -->
+           
+        </div>
+        <div class="small"><p>Please enter your Origin city</p></div>
+    </div>
+</section>
+<section id="offers" class="content-card offers-card">
+<div class="offers-header">
+    <div class="offers-copy">
+        <span class="offers-badge"><i class="fa-solid fa-sparkles"></i> Best Bus Deals</span>
+        <h2>Bus Booking Discounts</h2>
+        <p class="offers-subtitle">Fresh fare drops, cashback coupons, and festive specials curated for every route.</p>
+    </div>
+    <div class="offers-actions">
+        <div class="offers-stat">
+            <strong>10+</strong>
+            <span>live offers</span>
+        </div>
+        <button class="view-all-btn" onclick="toggleViewAll()">View All</button>
+    </div>
+</div>
+
+<div class="offers-section">
+
+    <!-- IMAGE SLIDER -->
+    <div class="slider-container" id="imageOffers">
+        <button class="nav-btn prev" onclick="slideLeft()">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+        <div class="slider" id="offerSlider">
+            <div class="offer-slide">
+                <img src="Assets/bus-booking.png" alt="Bus booking cashback offer" loading="lazy">
+                <div class="offer-slide-copy">
+                    <span class="offer-tag">Cashback</span>
+                    <h3>Save up to 20%</h3>
+                    <p>Use code <strong>JET20</strong> on selected bus routes.</p>
+                </div>
+            </div>
+            <div class="offer-slide">
+                <img src="Assets/vector.jpg" alt="First booking discount offer" loading="lazy">
+                <div class="offer-slide-copy">
+                    <span class="offer-tag">First Ride</span>
+                    <h3>Get Rs.150 Off</h3>
+                    <p>Extra savings for your first bus ticket booking.</p>
+                </div>
+            </div>
+            <div class="offer-slide">
+                <img src="Assets/panel1.jpg" alt="Weekend special bus booking deal" loading="lazy">
+                <div class="offer-slide-copy">
+                    <span class="offer-tag">Weekend</span>
+                    <h3>Flat Rs.100 Back</h3>
+                    <p>Book on weekends and unlock quick cashback deals.</p>
+                </div>
+            </div>
+            <div class="offer-slide">
+                <img src="Assets/bus-banner1.jpg" alt="Festival season bus discount" loading="lazy">
+                <div class="offer-slide-copy">
+                    <span class="offer-tag">Festival</span>
+                    <h3>Limited Time Fare Drop</h3>
+                    <p>Grab seasonal discounts before the seats fill up.</p>
+                </div>
+            </div>
+            <div class="offer-slide">
+                <img src="Assets/bus-banner.jpg" alt="Student bus travel discount" loading="lazy">
+                <div class="offer-slide-copy">
+                    <span class="offer-tag">Student</span>
+                    <h3>Extra 10% Off</h3>
+                    <p>Student fares made lighter on every intercity trip.</p>
+                </div>
+            </div>
+            <div class="offer-slide">
+                <img src="Assets/bus.jpg" alt="Card payment bus ticket offer" loading="lazy">
+                <div class="offer-slide-copy">
+                    <span class="offer-tag">Bank Offer</span>
+                    <h3>Card Offer up to Rs.200</h3>
+                    <p>Pay with partner cards and save more instantly.</p>
+                </div>
+            </div>
+        </div>
+
+        <button class="nav-btn next" onclick="slideRight()">
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
+    </div>
+
+    <!-- TEXT OFFERS LIST -->
+    <div class="text-offers" id="textOffers">
+        <ul>
+            <li>Flat 20% OFF on Bus Tickets (Use Code: JET20)</li>
+            <li>Save ₹150 on First Bus Booking</li>
+            <li>ICICI Bank Credit Card Offer – Flat ₹200 OFF</li>
+            <li>Student Discount – Extra 10% OFF</li>
+            <li>Festival Special Offer – Limited Time Deal</li>
+            <li>Weekend Offer – Flat ₹100 Cashback</li>
+        </ul>
+    </div>
+</div>
+<div class="offers-footer">
+    <div class="offer-chip">
+        <i class="fa-solid fa-ticket"></i>
+        <span>Instant coupon codes</span>
+    </div>
+    <div class="offer-chip">
+        <i class="fa-solid fa-wallet"></i>
+        <span>Wallet-friendly fares</span>
+    </div>
+    <div class="offer-chip">
+        <i class="fa-solid fa-bolt"></i>
+        <span>Flash weekend deals</span>
+    </div>
+</div>
+</section>
+<section class="content-card info-card">
+<div class="block"><br>
+    <h2>Why Choose Yubus for Bus Ticket Booking?</h2><br>
+<div class="para">Experience the next generation of travel with India's 4.8-star 
+    rated online bus ticket booking site. Trusted by millions across 
+    6,50,000+ routes, Yubus combines a massive network of 6,200+ partner 
+    <br>ers with industry-leading  innovation. From our Al-powered 'New Bus' filter and 360° virtual tours to rigorous safety checks, we ensure every journey is smart, transparent, and built for your comfort  <br>and safety.</div>
+</div><br><br>
+<div class="front">
+    <img src="Assets/photo1.jpg">
+            <img src="Assets/photo2.jpg">
+            <img src="Assets/photo3.jpg">
+            <img src="Assets/photo4.jpg">
+            <img src="Assets/photo5.jpg">
+            <img src="Assets/photo6.jpg">
+</div>
+</section>
+<section class="content-card services-card">
+    <div class="services-shell">
+        <div class="services-intro">
+            <span class="services-kicker">Digital Travel Support</span>
+            <h2>Online Bus Booking Services</h2>
+            <p class="services-lead">
+                Yubus brings booking, trip assistance, and service support into one cleaner experience
+                so passengers can search, compare, confirm, and manage bus journeys without friction.
+            </p>
+
+            <div class="services-highlights">
+                <div class="service-pill">
+                    <i class="fa-solid fa-ticket"></i>
+                    <span>Instant e-ticket confirmation</span>
+                </div>
+                <div class="service-pill">
+                    <i class="fa-solid fa-route"></i>
+                    <span>Route and operator comparison</span>
+                </div>
+                <div class="service-pill">
+                    <i class="fa-solid fa-headset"></i>
+                    <span>Fast support when needed</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="services-visual">
+            <div class="services-image-card">
+                <img src="Assets/vector.jpg" alt="Online bus booking services illustration">
+                <div class="services-image-copy">
+                    <span>Smarter Booking</span>
+                    <strong>Everything you need from search to seat confirmation in one place.</strong>
+                </div>
+            </div>
+
+            <div id="panel" class="panel-container">
+                <strong>How satisfied are you with our <br /> customer support performance?</strong>
+                <div class="ratings-container">
+                    <div class="rating">
+                        <img src="https://image.flaticon.com/icons/svg/187/187150.svg" alt="">
+                        <small>Unhappy</small>
+                    </div>
+
+                    <div class="rating">
+                        <img src="https://image.flaticon.com/icons/svg/187/187136.svg" alt=""/>
+                        <small>Neutral</small>
+                    </div>
+
+                    <div class="rating active">
+                        <img src="https://image.flaticon.com/icons/svg/187/187133.svg" alt=""/>
+                        <small>Satisfied</small>
+                    </div>
+                </div>
+                <button class="btn" id="send">Send Review</button>
+            </div>
+        </div>
+
+        <div class="graph">
+            <p>Yubus helps passengers compare operators, check route timings, review boarding points, and confirm seats through a simple digital booking flow.</p>
+            <p>Travelers can manage booking details, receive e-ticket access, and stay updated with service information without jumping between multiple pages.</p>
+            <p>Support, operator access, and trip visibility are combined into one platform so planning and managing bus travel feels faster and more reliable.</p>
+        </div>
+
+        <div class="services-feature-grid">
+            <div class="service-detail">
+                <i class="fa-solid fa-magnifying-glass-location"></i>
+                <h3>Search With Clarity</h3>
+                <p>Browse routes, travel times, and operator options with a cleaner comparison experience that reduces booking confusion.</p>
+            </div>
+
+            <div class="service-detail">
+                <i class="fa-solid fa-credit-card"></i>
+                <h3>Faster Checkout</h3>
+                <p>Move from seat selection to payment quickly with a simple booking flow designed around speed and confidence.</p>
+            </div>
+
+            <div class="service-detail">
+                <i class="fa-solid fa-bell-concierge"></i>
+                <h3>Travel Support</h3>
+                <p>Get booking help, service updates, and trip assistance from one connected place before and after confirmation.</p>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="content-card low-price-card">
+    <div class="gear">
+        <h1>Online Bus Ticket Booking at Lowest Price</h1>
+    </div><br><br>
+    <div class="jet">
+        <p>With Yubus, travelers can easily book bus tickets online at affordable fares and choose preferred services for a more comfortable and convenient journey. Yubus brings private operators and SRTC buses together in one booking flow, making route selection, seat choice, and ticket confirmation easier.</p><br><br>
+        <p>Below, you can explore the different types of buses available on Yubus and book the option that best matches your budget, route, and travel comfort.</p><br><br>
+        </div>
+    <!-- BUS TYPES SECTION -->
+<section class="bus-types-section">
+    <div class="bus-types-container">
+
+    <!-- LEFT IMAGE -->
+    <div class="bus-image">
+    <img src="./Assets/bus-booking.png" alt="Bus Booking">
+    </div>
+
+    <!-- RIGHT CONTENT -->
+    <div class="bus-content">
+
+    <div class="bus-types-list">
+        <ul>
+        <li>AC Buses</li>
+        <li>Non AC Buses</li>
+        <li>Ordinary Buses</li>
+        <li>Mini Buses</li>
+        <li>Super Luxury (Non-AC Seater)</li>
+        </ul>
+
+        <ul>
+        <li>Volvo AC Buses</li>
+        <li>Sleeper AC Buses</li>
+        <li>Sleeper Buses</li>
+        <li>Deluxe Buses</li>
+        <li>Sleeper Cum Seater AC</li>
+        </ul>
+
+        <ul>
+        <li>Double Decker Buses</li>
+        <li>Mercedes Buses</li>
+        <li>Non-Mercedes Buses</li>
+        <li>Electric Buses</li>
+        <li>Express Buses</li>
+        </ul>
+    </div>
+
+        <p class="bus-fare-text">
+        The bus ticket fare depends on factors such as the type of bus, bus operator,
+        distance between origin and destination cities, <br>and amenities offered.
+        Ticket prices may vary during festive seasons. Travelling by bus is cost-effective
+        and one of the most <br>convenient travel options.
+        </p>
+        </div>
+    </div>
+</section>
+</section>
+<section class="steps-section">
+    <h2>Buy tickets in <span>3 easy steps</span></h2>
+
+    <div class="steps-container">
+
+    <div class="step-card">
+    <div class="icon-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+    </div>
+    <div class="step-text">
+        <h3>Search</h3>
+        <p>
+        Enter your starting point, destination, and travel date to explore
+        available buses.
+        </p>
+    </div>
+    </div>
+
+    <div class="step-card">
+    <div class="icon-box">
+        <i class="fa-solid fa-circle-check"></i>
+    </div>
+    <div class="step-text">
+        <h3>Select</h3>
+        <p>
+        Choose your preferred bus, view seat layout, and pick your seats.
+        </p>
+        </div>
+    </div>
+
+    <div class="step-card">
+    <div class="icon-box">
+        <i class="fa-solid fa-wallet"></i>
+    </div>
+    <div class="step-text">
+        <h3>Pay</h3>
+        <p>
+        Complete your booking securely using cards, mobile banking,
+        or other payment options.
+        </p>
+    </div>
+    </div>
+    </div>
+</section>
+<div class="banner">
+    <div class="banner-content">
+        <div class="left-text">
+            <h2>Travel your world<br>with us!</h2>
+        </div>
+
+        <div class="center-text">
+            <h1>Upto ₹500 Off</h1>
+            <p>on Bus bookings!</p>
+        </div>
+
+        <div class="offer-code">
+            Code: <span>UPIBUS</span>
+        </div>
+    </div>
+</div>
+<section class="stats-section">
+
+    <div class="card">
+        <img src="./Assets/sell1.jpg" alt="customers">
+        <h2>36 Million</h2>
+        <p>happy customers globally</p>
+    </div>
+
+    <div class="card">
+        <img src="./Assets/sell2.jpg" alt="bus companies">
+        <h2>Over 5000</h2>
+        <p>bus companies worldwide</p>
+    </div>
+
+    <div class="card">
+        <img src="./Assets/sell3.png" alt="tickets">
+        <h2>200,000+</h2>
+        <p>tickets booked everyday</p>
+    </div>
+</section>
+<section class="travel-section">
+    <h2>Top Private Travels</h2>
+
+    <div class="logo-slider">
+        <div class="logo-track">
+
+            <img src="./Assets/freshbus.png" alt="Fresh Bus">
+            <img src="./Assets/zingbus.png" alt="Zingbus">
+            <img src="./Assets/intrcity.png" alt="Intrcity">
+            <img src="./Assets/flixbus.png" alt="Flixbus">
+            <img src="./Assets/shyamoli.png" alt="Shyamoli">
+
+            <!-- duplicate logos for smooth infinite scroll -->
+            <img src="./Assets/freshbus.png" alt="Fresh Bus">
+            <img src="./Assets/zingbus.png" alt="Zingbus">
+            <img src="./Assets/intrcity.png" alt="Intrcity">
+            <img src="./Assets/flixbus.png" alt="Flixbus">
+            <img src="./Assets/shyamoli.png" alt="Shyamoli">
+        </div>
+    </div>
+</section><br>
+<section id="popular-routes" class="popular-routes-section">
+    <br>
+    <div class="container">
+        <h1>Popular Bus Routes</h1>
+        <p class="subtitle">
+            Check popular bus routes, compare schedules, timings and prices.
+        </p>
+        <div class="popular-routes-toolbar">
+            <label class="popular-routes-date-field" for="popularRouteDate">
+                <span>Journey Date</span>
+                <input type="date" id="popularRouteDate">
+            </label>
+        </div>
+
+        <div id="routes" class="routes-grid">
+            <!-- Cards will be injected by JavaScript -->
+        </div>
+    </div>
+</section><br>
+        <section id="track-bus" class="track-section">
+    <div class="track-container">
+
+        <div class="track-text">
+            <h2>Track Your Bus Live Location</h2>
+
+            <p>
+                Yubus is solving the biggest concern while boarding a bus by providing a
+                tracking option that provides the live location of the bus. This option keeps
+                passengers informed about the bus live location so that passengers can plan
+                their boarding accordingly.
+            </p>
+
+            <p>
+                Yubus live bus tracking system allows you to track your bus status by entering
+                your Booking ID and either Email ID or Mobile Number. It's a simple, fast,
+                and secure way to manage and track your bus live location.
+            </p>
+
+            <button class="track-btn" id="trackNowBtn">Track Now</button>
+        </div>
+
+        <div class="track-image">
+            <img src="./Assets/track-map.svg" alt="Live bus tracking map and location illustration">
+        </div>
+
+    </div>
+</section>
+
+<section class="about-yubus">
+    <div class="about-container">
+        <div class="about-copy">
+            <span class="about-kicker">About The Brand</span>
+            <h2>About Yubus</h2>
+
+            <p>
+                Yubus focuses on delivering simple and reliable bus booking solutions for travelers.
+                Continuous product improvements have helped the platform grow into a trusted place for
+                route discovery, digital ticketing, and operator access across many cities.
+            </p>
+
+            <p>
+                Built to simplify travel from search to boarding, YUbus combines booking support,
+                e-ticketing, live trip visibility, and service assistance into one smoother experience
+                for everyday passengers.
+            </p>
+
+            <div class="about-points">
+                <div class="about-point">
+                    <i class="fa-solid fa-ticket"></i>
+                    <span>Simple digital ticketing and faster booking flow</span>
+                </div>
+                <div class="about-point">
+                    <i class="fa-solid fa-location-crosshairs"></i>
+                    <span>Live trip updates for more confident boarding</span>
+                </div>
+                <div class="about-point">
+                    <i class="fa-solid fa-headset"></i>
+                    <span>Reliable support when travelers need help</span>
+                </div>
+            </div>
+
+            <a href="#" class="about-link">Know more about YUbus</a>
+        </div>
+
+        <div class="about-aside">
+            <div class="about-image-card">
+                <img src="Assets/bus-banner.jpg" alt="YUbus travel experience visual">
+                <div class="about-image-caption">Trusted journeys, smarter bookings, and cleaner travel planning.</div>
+            </div>
+
+            <div class="about-mini-stats">
+                <div class="about-stat">
+                    <strong>24x7</strong>
+                    <span>support</span>
+                </div>
+                <div class="about-stat">
+                    <strong>Fast</strong>
+                    <span>booking flow</span>
+                </div>
+                <div class="about-stat">
+                    <strong>Live</strong>
+                    <span>trip updates</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+<section class="busroutes-section">
+
+    <div class="busroutes-container">
+
+        <!-- Tabs -->
+        <div class="busroutes-tabs">
+            <button class="busroutes-tab active" onclick="showBusTab('tab1')">Top Bus Routes</button>
+            <button class="busroutes-tab" onclick="showBusTab('tab2')">Buses From Top Cities</button>
+            <button class="busroutes-tab" onclick="showBusTab('tab3')">Top RTC Buses</button>
+            <button class="busroutes-tab" onclick="showBusTab('tab4')">Top Bus Services</button>
+            <button class="busroutes-tab" onclick="showBusTab('tab5')">Quick Links</button>
+        </div>
+
+        <!-- TAB 1 -->
+        <div id="tab1" class="busroutes-content active">
+            <div class="busroutes-grid">
+
+                <ul>
+                    <li>Hyderabad to Bangalore Bus</li>
+                    <li>Vijayawada to Hyderabad Bus</li>
+                    <li>Chennai to Madurai Bus</li>
+                    <li>Mumbai to Ahmedabad Bus</li>
+                    <li>Ahmedabad to Rajkot Bus</li>
+                    <li>Jaipur to Ahmedabad Bus</li>
+                </ul>
+
+                <ul>
+                    <li>Hyderabad to Vijayawada Bus</li>
+                    <li>Bangalore to Hyderabad Bus</li>
+                    <li>Chennai to Coimbatore Bus</li>
+                    <li>Indore to Bhopal Bus</li>
+                    <li>Ahmedabad to Indore Bus</li>
+                    <li>Delhi to Lucknow Bus</li>
+                </ul>
+
+                <ul>
+                    <li>Hyderabad to Mumbai Bus</li>
+                    <li>Bangalore to Chennai Bus</li>
+                    <li>Mumbai to Pune Bus</li>
+                    <li>Indore to Ahmedabad Bus</li>
+                    <li>Udaipur to Jaipur Bus</li>
+                    <li>Delhi to Gorakhpur Bus</li>
+                </ul>
+
+                <ul>
+                    <li>Vijayawada to Bangalore Bus</li>
+                    <li>Chennai to Bangalore Bus</li>
+                    <li>Mumbai to Hyderabad Bus</li>
+                    <li>Ahmedabad to Jaipur Bus</li>
+                    <li>Jaipur to Delhi Bus</li>
+                    <li>Delhi to Shimla Bus</li>
+                </ul>
+
+            </div>
+        </div>
+
+        <!-- OTHER TABS -->
+        <div id="tab2" class="busroutes-content">
+            <p>Popular buses from major cities will appear here.</p>
+            <ul>
+                    <li>Hyderabad to Bangalore Bus</li>
+                    <li>Vijayawada to Hyderabad Bus</li>
+                    <li>Chennai to Madurai Bus</li>
+                    <li>Mumbai to Ahmedabad Bus</li>
+                    <li>Ahmedabad to Rajkot Bus</li>
+                    <li>Jaipur to Ahmedabad Bus</li>
+                    <li>Delhi to Jaipur Bus</li>
+                </ul>
+
+        </div>
+
+        <div id="tab3" class="busroutes-content">
+            <p>RTC bus routes content.</p>
+            <ul>
+                    <li>Hyderabad to Mumbai Bus</li>
+                    <li>Bangalore to Chennai Bus</li>
+                    <li>Mumbai to Pune Bus</li>
+                    <li>Indore to Ahmedabad Bus</li>
+                    <li>Udaipur to Jaipur Bus</li>
+                    <li>Delhi to Gorakhpur Bus</li>
+                </ul>
+
+                <ul>
+                    <li>Vijayawada to Bangalore Bus</li>
+                    <li>Chennai to Bangalore Bus</li>
+                    <li>Mumbai to Hyderabad Bus</li>
+                    <li>Ahmedabad to Jaipur Bus</li>
+                    <li>Jaipur to Delhi Bus</li>
+                    <li>Delhi to Shimla Bus</li>
+                </ul>
+        </div>
+
+        <div id="tab4" class="busroutes-content">
+            <p>Top bus services content.</p>
+            <ul>
+                    <li>Hyderabad to Bangalore Bus</li>
+                    <li>Vijayawada to Hyderabad Bus</li>
+                    <li>Chennai to Madurai Bus</li>
+                    <li>Mumbai to Ahmedabad Bus</li>
+                    <li>Ahmedabad to Rajkot Bus</li>
+                    <li>Jaipur to Ahmedabad Bus</li>
+                    <li>Delhi to Jaipur Bus</li>
+                </ul>
+
+                <ul>
+                    <li>Hyderabad to Vijayawada Bus</li>
+                    <li>Bangalore to Hyderabad Bus</li>
+                    <li>Chennai to Coimbatore Bus</li>
+                    <li>Indore to Bhopal Bus</li>
+                    <li>Ahmedabad to Indore Bus</li>
+                    <li>Delhi to Lucknow Bus</li>
+                </ul>
+        </div>
+
+        <div id="tab5" class="busroutes-content">
+            <p>Quick links content.</p>
+            <ul>
+                    <li>Hyderabad to Bangalore Bus</li>
+                    <li>Vijayawada to Hyderabad Bus</li>
+                    <li>Chennai to Madurai Bus</li>
+                    <li>Mumbai to Ahmedabad Bus</li>
+                    <li>Ahmedabad to Rajkot Bus</li>
+                    <li>Jaipur to Ahmedabad Bus</li>
+                    <li>Delhi to Jaipur Bus</li>
+                </ul>
+
+                <ul>
+                    <li>Hyderabad to Vijayawada Bus</li>
+                    <li>Bangalore to Hyderabad Bus</li>
+                    <li>Chennai to Coimbatore Bus</li>
+                    <li>Indore to Bhopal Bus</li>
+                    <li>Ahmedabad to Indore Bus</li>
+                    <li>Delhi to Lucknow Bus</li>
+                </ul>
+        </div>
+
+    </div>
+</section><br>
+<footer>
+    <div class="footer-container">
+        <div class="footer-section">
+            <h3>Company</h3>
+            <ul>
+                <li><a href="#">About Us</a></li>
+                <li><a href="#">Careers</a></li>
+                <li><a href="#">Press</a></li>
+                <li><a href="#">contact</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h3>Support</h3>
+            <ul>
+                <li><a href="#">Help Center</a></li>
+                <li><a href="#">Cancellation & Refunds</a></li>
+                <li><a href="#">Contact Us</a></li>
+                <li><a href="#">Feedback</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h3>Legal</h3>
+            <ul>
+                <li><a href="#">Terms of Service</a></li>
+                <li><a href="#">Privacy Policy</a></li>
+                <li><a href="#">Cookie Policy</a></li>
+                <li><a href="#">Disclaimer</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h3>Follow Us</h3>
+            <div class="social-icons">
+                <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="#"><i class="fa-brands fa-twitter"></i></a>
+                <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+            </div>
+        </div>
+        <div class="kiet">
+                <h4>Project Created By:</h4>
+                <h3>K.Poornasiva</h3>
+                <h3>S.K.S.Prakash</h3>
+                <h3>N.Prabhas</h3>
+                <h3>R.Subramanyam</h3>
+        </div>
+</div>
+    <p class="copyright">© 2026 Yubus. All rights reserved.</p>
+</footer>
+<!-- <script>
+    const storedOTP = localStorage.getItem("userOTP");
+
+    if (!storedOTP) {
+        // If OTP not found → redirect back to OTP page
+        window.location.href = "otp.html";
+    } else {
+        console.log("Stored OTP:", storedOTP);
+    }
+</script> -->
+<script src="busData.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
