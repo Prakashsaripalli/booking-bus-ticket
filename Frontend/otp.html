@@ -20,7 +20,10 @@
         <input type="text" maxlength="1" class="otp-box">
     </div>
 
-    <button onclick="verifyOTP()">Verify OTP</button>
+    <button class="otp-primary-btn" onclick="verifyOTP()">Verify OTP</button>
+    <button type="button" class="otp-secondary-btn" id="resendOtpBtn">Resend OTP</button>
+    <p class="otp-status" id="resendOtpStatus">Didn't receive it? Tap resend to get a new OTP.</p>
+    <button type="button" class="otp-back-btn" id="otpBackBtn">Back to Login</button>
 </div>
 
 <script src="otp.js"></script>

@@ -27,9 +27,9 @@ function updateAuthNav() {
 
 updateAuthNav();
 
-tabs.forEach(tab => {
+tabs.forEach((tab) => {
     tab.addEventListener("click", () => {
-        tabs.forEach(t => t.classList.remove("active"));
+        tabs.forEach((item) => item.classList.remove("active"));
         tab.classList.add("active");
     });
 });
@@ -42,96 +42,131 @@ if (swapBtn) {
 const dayButtons = document.querySelectorAll(".day-btn");
 const dateInput = document.querySelector("input[type='date']");
 
-dayButtons[0].addEventListener("click", () => {
-    const today = new Date();
-    dateInput.value = today.toISOString().split("T")[0];
-});
+if (dayButtons.length >= 2 && dateInput) {
+    dayButtons[0].addEventListener("click", () => {
+        const today = new Date();
+        dateInput.value = today.toISOString().split("T")[0];
+    });
 
-dayButtons[1].addEventListener("click", () => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    dateInput.value = tomorrow.toISOString().split("T")[0];
-});
+    dayButtons[1].addEventListener("click", () => {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        dateInput.value = tomorrow.toISOString().split("T")[0];
+    });
+}
 
 
 
 
-document.getElementById("searchBtn").addEventListener("click", function () {
+const searchBtn = document.getElementById("searchBtn");
+if (searchBtn) {
+    searchBtn.addEventListener("click", () => {
 
-    const from = document.getElementById("from").value;
-    const to = document.getElementById("to").value;
-    const date = document.getElementById("date").value;
+        const from = document.getElementById("from").value;
+        const to = document.getElementById("to").value;
+        const date = document.getElementById("date").value;
 
-    if(!from || !to || !date){
-        alert("Fill all fields");
-        return;
-    }
+        if (!from || !to || !date) {
+            alert("Fill all fields");
+            return;
+        }
 
-    window.location.href =
-        `result.html?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&date=${date}`;
-});
+        window.location.href =
+            `result.html?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&date=${date}`;
+    });
+}
 
 
 const fromCityInput = document.getElementById("from");
+const toCityInput = document.getElementById("to");
 const fromDropdown = document.getElementById("fromDropdown");
-
-fromCityInput.addEventListener("click", () => {
-    fromDropdown.style.display = "block";
-});
-
-function selectCity(city) {
-    fromCityInput.value = city;
-    fromDropdown.style.display = "none";
-}
-
-document.addEventListener("click", (e) => {
-    if (!e.target.closest(".city-field")) {
-        fromDropdown.style.display = "none";
-    }
-});
-
-const dropdown = document.getElementById("fromDropdown");
-
-fromCityInput.addEventListener("click", () => {
-    dropdown.style.display = "block";
-});
-
-
-function selectCity(city) {
-    fromCityInput.value = city;
-    dropdown.style.display = "none";
-}
-
-
-document.addEventListener("click", (e) => {
-    if (!e.target.closest(".city-field")) {
-        dropdown.style.display = "none";
-    }
-});
-
-
-////
-const fromCity = document.getElementById("from");
-const toCity = document.getElementById("to");
 const toDropdown = document.getElementById("toDropdown");
+const fromCityList = document.getElementById("fromCityList");
+const toCityList = document.getElementById("toCityList");
 
-fromCity.addEventListener("click", () => {
-    fromDropdown.style.display = "block";
-    toDropdown.style.display = "none";
-});
+const cityCatalog = window.CITY_CATALOG || {
+    "Popular": ["Hyderabad", "Vijayawada", "Visakhapatnam", "Chennai", "Bengaluru", "Kochi", "Bhubaneswar"]
+};
+const cityStateOrder = Array.isArray(window.CITY_STATE_ORDER)
+    ? window.CITY_STATE_ORDER
+    : Object.keys(cityCatalog);
 
-toCity.addEventListener("click", () => {
-    toDropdown.style.display = "block";
-    fromDropdown.style.display = "none";
-});
+function toggleDropdown(dropdown, shouldShow) {
+    if (!dropdown) {
+        return;
+    }
+    dropdown.style.display = shouldShow ? "block" : "none";
+}
 
 function selectCity(inputId, city) {
-    document.getElementById(inputId).value = city;
-    fromDropdown.style.display = "none";
-    toDropdown.style.display = "none";
+    const input = document.getElementById(inputId);
+    if (input) {
+        input.value = city;
+    }
+    toggleDropdown(fromDropdown, false);
+    toggleDropdown(toDropdown, false);
 }
 
-function swapCities(e) {
+function buildCityDropdown(listEl, inputId) {
+    if (!listEl) {
+        return;
+    }
+    listEl.innerHTML = "";
+
+    cityStateOrder.forEach((state) => {
+        const cities = cityCatalog[state];
+        if (!Array.isArray(cities) || cities.length === 0) {
+            return;
+        }
+
+        const stateTitle = document.createElement("p");
+        stateTitle.className = "dropdown-title";
+        stateTitle.textContent = state;
+        listEl.appendChild(stateTitle);
+
+        cities.forEach((city) => {
+            const item = document.createElement("div");
+            item.className = "city-item";
+
+            const strong = document.createElement("strong");
+            strong.textContent = city;
+
+            const span = document.createElement("span");
+            span.textContent = state;
+
+            item.appendChild(strong);
+            item.appendChild(span);
+            item.addEventListener("click", () => selectCity(inputId, city));
+            listEl.appendChild(item);
+        });
+    });
+}
+
+buildCityDropdown(fromCityList, "from");
+buildCityDropdown(toCityList, "to");
+
+if (fromCityInput) {
+    fromCityInput.addEventListener("click", () => {
+        toggleDropdown(fromDropdown, true);
+        toggleDropdown(toDropdown, false);
+    });
+}
+
+if (toCityInput) {
+    toCityInput.addEventListener("click", () => {
+        toggleDropdown(toDropdown, true);
+        toggleDropdown(fromDropdown, false);
+    });
+}
+
+document.addEventListener("click", (event) => {
+    if (!event.target.closest(".city-field")) {
+        toggleDropdown(fromDropdown, false);
+        toggleDropdown(toDropdown, false);
+    }
+});
+
+function swapCities() {
     const fromField = document.getElementById("from");
     const toField = document.getElementById("to");
     if (!fromField || !toField) {
@@ -142,68 +177,43 @@ function swapCities(e) {
     toField.value = temp;
 }
 
-document.addEventListener("click", (e) => {
-    if (!e.target.closest(".city-field")) {
-        fromDropdown.style.display = "none";
-        toDropdown.style.display = "none";
-    }
-});
-
 
 const slider = document.getElementById("offerSlider");
+const imageOffers = document.getElementById("imageOffers");
+const textOffers = document.getElementById("textOffers");
+const offersToggleBtn = document.querySelector(".view-all-btn");
 
 function slideLeft() {
+    if (!slider) {
+        return;
+    }
     slider.scrollLeft -= 300;
 }
 
 function slideRight() {
+    if (!slider) {
+        return;
+    }
     slider.scrollLeft += 300;
 }
-
 
 let isViewAll = false;
 
 function toggleViewAll() {
-    const slider = document.getElementById("offerSlider");
-    const btn = document.querySelector(".view-all-btn");
-
     isViewAll = !isViewAll;
 
-    if (isViewAll) {
-        slider.classList.add("view-all");
-        btn.innerText = "Show Less";
-    } else {
-        slider.classList.remove("view-all");
-        btn.innerText = "View All";
+    if (!imageOffers || !textOffers || !offersToggleBtn) {
+        return;
     }
-}
-
-
-
-const imageOffers = document.getElementById("imageOffers");
-const textOffers = document.getElementById("textOffers");
-const btn = document.querySelector(".view-all-btn");
-
-
-function slideLeft() {
-    slider.scrollLeft -= 300;
-}
-
-function slideRight() {
-    slider.scrollLeft += 300;
-}
-
-function toggleViewAll() {
-    isViewAll = !isViewAll;
 
     if (isViewAll) {
         imageOffers.style.display = "none";
         textOffers.style.display = "block";
-        btn.innerText = "Show Less";
+        offersToggleBtn.innerText = "Show Less";
     } else {
         imageOffers.style.display = "block";
         textOffers.style.display = "none";
-        btn.innerText = "View All";
+        offersToggleBtn.innerText = "View All";
     }
 }
 
@@ -213,62 +223,68 @@ let isDragging = false;
 let startX;
 let scrollLeftStart;
 
-// Disable browser context menu on slider
-slider.addEventListener("contextmenu", e => e.preventDefault());
+if (slider) {
+    // Disable browser context menu on slider
+    slider.addEventListener("contextmenu", (event) => event.preventDefault());
 
-// Right mouse button down
-slider.addEventListener("mousedown", (e) => {
-    if (e.button !== 2) return; // RIGHT CLICK ONLY
+    // Right mouse button down
+    slider.addEventListener("mousedown", (event) => {
+        if (event.button !== 2) return; // RIGHT CLICK ONLY
 
-    isDragging = true;
-    slider.classList.add("dragging");
-    startX = e.pageX;
-    scrollLeftStart = slider.scrollLeft;
-});
+        isDragging = true;
+        slider.classList.add("dragging");
+        startX = event.pageX;
+        scrollLeftStart = slider.scrollLeft;
+    });
 
-// Mouse move
-document.addEventListener("mousemove", (e) => {
-    if (!isDragging) return;
+    // Mouse move
+    document.addEventListener("mousemove", (event) => {
+        if (!isDragging) return;
 
-    const x = e.pageX;
-    const walk = (startX - x);
-    slider.scrollLeft = scrollLeftStart + walk;
-});
+        const x = event.pageX;
+        const walk = (startX - x);
+        slider.scrollLeft = scrollLeftStart + walk;
+    });
 
-// Mouse up
-document.addEventListener("mouseup", () => {
-    isDragging = false;
-    slider.classList.remove("dragging");
-});
+    // Mouse up
+    document.addEventListener("mouseup", () => {
+        isDragging = false;
+        slider.classList.remove("dragging");
+    });
+}
 
 
-const ratings = document.querySelectorAll('.rating')
-const ratingsContainer = document.querySelector('.ratings-container')
-const sendBtn = document.querySelector('#send')
-const panel = document.querySelector('#panel')
-let selectedRating = 'Satisfied'
+const ratings = document.querySelectorAll(".rating");
+const ratingsContainer = document.querySelector(".ratings-container");
+const sendBtn = document.querySelector("#send");
+const panel = document.querySelector("#panel");
+let selectedRating = "Satisfied";
 
-ratingsContainer.addEventListener('click', (e) => {
-    if (e.target.parentNode.classList.contains('rating')) {
-        removeActive()
-        e.target.parentNode.classList.add('active')
-        selectedRating = e.target.nextElementSibling.innerHTML
-    }
-})
+if (ratingsContainer) {
+    ratingsContainer.addEventListener("click", (event) => {
+        if (event.target.parentNode.classList.contains("rating")) {
+            removeActive();
+            event.target.parentNode.classList.add("active");
+            selectedRating = event.target.nextElementSibling.innerHTML;
+        }
+    });
+}
 
-sendBtn.addEventListener('click', (e) => {
-    panel.innerHTML = `
+if (sendBtn && panel) {
+    sendBtn.addEventListener("click", () => {
+        panel.innerHTML = `
         <i class="fas fa-heart"></i>
         <strong>Thank You!</strong>
         <br>
         <strong>Feedback: ${selectedRating}</strong>
         <p>We'll use your feedback to improve our customer support</p>
-    `
-})
+    `;
+    });
+}
 
 function removeActive() {
     for (let i = 0; i < ratings.length; i++) {
-        ratings[i].classList.remove('active')
+        ratings[i].classList.remove("active");
     }
 }
 const routesData = typeof window.getCatalogPopularRoutes === "function"
@@ -497,34 +513,9 @@ async function loadPopularRoutes() {
     }
 }
 
-routesData.forEach(route => {
-    const card = document.createElement("div");
-    card.className = "route-card";
-
-    card.innerHTML = `
-        <div class="route-info">
-            <img src="${route.image}" alt="${route.from} to ${route.to}">
-            <div class="route-name">${route.from} → ${route.to}</div>
-        </div>
-        <button class="view-btn">View Buses</button>
-    `;
-
-    routesContainer.appendChild(card);
-
-    const viewButton = card.querySelector(".view-btn");
-    if (viewButton) {
-        viewButton.addEventListener("click", () => {
-            const query = new URLSearchParams({
-                from: route.from,
-                to: route.to,
-                date: getPopularRouteDate()
-            });
-
-            window.location.href = `result.html?${query.toString()}`;
-        });
-    }
-});
-
+if (routesContainer) {
+    renderPopularRoutes(routesData);
+}
 initializePopularRouteDate();
 loadPopularRoutes();
 
@@ -569,7 +560,11 @@ if (button && loader) {
     });
 }
 
-function showBusTab(tabId) {
+function showBusTab(tabButton) {
+    const tabId = typeof tabButton === "string" ? tabButton : tabButton?.dataset?.tab;
+    if (!tabId) {
+        return;
+    }
 
     let contents = document.querySelectorAll(".busroutes-content");
     let tabs = document.querySelectorAll(".busroutes-tab");
@@ -582,7 +577,17 @@ function showBusTab(tabId) {
         tab.classList.remove("active");
     });
 
-    document.getElementById(tabId).classList.add("active");
-    event.target.classList.add("active");
+    const activeTab = document.getElementById(tabId);
+    if (activeTab) {
+        activeTab.classList.add("active");
+    }
+
+    const activeButton = typeof tabButton === "string"
+        ? document.querySelector(`.busroutes-tab[data-tab="${tabId}"]`)
+        : tabButton;
+    if (activeButton) {
+        activeButton.classList.add("active");
+    }
 }
+
 

@@ -46,7 +46,8 @@ body {
     box-shadow: 0 0 5px rgba(255,75,43,0.6);
 }
 
-button {
+.otp-primary-btn,
+.otp-secondary-btn {
     width: 100%;
     padding: 12px;
     background: linear-gradient(135deg, #ff4b2b, #ff416c);
@@ -57,6 +58,49 @@ button {
     cursor: pointer;
 }
 
-button:hover {
+.otp-primary-btn:hover,
+.otp-secondary-btn:hover {
     opacity: 0.9;
+}
+
+.otp-secondary-btn {
+    margin-top: 12px;
+    background: #fff;
+    color: #ff4b2b;
+    border: 1px solid #ff4b2b;
+}
+
+.otp-secondary-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.otp-status {
+    margin-top: 12px;
+    font-size: 12px;
+    color: #666;
+}
+
+.otp-status.success {
+    color: #1b7f3f;
+}
+
+.otp-status.error {
+    color: #c0392b;
+}
+
+.otp-back-btn {
+    margin-top: 10px;
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    color: #333;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.otp-back-btn:hover {
+    border-color: #bbb;
 }

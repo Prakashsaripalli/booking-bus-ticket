@@ -215,6 +215,22 @@ input:focus {
     font-size: 13px;
 }
 
+.back-btn {
+    width: 100%;
+    margin-top: 12px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    color: #111827;
+    font-size: 13px;
+    height: 44px;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    border-color: #cbd5f5;
+}
+
 .hidden {
     display: none;
 }

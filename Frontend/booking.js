@@ -6,6 +6,10 @@ const selectedSeatsDisplay = document.getElementById("selectedSeats");
 const gstDisplay = document.getElementById("gstAmount");
 const totalDisplay = document.getElementById("totalAmount");
 const proceedBtn = document.getElementById("proceedBtn");
+const startPointSelect = document.getElementById("startPointSelect");
+const dropPointSelect = document.getElementById("dropPointSelect");
+const confirmPointsBtn = document.getElementById("confirmPointsBtn");
+const boardingStatus = document.getElementById("boardingStatus");
 const journeyRouteDisplay = document.getElementById("journeyRoute");
 const journeyDateDisplay = document.getElementById("journeyDate");
 const journeyNotice = document.getElementById("journeyNotice");
@@ -38,6 +42,87 @@ const busType = typeof window.resolveBusCoachType === "function"
 const basePrice = parseInt(params.get("price"), 10) || parseInt(catalogBus?.price, 10) || 1299;
 
 let selectedUnits = [];
+let boardingConfirmed = false;
+
+const CITY_POINTS = window.CITY_POINTS || {
+    Hyderabad: ["Gachibowli", "Kukatpally", "Ameerpet", "LB Nagar", "MGBS"],
+    Warangal: ["Hanamkonda", "Kazipet", "Warangal Bus Stand", "Narsampet", "Mulugu"],
+    Karimnagar: ["Karimnagar Bus Stand", "Kothapalli", "Jagtial Road", "Karimnagar Bypass", "Manakondur"],
+    Nizamabad: ["Nizamabad Bus Stand", "Bodhan Road", "Nizamabad Railway Station", "Armur", "Nizamsagar Road"],
+    Khammam: ["Khammam Bus Stand", "Bypass Road", "Wyra Road", "Kothagudem", "Madhira"],
+    Vijayawada: ["Benz Circle", "PNBS", "Auto Nagar", "MG Road", "Gannavaram"],
+    Visakhapatnam: ["Dwaraka Nagar", "Maddilapalem", "NAD", "Gajuwaka", "Seethammadhara"],
+    Tirupati: ["APSRTC Bus Stand", "Leela Mahal", "Renigunta", "Tirumala", "Alipiri"],
+    Guntur: ["Guntur Bus Stand", "Brodipet", "Arundelpet", "Ring Road", "Nallapadu"],
+    Kurnool: ["Kurnool Bus Stand", "Gandhi Nagar", "Nandyal Road", "Kallur", "Bypass"],
+    Nellore: ["RTC Bus Stand", "Stonehousepet", "Nellore Bypass", "Kavali", "Atmakur"],
+    Rajahmundry: ["RTC Complex", "Kotipalli", "Danavaipeta", "Bypass Road", "Morampudi"],
+    Bhubaneswar: ["Baramunda", "Vani Vihar", "Master Canteen", "Patia", "Kharavel Nagar"],
+    Cuttack: ["Badambadi", "Link Road", "College Square", "CDA", "Bypass"],
+    Puri: ["Puri Bus Stand", "Grand Road", "Station Road", "Swargadwar", "Konark Road"],
+    Rourkela: ["Rourkela Bus Stand", "Sector 2", "Panposh", "Chhend", "Bisra Road"],
+    Sambalpur: ["Sambalpur Bus Stand", "Ainthapali", "Dhanupali", "Burla", "Hirakud"],
+    Berhampur: ["Berhampur Bus Stand", "Gopalpur", "Ankuli", "Bada Bazar", "Lochapada"],
+    Chennai: ["Koyambedu", "Guindy", "Tambaram", "Central", "Perungudi"],
+    Coimbatore: ["Gandhipuram", "Ukkadam", "Saravanampatti", "Peelamedu", "Singanallur"],
+    Madurai: ["Mattuthavani", "Periyar", "Thallakulam", "KK Nagar", "Anna Nagar"],
+    Tiruchirappalli: ["Chathiram", "Srirangam", "Thillai Nagar", "Ponmalai", "Central"],
+    Salem: ["Five Roads", "New Bus Stand", "Shevapet", "Gugai", "Salem Junction"],
+    Kochi: ["Vyttila", "Edappally", "Aluva", "Kalamassery", "Fort Kochi"],
+    Thiruvananthapuram: ["Thampanoor", "Technopark", "Kazhakkoottam", "Attingal", "Nedumangad"],
+    Kozhikode: ["Mavoor Road", "Ramanattukara", "Kallai", "Medical College", "Thondayad"],
+    Thrissur: ["Swaraj Round", "Puzhakkal", "Mannuthy", "Ollur", "Kuttanellur"],
+    Kannur: ["Kannur Bus Stand", "Thana", "Payyambalam", "Talap", "Kuthuparamba"],
+    Bangalore: ["Majestic", "Silk Board", "Electronic City", "Hebbal", "KR Puram"],
+    Mysore: ["Mysore Bus Stand", "Jayalakshmipuram", "Vijayanagar", "Hebbal", "Ramaswamy Circle"],
+    Mangalore: ["Hampankatta", "Lalbagh", "Kankanady", "Surathkal", "Kuloor"],
+    Hubli: ["Hubli Bus Stand", "Gokul Road", "Keshwapur", "Unkal", "Bypass"],
+    Belgaum: ["Belgaum Bus Stand", "Tilakwadi", "Udyambag", "Sambra", "Bypass"]
+};
+
+function getPointsForCity(city) {
+    const normalized = String(city || "").trim();
+    return CITY_POINTS[normalized] || ["Main Bus Stand", "City Center", "Railway Station", "Airport", "Bypass"];
+}
+
+function setBoardingStatus(message, variant = "") {
+    if (!boardingStatus) {
+        return;
+    }
+    boardingStatus.textContent = message;
+    boardingStatus.className = "boarding-status";
+    if (variant) {
+        boardingStatus.classList.add(variant);
+    }
+}
+
+function populateSelect(select, points, placeholder) {
+    if (!select) {
+        return;
+    }
+    select.innerHTML = "";
+    const placeholderOption = document.createElement("option");
+    placeholderOption.value = "";
+    placeholderOption.textContent = placeholder;
+    placeholderOption.disabled = true;
+    placeholderOption.selected = true;
+    select.appendChild(placeholderOption);
+    points.forEach((point) => {
+        const option = document.createElement("option");
+        option.value = point;
+        option.textContent = point;
+        select.appendChild(option);
+    });
+}
+
+function resetBoardingConfirmation() {
+    boardingConfirmed = false;
+    if (confirmPointsBtn) {
+        confirmPointsBtn.disabled = false;
+        confirmPointsBtn.textContent = "Submit Boarding Details";
+    }
+    setBoardingStatus("Select starting and dropping points to continue.", "");
+}
 
 function normalizeDate(value) {
     return (value || "").trim();
@@ -467,6 +552,44 @@ function initPage() {
 
     updatePayment();
 
+    populateSelect(startPointSelect, getPointsForCity(from), "Select starting point");
+    populateSelect(dropPointSelect, getPointsForCity(to), "Select dropping point");
+
+    if (startPointSelect) {
+        startPointSelect.addEventListener("change", resetBoardingConfirmation);
+    }
+
+    if (dropPointSelect) {
+        dropPointSelect.addEventListener("change", resetBoardingConfirmation);
+    }
+
+    if (confirmPointsBtn) {
+        confirmPointsBtn.addEventListener("click", () => {
+            const startPoint = startPointSelect?.value || "";
+            const dropPoint = dropPointSelect?.value || "";
+
+            if (!startPoint) {
+                setBoardingStatus("Please select a starting point.", "error");
+                startPointSelect?.focus();
+                return;
+            }
+
+            if (!dropPoint) {
+                setBoardingStatus("Please select a dropping point.", "error");
+                dropPointSelect?.focus();
+                return;
+            }
+
+            boardingConfirmed = true;
+            confirmPointsBtn.disabled = true;
+            confirmPointsBtn.textContent = "Boarding Details Saved";
+            setBoardingStatus("Boarding details saved. You can proceed now.", "success");
+
+            localStorage.setItem("boardingStartPoint", startPoint);
+            localStorage.setItem("boardingDropPoint", dropPoint);
+        });
+    }
+
     proceedBtn.addEventListener("click", () => {
         if (isPastJourneyDate(journeyDate)) {
             alert("Past travel dates cannot be booked. Please go back and choose a valid date.");
@@ -475,6 +598,18 @@ function initPage() {
 
         if (selectedUnits.length === 0) {
             alert("Please select at least one seat or berth.");
+            return;
+        }
+
+        if (!boardingConfirmed) {
+            alert("Please submit your starting and dropping points before proceeding.");
+            return;
+        }
+
+        const startPoint = startPointSelect?.value || "";
+        const dropPoint = dropPointSelect?.value || "";
+        if (!startPoint || !dropPoint) {
+            alert("Please select both starting and dropping points.");
             return;
         }
 
@@ -487,7 +622,9 @@ function initPage() {
             date: journeyDate,
             departureTime,
             seats: selectedUnits.map((unit) => unit.label).join(","),
-            total: String(finalTotal)
+            total: String(finalTotal),
+            startPoint,
+            dropPoint
         });
 
         window.location.href = `payment.html?${query.toString()}`;

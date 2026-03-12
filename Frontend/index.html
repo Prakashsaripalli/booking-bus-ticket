@@ -13,12 +13,14 @@
         <link rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 </head>
-<body>
+<body id="top">
 
 <nav class="navbar">
     <div class="nav-left">
         <h1 class="logo">Yubus</h1>
-        <img src="./Assets/WhatsApp Image 2026-03-07 at 10.29.40 AM.jpeg" alt="image" width="65px" height="50px">
+        <a class="logo-link" href="#top" aria-label="Go to top">
+            <img src="./Assets/WhatsApp Image 2026-03-07 at 10.29.40 AM.jpeg" alt="Yubus logo" width="65px" height="50px">
+        </a>
     </div>
     <div class="nav-right">
         <a href="#offers"><i class="fa-solid fa-tags"></i> Offers</a>
@@ -56,20 +58,7 @@
 
                 <div class="city-dropdown" id="fromDropdown">
                     <p class="dropdown-title">POPULAR CITIES</p>
-
-                    <div class="city-item" onclick="selectCity('from','Hyderabad')"><strong>Hyderabad</strong><span>Telangana</span></div>
-                    <div class="city-item" onclick="selectCity('from','Bangalore')"><strong>Bangalore</strong><span>Karnataka</span></div>
-                    <div class="city-item" onclick="selectCity('from','Chennai')"><strong>Chennai</strong><span>Tamil Nadu</span></div>
-                    <div class="city-item" onclick="selectCity('from','Goa')"><strong>Goa</strong><span>Goa</span></div>
-                    <div class="city-item" onclick="selectCity('from','Vijayawada')"><strong>Vijayawada</strong><span>Andhra Pradesh</span></div>
-                    <div class="city-item" onclick="selectCity('from','Nellore')"><strong>Nellore</strong><span>Andhra Pradesh</span></div>
-                    <div class="city-item" onclick="selectCity('from','Jaipur')"><strong>Jaipur</strong><span>Rajasthan</span></div>
-                    <div class="city-item" onclick="selectCity('from','Mangalore')"><strong>Mangalore</strong><span>Karnataka</span></div>
-                    <div class="city-item" onclick="selectCity('from','Tirupati')"><strong>Tirupati</strong><span>Andhra Pradesh</span></div>
-                    <div class="city-item" onclick="selectCity('from','Visakhapatnam')"><strong>Visakhapatnam</strong><span>Andhra Pradesh</span></div>
-                    <div class="city-item" onclick="selectCity('from','Madurai')"><strong>Madurai</strong><span>Tamil Nadu</span></div>
-                    <div class="city-item" onclick="selectCity('from','Delhi')"><strong>Delhi</strong><span>Delhi</span></div>
-                    <div class="city-item" onclick="selectCity('from','Lucknow')"><strong>Lucknow</strong><span>Uttar Pradesh</span></div>
+                    <div id="fromCityList"></div>
                 </div>
             </div>
 
@@ -85,20 +74,7 @@
 
                 <div class="city-dropdown" id="toDropdown">
                     <p class="dropdown-title">POPULAR CITIES</p>
-
-                    <div class="city-item" onclick="selectCity('to','Hyderabad')"><strong>Hyderabad</strong><span>Telangana</span></div>
-                    <div class="city-item" onclick="selectCity('to','Bangalore')"><strong>Bangalore</strong><span>Karnataka</span></div>
-                    <div class="city-item" onclick="selectCity('to','Chennai')"><strong>Chennai</strong><span>Tamil Nadu</span></div>
-                    <div class="city-item" onclick="selectCity('to','Goa')"><strong>Goa</strong><span>Goa</span></div>
-                    <div class="city-item" onclick="selectCity('to','Vijayawada')"><strong>Vijayawada</strong><span>Andhra Pradesh</span></div>
-                    <div class="city-item" onclick="selectCity('to','Nellore')"><strong>Nellore</strong><span>Andhra Pradesh</span></div>
-                    <div class="city-item" onclick="selectCity('to','Jaipur')"><strong>Jaipur</strong><span>Rajasthan</span></div>
-                    <div class="city-item" onclick="selectCity('to','Mangalore')"><strong>Mangalore</strong><span>Karnataka</span></div>
-                    <div class="city-item" onclick="selectCity('to','Tirupati')"><strong>Tirupati</strong><span>Andhra Pradesh</span></div>
-                    <div class="city-item" onclick="selectCity('to','Visakhapatnam')"><strong>Visakhapatnam</strong><span>Andhra Pradesh</span></div>
-                    <div class="city-item" onclick="selectCity('to','Madurai')"><strong>Madurai</strong><span>Tamil Nadu</span></div>
-                    <div class="city-item" onclick="selectCity('to','Delhi')"><strong>Delhi</strong><span>Delhi</span></div>
-                    <div class="city-item" onclick="selectCity('to','Lucknow')"><strong>Lucknow</strong><span>Uttar Pradesh</span></div>
+                    <div id="toCityList"></div>
                 </div>
             </div>
 
@@ -599,11 +575,11 @@
 
         <!-- Tabs -->
         <div class="busroutes-tabs">
-            <button class="busroutes-tab active" onclick="showBusTab('tab1')">Top Bus Routes</button>
-            <button class="busroutes-tab" onclick="showBusTab('tab2')">Buses From Top Cities</button>
-            <button class="busroutes-tab" onclick="showBusTab('tab3')">Top RTC Buses</button>
-            <button class="busroutes-tab" onclick="showBusTab('tab4')">Top Bus Services</button>
-            <button class="busroutes-tab" onclick="showBusTab('tab5')">Quick Links</button>
+            <button class="busroutes-tab active" data-tab="tab1" onclick="showBusTab(this)">Top Bus Routes</button>
+            <button class="busroutes-tab" data-tab="tab2" onclick="showBusTab(this)">Buses From Top Cities</button>
+            <button class="busroutes-tab" data-tab="tab3" onclick="showBusTab(this)">Top RTC Buses</button>
+            <button class="busroutes-tab" data-tab="tab4" onclick="showBusTab(this)">Top Bus Services</button>
+            <button class="busroutes-tab" data-tab="tab5" onclick="showBusTab(this)">Quick Links</button>
         </div>
 
         <!-- TAB 1 -->
@@ -796,6 +772,8 @@
 <script src="script.js"></script>
 </body>
 </html>
+
+
 
 
 

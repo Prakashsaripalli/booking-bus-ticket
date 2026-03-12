@@ -52,6 +52,19 @@
     <div class="payment-box">
         <h3>Payment Details</h3>
 
+        <div class="boarding-section">
+            <h4>Boarding Details</h4>
+
+            <label for="startPointSelect">Starting Point</label>
+            <select id="startPointSelect" class="boarding-select"></select>
+
+            <label for="dropPointSelect">Dropping Point</label>
+            <select id="dropPointSelect" class="boarding-select"></select>
+
+            <button type="button" class="boarding-btn" id="confirmPointsBtn">Submit Boarding Details</button>
+            <p class="boarding-status" id="boardingStatus">Select starting and dropping points to continue.</p>
+        </div>
+
         <div class="price-row">
             <span>Selected Fare</span>
             <span>Rs <span id="seatPrice">0</span></span>

@@ -14,6 +14,159 @@ function buildOtpUrl(path, base) {
 }
 
 const inputs = document.querySelectorAll(".otp-box");
+const resendOtpBtn = document.getElementById("resendOtpBtn");
+const resendOtpStatus = document.getElementById("resendOtpStatus");
+const otpBackBtn = document.getElementById("otpBackBtn");
+const RESEND_COOLDOWN_MS = 15000;
+let resendCooldownUntil = 0;
+let resendCooldownTimer = null;
+
+function setResendStatus(message, variant = "") {
+    if (!resendOtpStatus) {
+        return;
+    }
+    resendOtpStatus.textContent = message;
+    resendOtpStatus.className = "otp-status";
+    if (variant) {
+        resendOtpStatus.classList.add(variant);
+    }
+}
+
+function clearOtpInputs() {
+    inputs.forEach((input) => {
+        input.value = "";
+    });
+    if (inputs[0]) {
+        inputs[0].focus();
+    }
+}
+
+function updateResendButton() {
+    if (!resendOtpBtn) {
+        return;
+    }
+
+    const remaining = resendCooldownUntil - Date.now();
+    if (remaining > 0) {
+        const seconds = Math.ceil(remaining / 1000);
+        resendOtpBtn.disabled = true;
+        resendOtpBtn.textContent = `Resend in ${seconds}s`;
+        return;
+    }
+
+    resendOtpBtn.disabled = false;
+    resendOtpBtn.textContent = "Resend OTP";
+    if (resendCooldownTimer) {
+        clearInterval(resendCooldownTimer);
+        resendCooldownTimer = null;
+    }
+}
+
+function startResendCooldown() {
+    resendCooldownUntil = Date.now() + RESEND_COOLDOWN_MS;
+    updateResendButton();
+    if (resendCooldownTimer) {
+        clearInterval(resendCooldownTimer);
+    }
+    resendCooldownTimer = setInterval(updateResendButton, 500);
+}
+
+async function postOtpWithFallback(path, payload) {
+    let lastError;
+    for (const base of OTP_API_BASES) {
+        try {
+            const response = await fetch(buildOtpUrl(path, base), {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json().catch(() => ({}));
+            return { response, data };
+        } catch (error) {
+            lastError = error;
+        }
+    }
+    throw lastError || new Error("OTP backend not reachable");
+}
+
+async function resendOTP() {
+    if (!resendOtpBtn) {
+        return;
+    }
+
+    if (Date.now() < resendCooldownUntil) {
+        updateResendButton();
+        setResendStatus("Please wait before requesting another OTP.", "error");
+        return;
+    }
+
+    const loginType = localStorage.getItem("loginType");
+    const mobile = localStorage.getItem("mobile") || "";
+    const userEmail = localStorage.getItem("userEmail") || "";
+    const useEmail = loginType === "email" || (!mobile && userEmail);
+
+    const payload = {};
+    if (useEmail) {
+        if (!userEmail) {
+            alert("Email missing. Please login again.");
+            window.location.href = "login.html";
+            return;
+        }
+        payload.email = userEmail;
+        localStorage.setItem("loginType", "email");
+    } else {
+        if (!mobile) {
+            alert("Mobile number missing. Please login again.");
+            window.location.href = "login.html";
+            return;
+        }
+        payload.mobile = `+91${mobile}`;
+        localStorage.setItem("loginType", "phone");
+    }
+
+    resendOtpBtn.disabled = true;
+    resendOtpBtn.textContent = "Sending...";
+    setResendStatus("Requesting a new OTP...", "");
+    let resendSucceeded = false;
+
+    try {
+        const { response, data } = await postOtpWithFallback("/api/auth/send-otp", payload);
+        if (!response.ok || data.success === false) {
+            setResendStatus(data.message || "OTP send failed. Please try again.", "error");
+            return;
+        }
+
+        localStorage.removeItem("userOTPVerified");
+        localStorage.removeItem("mockOTP");
+        localStorage.removeItem("mockOTPExpiry");
+
+        if (data.otp) {
+            const expiresAt = Date.now() + 5 * 60 * 1000;
+            localStorage.setItem("otpMode", "debug");
+            localStorage.setItem("mockOTP", data.otp);
+            localStorage.setItem("mockOTPExpiry", String(expiresAt));
+            alert(`OTP (dev): ${data.otp}. Use it within 5 minutes.`);
+            setResendStatus("New OTP generated for testing.", "success");
+        } else {
+            localStorage.setItem("otpMode", "api");
+            setResendStatus("New OTP sent. Please check your inbox or SMS.", "success");
+        }
+
+        clearOtpInputs();
+        resendSucceeded = true;
+        startResendCooldown();
+    } catch (error) {
+        setResendStatus(
+            `OTP send API error. Check backend availability at ${window.YUBUS_API?.describeTarget?.() || "http://localhost:8081"}.`,
+            "error"
+        );
+    } finally {
+        if (!resendSucceeded) {
+            resendOtpBtn.disabled = false;
+            resendOtpBtn.textContent = "Resend OTP";
+        }
+    }
+}
 
 inputs.forEach((input, index) => {
     input.addEventListener("input", () => {
@@ -42,6 +195,19 @@ inputs.forEach((input, index) => {
         inputs[focusIndex].focus();
     });
 });
+
+if (resendOtpBtn) {
+    resendOtpBtn.addEventListener("click", () => {
+        void resendOTP();
+    });
+    updateResendButton();
+}
+
+if (otpBackBtn) {
+    otpBackBtn.addEventListener("click", () => {
+        window.location.href = "login.html";
+    });
+}
 
 async function verifyOTP() {
     let otp = "";

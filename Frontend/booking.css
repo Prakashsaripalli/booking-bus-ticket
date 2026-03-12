@@ -645,6 +645,68 @@ body {
     top: 20px;
 }
 
+.boarding-section {
+    margin: 16px 0 18px;
+    padding: 14px;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+.boarding-section h4 {
+    margin: 0 0 10px;
+    font-size: 15px;
+}
+
+.boarding-section label {
+    display: block;
+    margin: 10px 0 6px;
+    font-size: 12px;
+    color: #4b5563;
+}
+
+.boarding-select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    font-size: 13px;
+    color: #111827;
+}
+
+.boarding-btn {
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid #d32f2f;
+    background: #fff;
+    color: #d32f2f;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.boarding-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.boarding-status {
+    margin: 10px 0 0;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.boarding-status.success {
+    color: #1b7f3f;
+}
+
+.boarding-status.error {
+    color: #b42343;
+}
+
 .price-row {
     display: flex;
     justify-content: space-between;

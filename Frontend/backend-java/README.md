@@ -26,9 +26,19 @@ Tables are auto-created on startup: `users`, `otps`, `payments`.
 
 For email OTP delivery, set:
 
-- `SMTP_USER=saisaripalli4988@gmail.com`
-- `SMTP_APP_PASSWORD=<gmail-app-password>`
-- `SMTP_FROM=saisaripalli4988@gmail.com` (optional)
+- `SMTP_USER=prakashsaripalli1198@gmail.com`
+- `SMTP_APP_PASSWORD=<vcfwwdbmzascrhad>`
+- `SMTP_FROM=prakashsaripalli1198@gmail.com` (optional)
+
+Windows local setup:
+
+1. Copy `Frontend/backend-java/.env.bat.example` to `Frontend/backend-java/.env.bat`
+2. Fill in your real Gmail address + app password
+3. Start the backend with `Frontend/start-backend.bat` (it loads `.env.bat`)
+
+If you run `java -jar ...` directly (or from an IDE), you must set the same
+environment variables in that shell/run configuration or the backend will
+respond with “SMTP_USER is not configured”.
 
 Optional local-dev flags:
 

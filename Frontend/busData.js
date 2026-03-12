@@ -1,102 +1,436 @@
 (function () {
     const routeImages = {
-        "Bangalore-Hyderabad": "https://images.unsplash.com/photo-1593693397690-362cb9666fc2",
-        "Bangalore-Chennai": "https://images.unsplash.com/photo-1589394815804-964ed0be2eb5",
-        "Bangalore-Tirupati": "https://images.unsplash.com/photo-1589394815804-964ed0be2eb5",
-        "Bangalore-Goa": "https://images.unsplash.com/photo-1516483638261-f4dbaf036963",
-        "Bangalore-Mangalore": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
         "Hyderabad-Vijayawada": "https://images.unsplash.com/photo-1625225233840-695456021cde",
-        "Hyderabad-Bangalore": "https://images.unsplash.com/photo-1593693397690-362cb9666fc2",
-        "Hyderabad-Chennai": "https://images.unsplash.com/photo-1589394815804-964ed0be2eb5",
-        "Hyderabad-Tirupati": "https://images.unsplash.com/photo-1593693397690-362cb9666fc2",
-        "Hyderabad-Visakhapatnam": "https://images.unsplash.com/photo-1519046904884-53103b34b206",
-        "Hyderabad-Nellore": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
-        "Hyderabad-Jaipur": "https://images.unsplash.com/photo-1477587458883-47145ed94245",
-        "Hyderabad-Delhi": "https://images.unsplash.com/photo-1524492412937-b28074a5d7da",
-        "Chennai-Hyderabad": "https://images.unsplash.com/photo-1593693397690-362cb9666fc2",
-        "Chennai-Bangalore": "https://images.unsplash.com/photo-1589394815804-964ed0be2eb5",
-        "Chennai-Madurai": "https://images.unsplash.com/photo-1524492412937-b28074a5d7da",
-        "Chennai-Nellore": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
-        "Vijayawada-Hyderabad": "https://images.unsplash.com/photo-1625225233840-695456021cde",
-        "Goa-Bangalore": "https://images.unsplash.com/photo-1516483638261-f4dbaf036963",
-        "Nellore-Hyderabad": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
-        "Nellore-Chennai": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
-        "Jaipur-Hyderabad": "https://images.unsplash.com/photo-1477587458883-47145ed94245",
-        "Delhi-Lucknow": "https://images.unsplash.com/photo-1524492412937-b28074a5d7da",
-        "Delhi-Hyderabad": "https://images.unsplash.com/photo-1524492412937-b28074a5d7da",
-        "Mangalore-Bangalore": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e"
+        "Hyderabad-Bengaluru": "https://images.unsplash.com/photo-1593693397690-362cb9666fc2",
+        "Bengaluru-Chennai": "https://images.unsplash.com/photo-1589394815804-964ed0be2eb5",
+        "Chennai-Kochi": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+        "Bhubaneswar-Visakhapatnam": "https://images.unsplash.com/photo-1519046904884-53103b34b206"
     };
 
-    const shortRouteKeys = new Set([
-        "hyderabad-vijayawada",
-        "vijayawada-hyderabad",
-        "bangalore-chennai",
-        "chennai-bangalore",
-        "nellore-chennai",
-        "chennai-nellore",
-        "bangalore-mangalore",
-        "mangalore-bangalore",
-        "bangalore-tirupati",
-        "tirupati-bangalore"
-    ]);
-
-    const buses = [
-        { id: 101, name: "Yubus Express", fromCity: "Hyderabad", toCity: "Vijayawada", departureTime: "06:30 AM", price: 899, busType: "AC Sleeper" },
-        { id: 102, name: "Yubus Deluxe", fromCity: "Hyderabad", toCity: "Vijayawada", departureTime: "10:00 PM", price: 699, busType: "Non-AC Seater" },
-        { id: 103, name: "Yubus Sunrise", fromCity: "Hyderabad", toCity: "Vijayawada", departureTime: "11:30 PM", price: 849, busType: "AC Seater" },
-        { id: 104, name: "Yubus Star", fromCity: "Vijayawada", toCity: "Hyderabad", departureTime: "07:00 AM", price: 799, busType: "AC Seater" },
-        { id: 105, name: "Yubus Return", fromCity: "Vijayawada", toCity: "Hyderabad", departureTime: "03:45 PM", price: 949, busType: "Sleeper" },
-        { id: 106, name: "Yubus Royal", fromCity: "Hyderabad", toCity: "Bangalore", departureTime: "05:30 PM", price: 1299, busType: "AC Sleeper" },
-        { id: 107, name: "Yubus Luxury", fromCity: "Hyderabad", toCity: "Bangalore", departureTime: "09:00 PM", price: 1599, busType: "AC Volvo" },
-        { id: 108, name: "Yubus Falcon", fromCity: "Hyderabad", toCity: "Bangalore", departureTime: "10:45 PM", price: 1399, busType: "Sleeper" },
-        { id: 109, name: "Yubus Night Rider", fromCity: "Bangalore", toCity: "Hyderabad", departureTime: "06:15 PM", price: 1199, busType: "Sleeper" },
-        { id: 110, name: "Yubus Sapphire", fromCity: "Bangalore", toCity: "Hyderabad", departureTime: "09:45 PM", price: 1349, busType: "AC Sleeper" },
-        { id: 111, name: "Yubus Dawn", fromCity: "Bangalore", toCity: "Hyderabad", departureTime: "11:15 PM", price: 1499, busType: "AC Volvo" },
-        { id: 112, name: "Yubus Comfort", fromCity: "Hyderabad", toCity: "Chennai", departureTime: "08:00 PM", price: 1499, busType: "AC Sleeper" },
-        { id: 113, name: "Yubus Coastline", fromCity: "Hyderabad", toCity: "Chennai", departureTime: "09:30 PM", price: 1549, busType: "AC Volvo" },
-        { id: 114, name: "Yubus Metro", fromCity: "Hyderabad", toCity: "Chennai", departureTime: "11:00 PM", price: 1249, busType: "Non-AC Sleeper" },
-        { id: 115, name: "Yubus SuperFast", fromCity: "Chennai", toCity: "Hyderabad", departureTime: "06:00 AM", price: 999, busType: "Non-AC" },
-        { id: 116, name: "Yubus Southern", fromCity: "Chennai", toCity: "Hyderabad", departureTime: "08:30 PM", price: 1399, busType: "AC Sleeper" },
-        { id: 117, name: "Yubus Meridian", fromCity: "Chennai", toCity: "Hyderabad", departureTime: "10:15 PM", price: 1499, busType: "AC Volvo" },
-        { id: 118, name: "Yubus Link", fromCity: "Bangalore", toCity: "Chennai", departureTime: "07:00 AM", price: 799, busType: "AC Seater" },
-        { id: 119, name: "Yubus Corridor", fromCity: "Bangalore", toCity: "Chennai", departureTime: "01:30 PM", price: 949, busType: "Sleeper" },
-        { id: 120, name: "Yubus Connect", fromCity: "Bangalore", toCity: "Chennai", departureTime: "10:30 PM", price: 1099, busType: "AC Sleeper" },
-        { id: 121, name: "Yubus Bay", fromCity: "Chennai", toCity: "Bangalore", departureTime: "06:30 AM", price: 829, busType: "AC Seater" },
-        { id: 122, name: "Yubus Velocity", fromCity: "Chennai", toCity: "Bangalore", departureTime: "09:45 PM", price: 999, busType: "Sleeper" },
-        { id: 123, name: "Yubus Temple", fromCity: "Bangalore", toCity: "Tirupati", departureTime: "09:00 PM", price: 899, busType: "AC Sleeper" },
-        { id: 124, name: "Yubus Pilgrim", fromCity: "Bangalore", toCity: "Tirupati", departureTime: "11:00 PM", price: 699, busType: "Non-AC Seater" },
-        { id: 125, name: "Yubus Darshan", fromCity: "Hyderabad", toCity: "Tirupati", departureTime: "07:30 PM", price: 1199, busType: "AC Sleeper" },
-        { id: 126, name: "Yubus Balaji", fromCity: "Hyderabad", toCity: "Tirupati", departureTime: "10:00 PM", price: 999, busType: "Sleeper" },
-        { id: 127, name: "Yubus Coast", fromCity: "Hyderabad", toCity: "Visakhapatnam", departureTime: "05:45 PM", price: 1399, busType: "AC Sleeper" },
-        { id: 128, name: "Yubus Seaside", fromCity: "Hyderabad", toCity: "Visakhapatnam", departureTime: "09:15 PM", price: 1599, busType: "AC Volvo" },
-        { id: 129, name: "Yubus Heritage", fromCity: "Chennai", toCity: "Madurai", departureTime: "08:15 PM", price: 999, busType: "AC Sleeper" },
-        { id: 130, name: "Yubus Lotus", fromCity: "Chennai", toCity: "Madurai", departureTime: "10:45 PM", price: 849, busType: "Sleeper" },
-        { id: 131, name: "Yubus Capital", fromCity: "Delhi", toCity: "Lucknow", departureTime: "09:00 PM", price: 1499, busType: "AC Sleeper" },
-        { id: 132, name: "Yubus Ganga", fromCity: "Delhi", toCity: "Lucknow", departureTime: "11:30 PM", price: 1699, busType: "AC Volvo" },
-        { id: 133, name: "Yubus Beach", fromCity: "Goa", toCity: "Bangalore", departureTime: "08:00 PM", price: 1299, busType: "Sleeper" },
-        { id: 134, name: "Yubus Konkan", fromCity: "Goa", toCity: "Bangalore", departureTime: "10:30 PM", price: 1499, busType: "AC Sleeper" },
-        { id: 135, name: "Yubus Escape", fromCity: "Bangalore", toCity: "Goa", departureTime: "07:30 PM", price: 1399, busType: "AC Sleeper" },
-        { id: 136, name: "Yubus Coastal", fromCity: "Bangalore", toCity: "Goa", departureTime: "10:00 PM", price: 1199, busType: "Sleeper" },
-        { id: 137, name: "Yubus Pearl", fromCity: "Nellore", toCity: "Chennai", departureTime: "06:00 AM", price: 549, busType: "AC Seater" },
-        { id: 138, name: "Yubus Gateway", fromCity: "Nellore", toCity: "Chennai", departureTime: "05:15 PM", price: 449, busType: "Non-AC Seater" },
-        { id: 139, name: "Yubus Marina", fromCity: "Chennai", toCity: "Nellore", departureTime: "08:00 AM", price: 579, busType: "AC Seater" },
-        { id: 140, name: "Yubus Shore", fromCity: "Chennai", toCity: "Nellore", departureTime: "06:45 PM", price: 649, busType: "Sleeper" },
-        { id: 141, name: "Yubus Frontier", fromCity: "Hyderabad", toCity: "Nellore", departureTime: "08:45 PM", price: 999, busType: "AC Sleeper" },
-        { id: 142, name: "Yubus Horizon", fromCity: "Hyderabad", toCity: "Nellore", departureTime: "10:20 PM", price: 899, busType: "Sleeper" },
-        { id: 143, name: "Yubus Deccan", fromCity: "Nellore", toCity: "Hyderabad", departureTime: "07:10 PM", price: 949, busType: "AC Sleeper" },
-        { id: 144, name: "Yubus Pink", fromCity: "Hyderabad", toCity: "Jaipur", departureTime: "04:30 PM", price: 1899, busType: "AC Sleeper" },
-        { id: 145, name: "Yubus Desert", fromCity: "Hyderabad", toCity: "Jaipur", departureTime: "07:45 PM", price: 2099, busType: "AC Volvo" },
-        { id: 146, name: "Yubus Royal Raj", fromCity: "Jaipur", toCity: "Hyderabad", departureTime: "05:00 PM", price: 1949, busType: "AC Sleeper" },
-        { id: 147, name: "Yubus Capital Connect", fromCity: "Hyderabad", toCity: "Delhi", departureTime: "03:30 PM", price: 2199, busType: "AC Sleeper" },
-        { id: 148, name: "Yubus North Star", fromCity: "Hyderabad", toCity: "Delhi", departureTime: "06:45 PM", price: 2399, busType: "AC Volvo" },
-        { id: 149, name: "Yubus Red Fort", fromCity: "Hyderabad", toCity: "Delhi", departureTime: "09:15 PM", price: 1999, busType: "Sleeper" },
-        { id: 150, name: "Yubus Deccan Return", fromCity: "Delhi", toCity: "Hyderabad", departureTime: "04:00 PM", price: 2149, busType: "AC Sleeper" },
-        { id: 151, name: "Yubus Capital Return", fromCity: "Delhi", toCity: "Hyderabad", departureTime: "08:10 PM", price: 2349, busType: "AC Volvo" },
-        { id: 152, name: "Yubus Western", fromCity: "Bangalore", toCity: "Mangalore", departureTime: "06:30 AM", price: 699, busType: "AC Seater" },
-        { id: 153, name: "Yubus Coast Express", fromCity: "Bangalore", toCity: "Mangalore", departureTime: "10:00 PM", price: 899, busType: "Sleeper" },
-        { id: 154, name: "Yubus Harbor", fromCity: "Mangalore", toCity: "Bangalore", departureTime: "07:30 AM", price: 749, busType: "AC Seater" },
-        { id: 155, name: "Yubus Monsoon", fromCity: "Mangalore", toCity: "Bangalore", departureTime: "09:45 PM", price: 949, busType: "Sleeper" }
+    const apCities = [
+        "Visakhapatnam",
+        "Anakapalle",
+        "Bheemunipatnam",
+        "Narsipatnam",
+        "Vizianagaram",
+        "Bobbili",
+        "Salur",
+        "Srikakulam",
+        "Palasa",
+        "Amadalavalasa",
+        "Rajahmundry",
+        "Kakinada",
+        "Amalapuram",
+        "Jaggampeta",
+        "Peddapuram",
+        "Samalkot",
+        "Mandapeta",
+        "Ramachandrapuram",
+        "Tuni",
+        "Eluru",
+        "Bhimavaram",
+        "Tadepalligudem",
+        "Tanuku",
+        "Narasapuram",
+        "Vijayawada",
+        "Machilipatnam",
+        "Gudivada",
+        "Nuzvid",
+        "Avanigadda",
+        "Guntur",
+        "Tenali",
+        "Mangalagiri",
+        "Narasaraopet",
+        "Sattenapalli",
+        "Ongole",
+        "Chirala",
+        "Markapur",
+        "Nellore",
+        "Kavali",
+        "Gudur",
+        "Naidupeta",
+        "Tirupati",
+        "Chittoor",
+        "Madanapalle",
+        "Puttur",
+        "Kadapa",
+        "Proddatur",
+        "Pulivendula",
+        "Rayachoti",
+        "Anantapur",
+        "Dharmavaram",
+        "Hindupur",
+        "Kadiri",
+        "Kurnool",
+        "Nandyal",
+        "Adoni",
+        "Yemmiganur"
     ];
+
+    const telanganaCities = [
+        "Hyderabad",
+        "Warangal",
+        "Hanamkonda",
+        "Karimnagar",
+        "Nizamabad",
+        "Khammam",
+        "Ramagundam",
+        "Mahabubnagar",
+        "Nalgonda",
+        "Adilabad",
+        "Siddipet",
+        "Mancherial",
+        "Jagtial",
+        "Miryalaguda",
+        "Suryapet",
+        "Kamareddy",
+        "Bodhan",
+        "Armoor",
+        "Bellampalli",
+        "Bhainsa",
+        "Vikarabad",
+        "Wanaparthy",
+        "Gadwal",
+        "Medak",
+        "Sangareddy",
+        "Zaheerabad",
+        "Shadnagar",
+        "Kodad"
+    ];
+
+    const tamilNaduCities = [
+        "Chennai",
+        "Coimbatore",
+        "Madurai",
+        "Tiruchirappalli",
+        "Salem",
+        "Tirunelveli",
+        "Tiruppur",
+        "Vellore",
+        "Erode",
+        "Thoothukudi",
+        "Dindigul",
+        "Thanjavur",
+        "Karur",
+        "Nagercoil",
+        "Hosur",
+        "Kanchipuram",
+        "Kumbakonam",
+        "Cuddalore",
+        "Nagapattinam",
+        "Tiruvannamalai",
+        "Pollachi",
+        "Sivakasi",
+        "Virudhunagar",
+        "Namakkal",
+        "Dharmapuri",
+        "Krishnagiri",
+        "Ranipet",
+        "Arakkonam",
+        "Pudukkottai",
+        "Mayiladuthurai",
+        "Villupuram",
+        "Tenkasi"
+    ];
+
+    const keralaCities = [
+        "Thiruvananthapuram",
+        "Kochi",
+        "Kozhikode",
+        "Thrissur",
+        "Kollam",
+        "Kannur",
+        "Alappuzha",
+        "Kottayam",
+        "Palakkad",
+        "Malappuram",
+        "Kasaragod",
+        "Pathanamthitta",
+        "Idukki",
+        "Perinthalmanna",
+        "Ponnani",
+        "Taliparamba",
+        "Payyannur",
+        "Kanhangad",
+        "Chalakudy",
+        "Kodungallur",
+        "Guruvayur",
+        "Paravur",
+        "Aluva",
+        "Angamaly"
+    ];
+
+    const karnatakaCities = [
+        "Bengaluru",
+        "Mysuru",
+        "Mangaluru",
+        "Hubballi",
+        "Dharwad",
+        "Belagavi",
+        "Ballari",
+        "Davanagere",
+        "Shivamogga",
+        "Tumakuru",
+        "Udupi",
+        "Bidar",
+        "Hassan",
+        "Kalaburagi",
+        "Raichur",
+        "Koppal",
+        "Gadag",
+        "Bagalkot",
+        "Chitradurga",
+        "Chikkamagaluru",
+        "Mandya",
+        "Ramanagara",
+        "Karwar",
+        "Sirsi",
+        "Hospet",
+        "Yadgir"
+    ];
+
+    const odishaCities = [
+        "Bhubaneswar",
+        "Cuttack",
+        "Rourkela",
+        "Brahmapur",
+        "Sambalpur",
+        "Puri",
+        "Balasore",
+        "Bhadrak",
+        "Baripada",
+        "Jharsuguda",
+        "Jeypore",
+        "Angul",
+        "Dhenkanal",
+        "Rayagada",
+        "Kendrapara",
+        "Jagatsinghpur",
+        "Bargarh",
+        "Paradeep",
+        "Talcher",
+        "Koraput",
+        "Malkangiri",
+        "Phulbani",
+        "Nabarangpur",
+        "Sonepur"
+    ];
+
+    const cityCatalog = {
+        Telangana: telanganaCities,
+        "Andhra Pradesh": apCities,
+        "Tamil Nadu": tamilNaduCities,
+        Kerala: keralaCities,
+        Karnataka: karnatakaCities,
+        Odisha: odishaCities
+    };
+
+    const baseRoutes = [];
+    const routeKeySet = new Set();
+
+    function addRoute(from, to, distanceKm) {
+        const key = `${from}|${to}`.toLowerCase();
+        if (routeKeySet.has(key)) {
+            return;
+        }
+        routeKeySet.add(key);
+        baseRoutes.push({ from, to, distanceKm });
+    }
+
+    function addRoutePair(from, to, distanceKm) {
+        addRoute(from, to, distanceKm);
+        addRoute(to, from, distanceKm);
+    }
+
+    addRoutePair("Hyderabad", "Vijayawada", 275);
+    addRoutePair("Hyderabad", "Visakhapatnam", 620);
+    addRoutePair("Hyderabad", "Tirupati", 560);
+    addRoutePair("Hyderabad", "Kurnool", 210);
+    addRoutePair("Hyderabad", "Warangal", 150);
+    addRoutePair("Hyderabad", "Khammam", 200);
+    addRoutePair("Hyderabad", "Karimnagar", 160);
+    addRoutePair("Hyderabad", "Nizamabad", 175);
+    addRoutePair("Vijayawada", "Visakhapatnam", 350);
+    addRoutePair("Vijayawada", "Guntur", 40);
+    addRoutePair("Visakhapatnam", "Rajahmundry", 200);
+    addRoutePair("Tirupati", "Nellore", 140);
+    addRoutePair("Warangal", "Vijayawada", 250);
+    addRoutePair("Guntur", "Tirupati", 380);
+    addRoutePair("Kurnool", "Bengaluru", 360);
+    addRoutePair("Nellore", "Chennai", 175);
+    addRoutePair("Bengaluru", "Mysuru", 150);
+    addRoutePair("Bengaluru", "Mangaluru", 350);
+    addRoutePair("Bengaluru", "Hubballi", 410);
+    addRoutePair("Bengaluru", "Belagavi", 510);
+    addRoutePair("Chennai", "Madurai", 460);
+    addRoutePair("Chennai", "Coimbatore", 510);
+    addRoutePair("Chennai", "Tiruchirappalli", 330);
+    addRoutePair("Chennai", "Salem", 345);
+    addRoutePair("Coimbatore", "Madurai", 215);
+    addRoutePair("Kochi", "Thiruvananthapuram", 210);
+    addRoutePair("Kochi", "Kozhikode", 180);
+    addRoutePair("Kochi", "Thrissur", 85);
+    addRoutePair("Kochi", "Kannur", 275);
+    addRoutePair("Bengaluru", "Chennai", 350);
+    addRoutePair("Bengaluru", "Hyderabad", 570);
+    addRoutePair("Bengaluru", "Kochi", 550);
+    addRoutePair("Chennai", "Kochi", 690);
+    addRoutePair("Hyderabad", "Chennai", 625);
+    addRoutePair("Chennai", "Bhubaneswar", 1240);
+    addRoutePair("Hyderabad", "Bhubaneswar", 1040);
+    addRoutePair("Visakhapatnam", "Bhubaneswar", 440);
+    addRoutePair("Bhubaneswar", "Brahmapur", 170);
+    addRoutePair("Bhubaneswar", "Rourkela", 340);
+    addRoutePair("Bhubaneswar", "Sambalpur", 320);
+    addRoutePair("Bhubaneswar", "Cuttack", 30);
+    addRoutePair("Bhubaneswar", "Puri", 60);
+    addRoutePair("Visakhapatnam", "Brahmapur", 280);
+    addRoutePair("Madurai", "Kochi", 270);
+    addRoutePair("Coimbatore", "Kochi", 200);
+    addRoutePair("Mangaluru", "Kochi", 450);
+    addRoutePair("Mysuru", "Coimbatore", 200);
+
+    const apRegions = {
+        northCoastal: [
+            "Visakhapatnam",
+            "Anakapalle",
+            "Bheemunipatnam",
+            "Narsipatnam",
+            "Vizianagaram",
+            "Bobbili",
+            "Salur",
+            "Srikakulam",
+            "Palasa",
+            "Amadalavalasa"
+        ],
+        eastCoastal: [
+            "Rajahmundry",
+            "Kakinada",
+            "Amalapuram",
+            "Jaggampeta",
+            "Peddapuram",
+            "Samalkot",
+            "Mandapeta",
+            "Ramachandrapuram",
+            "Tuni"
+        ],
+        westCoastal: [
+            "Eluru",
+            "Bhimavaram",
+            "Tadepalligudem",
+            "Tanuku",
+            "Narasapuram",
+            "Machilipatnam",
+            "Gudivada",
+            "Nuzvid",
+            "Avanigadda"
+        ],
+        central: [
+            "Vijayawada",
+            "Guntur",
+            "Tenali",
+            "Mangalagiri",
+            "Narasaraopet",
+            "Sattenapalli",
+            "Ongole",
+            "Chirala",
+            "Markapur"
+        ],
+        southCoastal: [
+            "Nellore",
+            "Kavali",
+            "Gudur",
+            "Naidupeta",
+            "Tirupati",
+            "Puttur",
+            "Chittoor",
+            "Madanapalle"
+        ],
+        rayalaseema: [
+            "Kadapa",
+            "Proddatur",
+            "Pulivendula",
+            "Rayachoti",
+            "Anantapur",
+            "Dharmavaram",
+            "Hindupur",
+            "Kadiri",
+            "Kurnool",
+            "Nandyal",
+            "Adoni",
+            "Yemmiganur"
+        ]
+    };
+
+    const apRegionLookup = Object.entries(apRegions).reduce((acc, [region, cities]) => {
+        cities.forEach((city) => {
+            acc[city] = region;
+        });
+        return acc;
+    }, {});
+
+    const apRegionAdjacency = {
+        northCoastal: ["eastCoastal"],
+        eastCoastal: ["northCoastal", "westCoastal"],
+        westCoastal: ["eastCoastal", "central"],
+        central: ["westCoastal", "southCoastal", "rayalaseema"],
+        southCoastal: ["central", "rayalaseema"],
+        rayalaseema: ["southCoastal", "central"]
+    };
+
+    function estimateApDistanceKm(from, to) {
+        const regionFrom = apRegionLookup[from];
+        const regionTo = apRegionLookup[to];
+        let min = 120;
+        let max = 620;
+
+        if (regionFrom && regionTo) {
+            if (regionFrom === regionTo) {
+                min = 60;
+                max = 220;
+            } else if ((apRegionAdjacency[regionFrom] || []).includes(regionTo)) {
+                min = 160;
+                max = 380;
+            } else {
+                min = 320;
+                max = 640;
+            }
+        }
+
+        const range = Math.max(1, max - min);
+        const seed = createStableHash(`${from}|${to}|ap`);
+        return min + (seed % range);
+    }
+
+    for (let i = 0; i < apCities.length; i += 1) {
+        for (let j = i + 1; j < apCities.length; j += 1) {
+            const fromCity = apCities[i];
+            const toCity = apCities[j];
+            addRoutePair(fromCity, toCity, estimateApDistanceKm(fromCity, toCity));
+        }
+    }
+
+    function estimateDistanceRange(from, to, min, max, tag) {
+        const range = Math.max(1, max - min);
+        const seed = createStableHash(`${from}|${to}|${tag}`);
+        return min + (seed % range);
+    }
+
+    function addIntraStateRoutes(cities, min, max, tag) {
+        for (let i = 0; i < cities.length; i += 1) {
+            for (let j = i + 1; j < cities.length; j += 1) {
+                const fromCity = cities[i];
+                const toCity = cities[j];
+                addRoutePair(fromCity, toCity, estimateDistanceRange(fromCity, toCity, min, max, tag));
+            }
+        }
+    }
+
+    addIntraStateRoutes(telanganaCities, 80, 420, "ts");
+    addIntraStateRoutes(tamilNaduCities, 120, 680, "tn");
+    addIntraStateRoutes(keralaCities, 60, 320, "kl");
+    addIntraStateRoutes(karnatakaCities, 120, 620, "ka");
+    addIntraStateRoutes(odishaCities, 120, 620, "od");
 
     function normalize(text) {
         return (text || "").trim().toLowerCase();
@@ -105,6 +439,12 @@
     function getRouteKey(from, to) {
         return `${normalize(from)}-${normalize(to)}`;
     }
+
+    const shortRouteKeys = new Set(
+        baseRoutes
+            .filter((route) => route.distanceKm <= 300)
+            .map((route) => getRouteKey(route.from, route.to))
+    );
 
     function createStableHash(value) {
         const source = String(value || "");
@@ -127,7 +467,7 @@
             bus?.departureTime || ""
         ].join("|");
 
-        return createStableHash(marker) % 4 === 0;
+        return createStableHash(marker) % 5 === 0;
     }
 
     function getSuggestedCoachType(bus) {
@@ -160,6 +500,103 @@
             busType: resolveBusCoachType(bus)
         };
     }
+
+    const busNameSeeds = [
+        "Express",
+        "Swift",
+        "Prime",
+        "Connect",
+        "Star",
+        "Royal",
+        "Metro",
+        "Turbo",
+        "Voyager",
+        "Pulse"
+    ];
+    const departureSlots = ["06:00 AM", "09:30 AM", "01:00 PM", "06:00 PM", "10:00 PM"];
+    const typeRates = {
+        Standard: 1.0,
+        "Non-AC Seater": 1.1,
+        "AC Seater": 1.3,
+        Sleeper: 1.6,
+        "AC Sleeper": 1.8,
+        "AC Volvo": 2.0
+    };
+
+    function pickType(distanceKm, index) {
+        if (distanceKm <= 250) {
+            const types = ["Non-AC Seater", "AC Seater", "AC Seater", "Standard", "Sleeper"];
+            return types[index % types.length];
+        }
+        if (distanceKm <= 500) {
+            const types = ["AC Seater", "Sleeper", "AC Sleeper", "Non-AC Seater", "Sleeper"];
+            return types[index % types.length];
+        }
+        const types = ["Sleeper", "AC Sleeper", "AC Volvo", "Sleeper", "AC Volvo"];
+        return types[index % types.length];
+    }
+
+    function calcPrice(distanceKm, type, index) {
+        const rate = typeRates[type] || 1.25;
+        let price = Math.round((distanceKm * rate) / 10) * 10;
+        price += index * 40;
+        return Math.max(299, price);
+    }
+
+    function toMinutes(timeStr) {
+        const [time, period] = timeStr.split(" ");
+        let [hours, minutes] = time.split(":").map(Number);
+        if (period === "PM" && hours !== 12) {
+            hours += 12;
+        }
+        if (period === "AM" && hours === 12) {
+            hours = 0;
+        }
+        return (hours * 60) + minutes;
+    }
+
+    function fromMinutes(totalMinutes) {
+        let minutes = totalMinutes % 1440;
+        if (minutes < 0) {
+            minutes += 1440;
+        }
+        let hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        const period = hours >= 12 ? "PM" : "AM";
+        hours = hours % 12;
+        if (hours === 0) {
+            hours = 12;
+        }
+        const paddedHours = String(hours).padStart(2, "0");
+        const paddedMinutes = String(mins).padStart(2, "0");
+        return `${paddedHours}:${paddedMinutes} ${period}`;
+    }
+
+    function shiftTime(slot, offsetMinutes) {
+        return fromMinutes(toMinutes(slot) + offsetMinutes);
+    }
+
+    let nextBusId = 1000;
+    const buses = [];
+
+    baseRoutes.forEach((route, routeIndex) => {
+        for (let index = 0; index < 5; index += 1) {
+            const type = pickType(route.distanceKm, index);
+            const price = calcPrice(route.distanceKm, type, index);
+            const timeOffset = (routeIndex * 7 + index * 3) % 40;
+            const departureTime = shiftTime(departureSlots[index % departureSlots.length], timeOffset);
+
+            buses.push({
+                id: nextBusId += 1,
+                name: `Yubus ${busNameSeeds[(routeIndex + index) % busNameSeeds.length]}`,
+                fromCity: route.from,
+                toCity: route.to,
+                departureTime,
+                price,
+                busType: type
+            });
+        }
+    });
 
     const catalogBuses = buses.map(normalizeBusRecord);
 
@@ -195,14 +632,72 @@
 
         return Array.from(routeMap.values())
             .sort((a, b) => b.busCount - a.busCount || a.from.localeCompare(b.from) || a.to.localeCompare(b.to))
-            .slice(0, limit || 16);
+            .slice(0, limit || 24);
     }
+
+    const cityPoints = {
+        Hyderabad: ["Gachibowli", "Kukatpally", "Ameerpet", "LB Nagar", "MGBS"],
+        Warangal: ["Hanamkonda", "Kazipet", "Warangal Bus Stand", "Narsampet", "Mulugu"],
+        Karimnagar: ["Karimnagar Bus Stand", "Kothapalli", "Jagtial Road", "Karimnagar Bypass", "Manakondur"],
+        Nizamabad: ["Nizamabad Bus Stand", "Bodhan Road", "Nizamabad Railway Station", "Armur", "Nizamsagar Road"],
+        Khammam: ["Khammam Bus Stand", "Bypass Road", "Wyra Road", "Kothagudem", "Madhira"],
+        Bhubaneswar: ["Baramunda", "Vani Vihar", "Master Canteen", "Patia", "Kharavel Nagar"],
+        Cuttack: ["Badambadi", "Link Road", "College Square", "CDA", "Bypass"],
+        Puri: ["Puri Bus Stand", "Grand Road", "Station Road", "Swargadwar", "Konark Road"],
+        Rourkela: ["Rourkela Bus Stand", "Sector 2", "Panposh", "Chhend", "Bisra Road"],
+        Sambalpur: ["Sambalpur Bus Stand", "Ainthapali", "Dhanupali", "Burla", "Hirakud"],
+        Brahmapur: ["Brahmapur Bus Stand", "Gopalpur", "Ankuli", "Bada Bazar", "Lochapada"],
+        Chennai: ["Koyambedu", "Guindy", "Tambaram", "Central", "Perungudi"],
+        Coimbatore: ["Gandhipuram", "Ukkadam", "Saravanampatti", "Peelamedu", "Singanallur"],
+        Madurai: ["Mattuthavani", "Periyar", "Thallakulam", "KK Nagar", "Anna Nagar"],
+        Tiruchirappalli: ["Chathiram", "Srirangam", "Thillai Nagar", "Ponmalai", "Central"],
+        Salem: ["Five Roads", "New Bus Stand", "Shevapet", "Gugai", "Salem Junction"],
+        Kochi: ["Vyttila", "Edappally", "Aluva", "Kalamassery", "Fort Kochi"],
+        Thiruvananthapuram: ["Thampanoor", "Technopark", "Kazhakkoottam", "Attingal", "Nedumangad"],
+        Kozhikode: ["Mavoor Road", "Ramanattukara", "Kallai", "Medical College", "Thondayad"],
+        Thrissur: ["Swaraj Round", "Puzhakkal", "Mannuthy", "Ollur", "Kuttanellur"],
+        Kannur: ["Kannur Bus Stand", "Thana", "Payyambalam", "Talap", "Kuthuparamba"],
+        Bengaluru: ["Majestic", "Silk Board", "Electronic City", "Hebbal", "KR Puram"],
+        Mysuru: ["Mysuru Bus Stand", "Jayalakshmipuram", "Vijayanagar", "Hebbal", "Ramaswamy Circle"],
+        Mangaluru: ["Hampankatta", "Lalbagh", "Kankanady", "Surathkal", "Kuloor"],
+        Hubballi: ["Hubballi Bus Stand", "Gokul Road", "Keshwapur", "Unkal", "Bypass"],
+        Belagavi: ["Belagavi Bus Stand", "Tilakwadi", "Udyambag", "Sambra", "Bypass"]
+    };
+
+    function addGenericPoints(city) {
+        return [
+            `${city} Bus Stand`,
+            "Main Road",
+            "Railway Station",
+            "City Center",
+            "Bypass"
+        ];
+    }
+
+    Object.values(cityCatalog).flat().forEach((city) => {
+        if (!cityPoints[city]) {
+            cityPoints[city] = addGenericPoints(city);
+        }
+    });
+
+    const stateOrder = [
+        "Telangana",
+        "Andhra Pradesh",
+        "Tamil Nadu",
+        "Kerala",
+        "Karnataka",
+        "Odisha"
+    ];
 
     window.BUS_CATALOG = catalogBuses;
     window.BUS_ROUTE_IMAGES = routeImages;
+    window.CITY_CATALOG = cityCatalog;
+    window.CITY_POINTS = cityPoints;
+    window.CITY_STATE_ORDER = stateOrder;
     window.getCatalogRouteImage = getRouteImage;
     window.getCatalogBusesByRoute = getBusesByRoute;
     window.getCatalogPopularRoutes = getPopularRoutes;
     window.normalizeCatalogBus = normalizeBusRecord;
     window.resolveBusCoachType = resolveBusCoachType;
+    window.CITY_CATALOG = cityCatalog;
 })();
