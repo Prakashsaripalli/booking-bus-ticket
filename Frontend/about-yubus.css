@@ -1,0 +1,241 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background:
+        radial-gradient(circle at top left, rgba(215, 79, 66, 0.12), transparent 24%),
+        radial-gradient(circle at bottom right, rgba(25, 118, 210, 0.12), transparent 22%),
+        linear-gradient(180deg, #fff9f6 0%, #f8fbff 100%);
+    color: #172033;
+}
+
+a {
+    text-decoration: none;
+}
+
+.about-page {
+    min-height: 100vh;
+    padding: 30px 18px;
+}
+
+.about-shell {
+    width: min(1160px, 100%);
+    margin: 0 auto;
+    display: grid;
+    gap: 24px;
+}
+
+.about-hero,
+.about-story-card,
+.about-card,
+.about-stat-card {
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+}
+
+.about-hero {
+    display: grid;
+    gap: 16px;
+    padding: 32px;
+    border-radius: 30px;
+    background:
+        radial-gradient(circle at top right, rgba(255, 211, 102, 0.2), transparent 24%),
+        linear-gradient(135deg, #172033 0%, #243754 100%);
+    color: #ffffff;
+}
+
+.about-back {
+    display: inline-flex;
+    width: fit-content;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.about-page-kicker {
+    display: inline-flex;
+    width: fit-content;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    color: #e2e8f0;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.about-hero h1 {
+    margin: 0;
+    font-size: 42px;
+    line-height: 1.12;
+}
+
+.about-hero p {
+    margin: 0;
+    max-width: 760px;
+    color: rgba(241, 245, 249, 0.94);
+    line-height: 1.8;
+}
+
+.about-story-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+    gap: 24px;
+    padding: 28px;
+    border-radius: 28px;
+    background: rgba(255, 255, 255, 0.94);
+}
+
+.about-story-copy {
+    display: grid;
+    gap: 16px;
+}
+
+.about-story-copy h2 {
+    margin: 0;
+    font-size: 30px;
+    color: #172033;
+}
+
+.about-story-copy p {
+    margin: 0;
+    color: #5f6b7a;
+    line-height: 1.8;
+}
+
+.about-point-list {
+    display: grid;
+    gap: 14px;
+    margin-top: 4px;
+}
+
+.about-point-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 15px 16px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #ffffff, #fff8f4);
+    border: 1px solid rgba(226, 232, 240, 0.95);
+}
+
+.about-point-item i {
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: rgba(215, 79, 66, 0.12);
+    color: #d74f42;
+}
+
+.about-point-item span {
+    color: #243041;
+    font-weight: 600;
+}
+
+.about-story-visual {
+    position: relative;
+    overflow: hidden;
+    min-height: 340px;
+    border-radius: 26px;
+}
+
+.about-story-visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.about-story-caption {
+    position: absolute;
+    inset: auto 18px 18px 18px;
+    padding: 16px 18px;
+    border-radius: 20px;
+    background: rgba(23, 32, 51, 0.72);
+    color: #ffffff;
+    line-height: 1.6;
+    backdrop-filter: blur(10px);
+}
+
+.about-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.about-card {
+    padding: 24px;
+    border-radius: 24px;
+    background: linear-gradient(180deg, #ffffff 0%, #fff8f4 100%);
+}
+
+.about-card h3 {
+    margin: 0 0 12px;
+    color: #172033;
+    font-size: 22px;
+}
+
+.about-card p {
+    margin: 0;
+    color: #5f6b7a;
+    line-height: 1.8;
+}
+
+.about-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.about-stat-card {
+    padding: 22px;
+    border-radius: 24px;
+    text-align: center;
+    background: linear-gradient(180deg, #ffffff 0%, #fff8f4 100%);
+}
+
+.about-stat-card strong {
+    display: block;
+    color: #172033;
+    font-size: 28px;
+}
+
+.about-stat-card span {
+    display: block;
+    margin-top: 8px;
+    color: #5f6b7a;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 12px;
+}
+
+@media (max-width: 860px) {
+    .about-story-card,
+    .about-grid,
+    .about-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .about-hero {
+        padding: 24px;
+    }
+
+    .about-hero h1 {
+        font-size: 32px;
+    }
+
+    .about-story-card {
+        padding: 22px;
+    }
+}

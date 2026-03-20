@@ -1,6 +1,8 @@
 package com.booking.backend.servlet;
 
+import com.booking.backend.dao.BookingDao;
 import com.booking.backend.dao.PaymentDao;
+import com.booking.backend.model.BookingRecord;
 import com.booking.backend.model.PaymentRecord;
 import com.booking.backend.model.PaymentRequest;
 import com.booking.backend.utils.EmailUtil;
@@ -12,15 +14,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
 public class PaymentServlet extends HttpServlet {
 
     private final PaymentDao paymentDao;
+    private final BookingDao bookingDao;
 
-    public PaymentServlet(PaymentDao paymentDao) {
+    public PaymentServlet(PaymentDao paymentDao, BookingDao bookingDao) {
         this.paymentDao = paymentDao;
+        this.bookingDao = bookingDao;
     }
 
     @Override
@@ -47,11 +52,23 @@ public class PaymentServlet extends HttpServlet {
             String departureTime = payload.departureTime == null ? "" : payload.departureTime.trim();
             String paymentMethod = payload.paymentMethod == null ? "" : payload.paymentMethod.trim();
 
-            if (passengerName.isEmpty() || !ValidationUtil.isValidMobile(mobile) || !ValidationUtil.isValidEmail(email)
-                    || payload.amount <= 0 || !ValidationUtil.isValidTransactionId(transactionId)) {
+            String validationError = null;
+            if (passengerName.isEmpty()) {
+                validationError = "Passenger name is required";
+            } else if (!ValidationUtil.isValidMobile(mobile)) {
+                validationError = "Invalid mobile number. Expected 10 digits or +91XXXXXXXXXX";
+            } else if (!ValidationUtil.isValidEmail(email)) {
+                validationError = "Valid email is required";
+            } else if (payload.amount <= 0) {
+                validationError = "Payment amount must be greater than 0";
+            } else if (!ValidationUtil.isValidTransactionId(transactionId)) {
+                validationError = "Transaction ID must have 1 to 4 starting letters and exactly 22 numbers after that";
+            }
+
+            if (validationError != null) {
                 ResponseUtil.json(resp, HttpServletResponse.SC_BAD_REQUEST, Map.of(
                         "success", false,
-                        "message", "Transaction ID must have 1 to 4 starting letters and exactly 22 numbers after that"
+                        "message", validationError
                 ));
                 return;
             }
@@ -68,21 +85,59 @@ public class PaymentServlet extends HttpServlet {
                 return;
             }
 
-            response.put("success", true);
-            response.put("message", "Payment processed");
-            response.put("payment", payment);
+            // Save the booking record to the database
+            String resolvedNotificationEmail = ValidationUtil.isValidEmail(notificationEmail) ? notificationEmail : "";
 
-            String emailTarget = !notificationEmail.isBlank() ? notificationEmail : email;
+            BookingRecord booking = new BookingRecord(
+                    bookingId,
+                    from,
+                    to,
+                    busName,
+                    seats,
+                    journeyDate,
+                    departureTime,
+                    payload.originalAmount,
+                    payload.amount,
+                    payload.discountAmount,
+                    passengerName,
+                    mobile,
+                    email,
+                    resolvedNotificationEmail.isBlank() ? email : resolvedNotificationEmail,
+                    "", // owner_mobile can be empty if not provided
+                    paymentMethod,
+                    transactionId,
+                    "Booked",
+                    Instant.now().toString(),
+                    null,
+                    null,
+                    0,
+                    null
+            );
+            bookingDao.save(booking);
+
+            response.put("success", true);
+            response.put("message", "Payment processed and booking created");
+            response.put("payment", payment);
+            response.put("booking", booking);
+
+            String emailTarget = ValidationUtil.isValidEmail(resolvedNotificationEmail)
+                    ? resolvedNotificationEmail
+                    : email;
+
             if (ValidationUtil.isValidEmail(emailTarget)) {
-                if (!EmailUtil.isSmtpConfigured()) {
+                if (!EmailUtil.isEmailDeliveryEnabled()) {
                     response.put("emailSent", false);
-                    response.put("emailMessage", EmailUtil.smtpMissingMessage());
+                    response.put("emailMessage", EmailUtil.shouldSkipEmail()
+                            ? "Booking confirmed, but email delivery skipped for local testing."
+                            : EmailUtil.smtpMissingMessage());
                 } else {
                     try {
                         EmailUtil.sendBookingConfirmationEmail(
                                 emailTarget,
                                 bookingId,
                                 passengerName,
+                                mobile,
+                                email,
                                 from,
                                 to,
                                 busName,

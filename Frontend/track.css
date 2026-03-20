@@ -95,7 +95,7 @@ body {
 
 .route-stats {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 14px;
     margin-top: 22px;
 }
@@ -412,11 +412,13 @@ body {
     position: absolute;
     width: 16px;
     height: 16px;
+    transform: translate(-50%, -50%);
     border-radius: 50%;
     background: #ffffff;
     border: 4px solid #3b82f6;
     box-shadow: 0 10px 20px rgba(47, 125, 231, 0.16);
     z-index: 1;
+    transition: left 0.9s ease, top 0.9s ease;
 }
 
 .route-blue-one {
@@ -444,6 +446,7 @@ body {
     justify-content: center;
     box-shadow: 0 14px 26px rgba(15, 23, 42, 0.16);
     z-index: 2;
+    transition: left 1s linear, top 1s linear;
 }
 
 .bus-marker::after {
@@ -467,6 +470,7 @@ body {
     font-weight: 800;
     box-shadow: 0 12px 22px rgba(15, 23, 42, 0.18);
     transform: translate(-50%, -50%);
+    transition: left 0.9s ease, top 0.9s ease;
 }
 
 .next-stop-pill {
@@ -480,6 +484,8 @@ body {
     color: #ffffff;
     font-weight: 800;
     box-shadow: 0 14px 24px rgba(22, 88, 177, 0.22);
+    transform: translate(-50%, -110%);
+    transition: left 0.9s ease, top 0.9s ease;
 }
 
 .next-stop-pill::after {
@@ -536,11 +542,13 @@ body {
     position: absolute;
     width: 20px;
     height: 20px;
+    transform: translate(-50%, -50%);
     border-radius: 50%;
     background: #2d7af0;
     border: 4px solid rgba(255, 255, 255, 0.95);
     box-shadow: 0 10px 20px rgba(37, 99, 235, 0.24);
     z-index: 1;
+    transition: left 0.9s ease, top 0.9s ease;
 }
 
 .stop-one {
@@ -678,6 +686,56 @@ body {
     font-weight: 700;
 }
 
+.tracking-progress-card,
+.timeline-card {
+    border-radius: 14px;
+    border: 1px solid rgba(169, 182, 199, 0.9);
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+}
+
+.tracking-progress-card {
+    padding: 16px 18px;
+}
+
+.tracking-progress-head,
+.tracking-progress-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.tracking-progress-head span,
+.tracking-progress-meta span {
+    color: #526072;
+    font-weight: 700;
+}
+
+.tracking-progress-head strong {
+    color: #0f67d0;
+    font-size: 24px;
+}
+
+.tracking-progress-bar {
+    height: 12px;
+    margin: 14px 0 12px;
+    border-radius: 999px;
+    background: rgba(208, 219, 230, 0.92);
+    overflow: hidden;
+}
+
+.tracking-progress-bar span {
+    display: block;
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #16a34a 0%, #21c46b 55%, #3b82f6 100%);
+    box-shadow: 0 8px 16px rgba(22, 163, 74, 0.24);
+    transition: width 1s ease;
+}
+
 .footer-live,
 .footer-updated {
     display: flex;
@@ -700,8 +758,109 @@ body {
     gap: 14px;
 }
 
+.live-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 18px;
+}
+
 .detail-item {
     padding: 18px;
+}
+
+.metric-card {
+    padding: 18px;
+    border-radius: 20px;
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    background: linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.metric-card span {
+    display: block;
+    color: #667487;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+}
+
+.metric-card strong {
+    color: #172033;
+    font-size: 20px;
+}
+
+.timeline-card {
+    margin-top: 18px;
+    padding: 20px;
+}
+
+.timeline-card h3 {
+    margin-bottom: 14px;
+}
+
+.stop-timeline {
+    display: grid;
+    gap: 14px;
+}
+
+.timeline-step {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr);
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.timeline-dot {
+    position: relative;
+    width: 16px;
+    height: 16px;
+    margin-top: 3px;
+    border-radius: 50%;
+    background: #d6deea;
+    box-shadow: 0 0 0 5px rgba(214, 222, 234, 0.4);
+}
+
+.timeline-step + .timeline-step .timeline-dot::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 4px);
+    width: 2px;
+    height: 24px;
+    transform: translateX(-50%);
+    background: rgba(210, 219, 231, 0.9);
+}
+
+.timeline-copy {
+    display: grid;
+    gap: 4px;
+}
+
+.timeline-copy strong {
+    color: #172033;
+    font-size: 15px;
+}
+
+.timeline-copy span {
+    color: #667487;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.timeline-step.completed .timeline-dot {
+    background: #16a34a;
+    box-shadow: 0 0 0 5px rgba(22, 163, 74, 0.16);
+}
+
+.timeline-step.current .timeline-dot {
+    background: #2563eb;
+    box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.18);
+}
+
+.timeline-step.current .timeline-copy strong {
+    color: #1f3da9;
 }
 
 .tips-card {
@@ -724,6 +883,10 @@ body {
     }
 
     .route-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .live-metrics-grid {
         grid-template-columns: 1fr;
     }
 }
@@ -761,6 +924,11 @@ body {
     .map-footer-strip {
         flex-direction: column;
         align-items: stretch;
+    }
+
+    .tracking-progress-head,
+    .tracking-progress-meta {
+        align-items: flex-start;
     }
 
     .map-controls {

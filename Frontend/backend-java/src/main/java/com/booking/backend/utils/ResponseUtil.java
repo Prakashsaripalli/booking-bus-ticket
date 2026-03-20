@@ -1,27 +1,25 @@
 package com.booking.backend.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
-import java.util.Map;
 
-public final class ResponseUtil {
+public class ResponseUtil {
+    private static final ObjectMapper mapper = new ObjectMapper();
 
-    private static final String DEFAULT_ALLOWED_ORIGIN = "*";
-
-    private ResponseUtil() {
+    public static void json(HttpServletResponse resp, int status, Object data) throws IOException {
+        resp.setStatus(status);
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
+        setCorsHeaders(resp);
+        mapper.writeValue(resp.getWriter(), data);
     }
 
-    public static void json(HttpServletResponse response, int status, Map<String, Object> body) throws IOException {
-        String allowedOrigin = System.getenv().getOrDefault("ALLOWED_ORIGIN", DEFAULT_ALLOWED_ORIGIN);
-
-        response.setStatus(status);
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.setHeader("Access-Control-Allow-Origin", allowedOrigin);
-        response.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,OPTIONS");
-        response.setHeader("Access-Control-Allow-Headers", "Content-Type");
-        response.setHeader("Vary", "Origin");
-        JsonUtil.mapper().writeValue(response.getWriter(), body);
+    private static void setCorsHeaders(HttpServletResponse resp) {
+        String allowedOrigin = Config.getAllowedOrigin();
+        resp.setHeader("Access-Control-Allow-Origin", allowedOrigin);
+        resp.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+        resp.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+        resp.setHeader("Access-Control-Max-Age", "86400");
     }
 }

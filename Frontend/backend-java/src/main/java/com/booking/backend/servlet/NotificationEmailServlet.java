@@ -35,9 +35,9 @@ public class NotificationEmailServlet extends HttpServlet {
             return;
         }
 
-        boolean smtpConfigured = EmailUtil.isSmtpConfigured();
-        boolean debugEmail = EmailUtil.isEmailDebugEnabled();
-        if (!smtpConfigured) {
+        boolean emailDeliveryEnabled = EmailUtil.isEmailDeliveryEnabled();
+        boolean debugEmail = EmailUtil.shouldSkipEmail();
+        if (!emailDeliveryEnabled) {
             if (debugEmail) {
                 ResponseUtil.json(resp, HttpServletResponse.SC_OK, Map.of(
                         "success", true,
@@ -99,12 +99,22 @@ public class NotificationEmailServlet extends HttpServlet {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            ResponseUtil.json(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Map.of(
-                    "success", false,
-                    "message", e.getMessage() == null || e.getMessage().isBlank()
-                            ? "Failed to send notification email"
-                            : e.getMessage()
-            ));
+            if (debugEmail) {
+                ResponseUtil.json(resp, HttpServletResponse.SC_OK, Map.of(
+                        "success", true,
+                        "message", "Email delivery skipped for local testing.",
+                        "warning", e.getMessage() == null || e.getMessage().isBlank()
+                                ? "Failed to send notification email."
+                                : e.getMessage()
+                ));
+            } else {
+                ResponseUtil.json(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Map.of(
+                        "success", false,
+                        "message", e.getMessage() == null || e.getMessage().isBlank()
+                                ? "Failed to send notification email"
+                                : e.getMessage()
+                ));
+            }
             return;
         }
 

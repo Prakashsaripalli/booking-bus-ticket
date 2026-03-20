@@ -1,58 +1,34 @@
 package com.booking.backend.model;
 
 public class BookingRecord {
-    private final String bookingId;
-    private final String from;
-    private final String to;
-    private final String busName;
-    private final String seats;
-    private final String journeyDate;
-    private final String departureTime;
-    private final int originalAmount;
-    private final int amount;
-    private final int discountAmount;
-    private final String passengerName;
-    private final String passengerMobile;
-    private final String passengerEmail;
-    private final String ownerEmail;
-    private final String ownerMobile;
-    private final String paymentMethod;
-    private final String transactionId;
-    private final String status;
-    private final String bookedAt;
-    private final String cancelledAt;
-    private final String refundStatus;
-    private final int refundAmount;
-    private final String refundedAt;
+    public String bookingId;
+    public String fromCity;
+    public String toCity;
+    public String busName;
+    public String seats;
+    public String journeyDate;
+    public String departureTime;
+    public int originalAmount;
+    public int amount;
+    public int discountAmount;
+    public String passengerName;
+    public String passengerMobile;
+    public String passengerEmail;
+    public String ownerEmail;
+    public String ownerMobile;
+    public String paymentMethod;
+    public String transactionId;
+    public String status;
+    public String bookedAt;
+    public String cancelledAt;
+    public String refundStatus;
+    public int refundAmount;
+    public String refundedAt;
 
-    public BookingRecord(
-            String bookingId,
-            String from,
-            String to,
-            String busName,
-            String seats,
-            String journeyDate,
-            String departureTime,
-            int originalAmount,
-            int amount,
-            int discountAmount,
-            String passengerName,
-            String passengerMobile,
-            String passengerEmail,
-            String ownerEmail,
-            String ownerMobile,
-            String paymentMethod,
-            String transactionId,
-            String status,
-            String bookedAt,
-            String cancelledAt,
-            String refundStatus,
-            int refundAmount,
-            String refundedAt
-    ) {
+    public BookingRecord(String bookingId, String fromCity, String toCity, String busName, String seats, String journeyDate, String departureTime, int originalAmount, int amount, int discountAmount, String passengerName, String passengerMobile, String passengerEmail, String ownerEmail, String ownerMobile, String paymentMethod, String transactionId, String status, String bookedAt, String cancelledAt, String refundStatus, int refundAmount, String refundedAt) {
         this.bookingId = bookingId;
-        this.from = from;
-        this.to = to;
+        this.fromCity = fromCity;
+        this.toCity = toCity;
         this.busName = busName;
         this.seats = seats;
         this.journeyDate = journeyDate;
@@ -76,8 +52,8 @@ public class BookingRecord {
     }
 
     public String getBookingId() { return bookingId; }
-    public String getFrom() { return from; }
-    public String getTo() { return to; }
+    public String getFrom() { return fromCity; }
+    public String getTo() { return toCity; }
     public String getBusName() { return busName; }
     public String getSeats() { return seats; }
     public String getJourneyDate() { return journeyDate; }

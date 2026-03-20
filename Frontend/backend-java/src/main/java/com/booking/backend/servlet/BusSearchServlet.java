@@ -26,13 +26,13 @@ public class BusSearchServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String from = req.getParameter("from");
-        String to = req.getParameter("to");
+        String from = firstNonBlank(req.getParameter("from"), req.getParameter("source"));
+        String to = firstNonBlank(req.getParameter("to"), req.getParameter("destination"));
 
         if (from == null || from.trim().isEmpty() || to == null || to.trim().isEmpty()) {
             ResponseUtil.json(resp, HttpServletResponse.SC_BAD_REQUEST, Map.of(
                     "success", false,
-                    "message", "Both from and to are required"
+                    "message", "Both source/from and destination/to are required"
             ));
             return;
         }
@@ -42,5 +42,15 @@ public class BusSearchServlet extends HttpServlet {
                 "success", true,
                 "data", buses
         ));
+    }
+
+    private String firstNonBlank(String primary, String secondary) {
+        if (primary != null && !primary.trim().isEmpty()) {
+            return primary;
+        }
+        if (secondary != null && !secondary.trim().isEmpty()) {
+            return secondary;
+        }
+        return null;
     }
 }

@@ -54,10 +54,9 @@
             <!-- Leaving From -->
             <div class="field city-field">
                 <label>Leaving From</label>
-                <input type="text" id="from" placeholder="Enter source" readonly>
+                <input type="text" id="from" placeholder="Enter source" autocomplete="off">
 
                 <div class="city-dropdown" id="fromDropdown">
-                    <p class="dropdown-title">POPULAR CITIES</p>
                     <div id="fromCityList"></div>
                 </div>
             </div>
@@ -70,10 +69,9 @@
             <!-- Going To -->
             <div class="field city-field">
                 <label>Going To</label>
-                <input type="text" id="to" placeholder="Enter destination" readonly>
+                <input type="text" id="to" placeholder="Enter destination" autocomplete="off">
 
                 <div class="city-dropdown" id="toDropdown">
-                    <p class="dropdown-title">POPULAR CITIES</p>
                     <div id="toCityList"></div>
                 </div>
             </div>
@@ -101,12 +99,12 @@
     <div class="offers-copy">
         <span class="offers-badge"><i class="fa-solid fa-sparkles"></i> Best Bus Deals</span>
         <h2>Bus Booking Discounts</h2>
-        <p class="offers-subtitle">Fresh fare drops, cashback coupons, and festive specials curated for every route.</p>
+        <p class="offers-subtitle" id="offersSubtitle">Fresh fare drops, cashback coupons, and festive specials curated for every route.</p>
     </div>
     <div class="offers-actions">
         <div class="offers-stat">
-            <strong>10+</strong>
-            <span>live offers</span>
+            <strong id="offersStatValue">10+</strong>
+            <span id="offersStatLabel">live offers</span>
         </div>
         <button class="view-all-btn" onclick="toggleViewAll()">View All</button>
     </div>
@@ -187,8 +185,11 @@
             <li>Weekend Offer – Flat ₹100 Cashback</li>
         </ul>
     </div>
+    <div class="offers-unavailable" id="offersUnavailableState" hidden aria-live="polite">
+        Offers are not available now. Please check back after the Offer Engine is active again.
+    </div>
 </div>
-<div class="offers-footer">
+<div class="offers-footer" id="offersFooter">
     <div class="offer-chip">
         <i class="fa-solid fa-ticket"></i>
         <span>Instant coupon codes</span>
@@ -222,58 +223,39 @@
 </section>
 <section class="content-card services-card">
     <div class="services-shell">
-        <div class="services-intro">
-            <span class="services-kicker">Digital Travel Support</span>
-            <h2>Online Bus Booking Services</h2>
-            <p class="services-lead">
-                Yubus brings booking, trip assistance, and service support into one cleaner experience
-                so passengers can search, compare, confirm, and manage bus journeys without friction.
-            </p>
+        <div class="services-hero">
+            <div class="services-intro">
+                <span class="services-kicker">Digital Travel Support</span>
+                <h2>Online Bus Booking Services</h2>
+                <p class="services-lead">
+                    Yubus brings booking, trip assistance, and service support into one cleaner experience
+                    so passengers can search, compare, confirm, and manage bus journeys without friction.
+                </p>
 
-            <div class="services-highlights">
-                <div class="service-pill">
-                    <i class="fa-solid fa-ticket"></i>
-                    <span>Instant e-ticket confirmation</span>
-                </div>
-                <div class="service-pill">
-                    <i class="fa-solid fa-route"></i>
-                    <span>Route and operator comparison</span>
-                </div>
-                <div class="service-pill">
-                    <i class="fa-solid fa-headset"></i>
-                    <span>Fast support when needed</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="services-visual">
-            <div class="services-image-card">
-                <img src="Assets/vector.jpg" alt="Online bus booking services illustration">
-                <div class="services-image-copy">
-                    <span>Smarter Booking</span>
-                    <strong>Everything you need from search to seat confirmation in one place.</strong>
+                <div class="services-highlights">
+                    <div class="service-pill">
+                        <i class="fa-solid fa-ticket"></i>
+                        <span>Instant e-ticket confirmation</span>
+                    </div>
+                    <div class="service-pill">
+                        <i class="fa-solid fa-route"></i>
+                        <span>Route and operator comparison</span>
+                    </div>
+                    <div class="service-pill">
+                        <i class="fa-solid fa-headset"></i>
+                        <span>Fast support when needed</span>
+                    </div>
                 </div>
             </div>
 
-            <div id="panel" class="panel-container">
-                <strong>How satisfied are you with our <br /> customer support performance?</strong>
-                <div class="ratings-container">
-                    <div class="rating">
-                        <img src="https://image.flaticon.com/icons/svg/187/187150.svg" alt="">
-                        <small>Unhappy</small>
-                    </div>
-
-                    <div class="rating">
-                        <img src="https://image.flaticon.com/icons/svg/187/187136.svg" alt=""/>
-                        <small>Neutral</small>
-                    </div>
-
-                    <div class="rating active">
-                        <img src="https://image.flaticon.com/icons/svg/187/187133.svg" alt=""/>
-                        <small>Satisfied</small>
+            <div class="services-visual">
+                <div class="services-image-card">
+                    <img src="Assets/vector.jpg" alt="Online bus booking services illustration">
+                    <div class="services-image-copy">
+                        <span>Smarter Booking</span>
+                        <strong>Everything you need from search to seat confirmation in one place.</strong>
                     </div>
                 </div>
-                <button class="btn" id="send">Send Review</button>
             </div>
         </div>
 
@@ -509,6 +491,84 @@
     </div>
 </section>
 
+<section class="content-card live-reviews-section">
+    <div class="live-reviews-container">
+        <div class="live-reviews-copy">
+            <span class="live-reviews-kicker">Passenger Voices</span>
+            <h2>Real-Time Travel Reviews</h2>
+            <p>See what riders are saying right now about boarding, comfort, timing, and the booking flow across Yubus routes.</p>
+
+            <div class="live-reviews-points">
+                <div class="live-reviews-point">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span>Fresh ride feedback that rotates automatically</span>
+                </div>
+                <div class="live-reviews-point">
+                    <i class="fa-solid fa-star"></i>
+                    <span>Quick highlights on comfort, punctuality, and support</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="live-review-card">
+            <div class="live-review-top">
+                <span class="live-review-badge"><span class="live-review-dot"></span> Live review feed</span>
+                <div class="live-review-actions">
+                    <button type="button" id="openQuickReview" class="live-review-button live-review-button-secondary">Quick Review</button>
+                    <a href="review.html" class="live-review-button">Give Review</a>
+                </div>
+            </div>
+
+            <div id="liveReviewMarquee" class="live-review-marquee" aria-label="Scrolling passenger reviews">
+                <div id="liveReviewTrack" class="live-review-track"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div id="quickReviewModal" class="quick-review-modal" hidden aria-hidden="true">
+    <div class="quick-review-backdrop" data-quick-review-close></div>
+    <div class="quick-review-dialog" role="dialog" aria-modal="true" aria-labelledby="quickReviewTitle">
+        <button type="button" class="quick-review-close" data-quick-review-close aria-label="Close quick review">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <span class="quick-review-kicker">Quick Review</span>
+        <h3 id="quickReviewTitle">Share a short trip reaction</h3>
+        <p class="quick-review-copy">This is the fast review flow. Just pick a quick review type and post it directly to the live review feed.</p>
+
+        <form id="quickReviewForm" class="quick-review-form">
+            <div class="quick-review-type-wrap">
+                <span class="quick-review-label">Quick Review Type</span>
+                <div class="quick-review-types">
+                    <button type="button" class="quick-review-type active" data-tag="Smooth Trip" data-rating="5" data-text="The trip was smooth and the overall Yubus experience felt simple and reliable.">
+                        <i class="fa-solid fa-bus"></i>
+                        <strong>Smooth Trip</strong>
+                        <span>Easy and comfortable</span>
+                    </button>
+                    <button type="button" class="quick-review-type" data-tag="Helpful Support" data-rating="5" data-text="Support was responsive and helped me manage the trip confidently.">
+                        <i class="fa-solid fa-headset"></i>
+                        <strong>Helpful Support</strong>
+                        <span>Fast help and guidance</span>
+                    </button>
+                    <button type="button" class="quick-review-type" data-tag="Needs Improvement" data-rating="3" data-text="The trip was okay, but some parts of the experience could be improved further.">
+                        <i class="fa-solid fa-wrench"></i>
+                        <strong>Needs Improvement</strong>
+                        <span>Some things can improve</span>
+                    </button>
+                </div>
+            </div>
+
+            <p class="quick-review-helper">We will use your saved account name when available. If no route is selected yet, it will be posted as a general Yubus experience review.</p>
+
+            <div class="quick-review-submit-row">
+                <button type="submit" class="quick-review-submit">Post Quick Review</button>
+            </div>
+
+            <p id="quickReviewStatus" class="quick-review-status" aria-live="polite"></p>
+        </form>
+    </div>
+</div>
+
 <section class="about-yubus">
     <div class="about-container">
         <div class="about-copy">
@@ -542,7 +602,7 @@
                 </div>
             </div>
 
-            <a href="#" class="about-link">Know more about YUbus</a>
+            <a href="about-yubus.html" class="about-link">Know more about YUbus</a>
         </div>
 
         <div class="about-aside">
@@ -768,8 +828,8 @@
         console.log("Stored OTP:", storedOTP);
     }
 </script> -->
-<script src="busData.js"></script>
-<script src="script.js"></script>
+<script src="busData.js?v=20260319-route-images-v4"></script>
+<script src="script.js?v=20260319-route-images-v4"></script>
 </body>
 </html>
 

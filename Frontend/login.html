@@ -2,87 +2,115 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yubus | Login</title>
-    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="login.css?v=20260319-separate-login-v1">
 </head>
 <body>
-<div class="login-page">
-    <section class="hero-panel">
-        <div class="hero-content">
-            <p class="hero-kicker">Yubus Premium Booking</p>
+<div id="userLoginShell" class="login-shell user-login-shell">
+    <div class="user-login-layout">
+        <section class="user-brand-panel">
+            <p class="user-brand-kicker">Yubus</p>
             <h1>Welcome Yubus</h1>
-            <p class="hero-tagline">Your bus, your journey.</p>
-            <p class="hero-copy">Travel smarter with comfort, style, and on-time rides across top routes.</p>
-        </div>
-    </section>
+            <p class="user-tagline">Your bus, your journey.</p>
+            <p class="user-brand-copy">Travel smarter with comfort, style, and on-time rides across top routes.</p>
+            <button class="switch-link switch-link-light" type="button" onclick="switchRole('admin')">Admin Login</button>
+        </section>
 
-    <section class="form-panel">
-        <div id="loginCard" class="login-card">
-            <div class="role-toggle">
-                <button id="adminTab" class="role-btn active" type="button" onclick="switchRole('admin')">Admin</button>
-                <button id="userTab" class="role-btn" type="button" onclick="switchRole('user')">User</button>
-            </div>
-
-            <h2 id="roleTitle">Admin Login</h2>
-
-            <form id="adminForm" onsubmit="adminLogin(event)">
-                <label for="adminIdentity">Username or Email</label>
-                <input id="adminIdentity" type="text" placeholder="Enter username or email" required>
-
-                <label for="adminPassword">Password</label>
-                <input id="adminPassword" type="password" placeholder="Enter password" required>
-
-                <button class="login-btn" type="submit">Login</button>
-                <button class="link-btn" type="button" onclick="adminForgotPassword()">Forgot Password?</button>
-            </form>
-
-            <form id="userForm" class="hidden" onsubmit="loginUser(event)">
-                <label for="userIdentity">Email</label>
-                <input id="userIdentity" type="email" placeholder="Enter registered email" required>
-
-                <label for="userPassword">Password</label>
-                <input id="userPassword" type="password" placeholder="Enter password" required>
-
-                <button class="login-btn" type="submit">Login</button>
-                <div class="user-actions">
-                    <button class="link-btn" type="button" onclick="forgotPassword()">Forgot Password?</button>
-                    <button class="link-btn" type="button" onclick="openSignup()">New User? Sign Up</button>
+        <section class="user-auth-panel">
+            <div id="loginCard" class="login-card user-card">
+                <div class="user-card-head">
+                    <h2>Welcome Back</h2>
+                    <p>Login with your registered email and password.</p>
                 </div>
-            </form>
 
-            <div id="statusMsg" class="status-msg">You have been logged out.</div>
-            <button class="back-btn" type="button" onclick="window.location.href='index.html'">Back</button>
-        </div>
+                <form id="userForm" onsubmit="loginUser(event)">
+                    <label for="userIdentity">Email</label>
+                    <input id="userIdentity" type="email" placeholder="Enter registered email" required>
 
-        <aside id="signupCard" class="signup-card hidden" aria-hidden="true">
-            <div class="signup-head">
-                <h3>Create New User</h3>
-                <button class="close-signup-btn" type="button" onclick="closeSignup()" aria-label="Close signup">x</button>
+                    <label for="userPassword">Password</label>
+                    <input id="userPassword" type="password" placeholder="Enter password" required>
+
+                    <button class="login-btn user-login-btn" type="submit">Login</button>
+                    <div class="user-actions">
+                        <button class="link-btn" type="button" onclick="forgotPassword()">Forgot Password?</button>
+                        <button class="link-btn" type="button" onclick="openSignup()">New User? Sign Up</button>
+                    </div>
+                </form>
+
+                <div id="statusMsg" class="status-msg">Login with your registered email and password.</div>
+                <button class="back-btn" type="button" onclick="window.location.href='index.html'">Back</button>
             </div>
 
-            <form id="signupForm" onsubmit="signupUser(event)">
-                <label for="signupName">Full Name</label>
-                <input id="signupName" type="text" placeholder="Enter full name" required>
+            <aside id="signupCard" class="signup-card hidden" aria-hidden="true">
+                <div class="signup-head">
+                    <h3>Create New User</h3>
+                    <button class="close-signup-btn" type="button" onclick="closeSignup()" aria-label="Close signup">x</button>
+                </div>
 
-                <label for="signupEmail">Email</label>
-                <input id="signupEmail" type="email" placeholder="Enter email address" required>
+                <form id="signupForm" onsubmit="signupUser(event)">
+                    <label for="signupName">Full Name</label>
+                    <input id="signupName" type="text" placeholder="Enter full name" required>
 
-                <label for="signupMobile">Mobile Number</label>
-                <input id="signupMobile" type="tel" placeholder="Enter 10-digit mobile number" maxlength="10" required>
+                    <label for="signupEmail">Email</label>
+                    <input id="signupEmail" type="email" placeholder="Enter email address" required>
 
-                <label for="signupPassword">Password</label>
-                <input id="signupPassword" type="password" placeholder="Create password" required>
+                    <label for="signupMobile">Mobile Number</label>
+                    <input id="signupMobile" type="tel" placeholder="Enter 10-digit mobile number" maxlength="10" required>
 
-                <label for="signupConfirmPassword">Confirm Password</label>
-                <input id="signupConfirmPassword" type="password" placeholder="Confirm password" required>
+                    <label for="signupPassword">Password</label>
+                    <input id="signupPassword" type="password" placeholder="Create password" required>
 
-                <button class="login-btn" type="submit">Create Account</button>
-                <button class="link-btn" type="button" onclick="closeSignup()">Back to Login</button>
-            </form>
-        </aside>
-    </section>
+                    <label for="signupConfirmPassword">Confirm Password</label>
+                    <input id="signupConfirmPassword" type="password" placeholder="Confirm password" required>
+
+                    <button class="login-btn user-login-btn" type="submit">Create Account</button>
+                    <button class="link-btn" type="button" onclick="closeSignup()">Back to Login</button>
+                </form>
+            </aside>
+        </section>
+    </div>
 </div>
 
-<script src="login.js"></script>
+<div id="adminLoginShell" class="login-shell admin-login-shell hidden">
+    <div class="admin-login-layout">
+        <section class="hero-panel">
+            <div class="hero-content">
+                <p class="hero-kicker">Yubus Premium Booking</p>
+                <h1>Admin Portal</h1>
+                <p class="hero-tagline">Control routes, bookings, and operations.</p>
+                <p class="hero-copy">Manage fleet activity, track bookings, and operate the platform from a dedicated admin workspace.</p>
+            </div>
+        </section>
+
+        <section class="form-panel">
+            <div class="login-card admin-card">
+                <div class="admin-card-head">
+                    <p class="admin-mini-kicker">Restricted Access</p>
+                    <h2 id="roleTitle">Admin Login</h2>
+                </div>
+
+                <form id="adminForm" onsubmit="adminLogin(event)">
+                    <label for="adminIdentity">Username or Email</label>
+                    <input id="adminIdentity" type="text" placeholder="Enter username or email" required>
+
+                    <label for="adminPassword">Password</label>
+                    <input id="adminPassword" type="password" placeholder="Enter password" required>
+
+                    <button class="login-btn admin-login-btn" type="submit">Login</button>
+                    <button class="link-btn admin-link-btn" type="button" onclick="adminForgotPassword()">Forgot Password?</button>
+                </form>
+
+                <div id="adminStatusMsg" class="status-msg admin-status-msg">Authorized admins only.</div>
+                <div class="admin-card-actions">
+                    <button class="back-btn" type="button" onclick="switchRole('user')">User Login</button>
+                    <button class="back-btn" type="button" onclick="window.location.href='index.html'">Back</button>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script src="login.js?v=20260320-otp-port-fallback-v2"></script>
 </body>
 </html>

@@ -4,7 +4,34 @@
     {
       "label": "Start Backend (Java)",
       "type": "shell",
-      "command": "${workspaceFolder}\\start-backend.bat",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}\\start-backend.ps1"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Build Backend (Java)",
+      "type": "shell",
+      "command": "${workspaceFolder}\\.tools\\apache-maven-3.9.9\\bin\\mvn.cmd",
+      "args": [
+        "-q",
+        "-DskipTests",
+        "compile"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}\\backend-java"
+      },
       "problemMatcher": [],
       "presentation": {
         "reveal": "always",

@@ -4,6 +4,8 @@ public class NotificationEmailRequest {
     public String type;
     public String email;
     public String name;
+    public String password;
+    // Booking confirmation fields
     public String bookingId;
     public String from;
     public String to;
@@ -15,6 +17,4 @@ public class NotificationEmailRequest {
     public int amount;
     public int discountAmount;
     public String transactionId;
-    public String password;
-    public String mobile;
 }

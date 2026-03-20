@@ -17,7 +17,7 @@ Default is MySQL JDBC:
 
 Runtime configuration:
 
-- `PORT=8081`
+- `PORT=8000`
 - `ALLOWED_ORIGIN=*`
 
 Tables are auto-created on startup: `users`, `otps`, `payments`.
@@ -52,12 +52,14 @@ mvn clean package
 java -jar target/backend-java-1.0.0.jar
 ```
 
-Server starts on: `http://localhost:8081`
+Server starts on: `http://localhost:8000`
 
 For production hosting, set `PORT` from your hosting platform and set `ALLOWED_ORIGIN` to your frontend domain.
 
 ## APIs
 
+- `GET /api/buses/search?from=<source>&to=<destination>`
+- `GET /api/buses/routes`
 - `POST /api/login`
 - `POST /api/auth/send-otp`
 - `POST /api/auth/verify-otp`

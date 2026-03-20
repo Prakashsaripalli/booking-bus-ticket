@@ -1,4 +1,13 @@
 {
     "liveServer.settings.port": 5501,
-    "java.configuration.updateBuildConfiguration": "interactive"
+    "maven.executable.path": "${workspaceFolder}\\.tools\\apache-maven-3.9.9\\bin\\mvn.cmd",
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.import.maven.enabled": true,
+    "java.project.sourcePaths": [
+        "backend-java/src/main/java"
+    ],
+    "java.project.outputPath": "backend-java/target/classes",
+    "java.project.referencedLibraries": [
+        ".m2/repository/**/*.jar"
+    ]
 }

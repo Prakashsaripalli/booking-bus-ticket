@@ -1,4 +1,6 @@
 const FEEDBACK_STORAGE_KEY = "supportFeedback";
+const ADMIN_FEATURES_KEY = "adminFeatureModules";
+const SUPPORT_UNAVAILABLE_MESSAGE = "Right now the Support Assistant is not working. Please try again after the module is active.";
 
 const chatMessages = document.getElementById("chatMessages");
 const chatForm = document.getElementById("chatForm");
@@ -11,10 +13,18 @@ const quickHelp = document.getElementById("quickHelp");
 const feedbackPanel = document.getElementById("feedbackPanel");
 const feedbackButtons = document.querySelectorAll(".feedback-btn");
 const feedbackNote = document.getElementById("feedbackNote");
+const supportUnavailableBanner = document.getElementById("supportUnavailableBanner");
+const chatStatusLabel = document.getElementById("chatStatusLabel");
+const chatStatusDot = document.getElementById("chatStatusDot");
+const chatStatus = chatStatusLabel?.closest(".chat-status");
+const sendBtn = chatForm?.querySelector(".send-btn");
+const quickHelpButtons = quickHelp?.querySelectorAll("[data-query]") || [];
+const speechSupportAvailable = Boolean(window.SpeechRecognition || window.webkitSpeechRecognition);
 
 let lastBotReply = "";
 let speechRecognition = null;
 let speechRecognitionActive = false;
+let supportPauseMessageShown = false;
 const bookingChatState = {
     awaitingDate: false,
     route: null
@@ -269,6 +279,103 @@ function setSpeechStatus(message, isError = false) {
 
     speechStatus.textContent = message;
     speechStatus.classList.toggle("error", isError);
+}
+
+function getAdminFeatureModules() {
+    try {
+        const parsedModules = JSON.parse(localStorage.getItem(ADMIN_FEATURES_KEY) || "[]");
+        return Array.isArray(parsedModules) ? parsedModules : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+function isSupportAssistantActive() {
+    const adminModules = getAdminFeatureModules();
+
+    if (adminModules.length === 0) {
+        return true;
+    }
+
+    const supportModule = adminModules.find((module) => module?.id === "support");
+    return typeof supportModule?.active === "boolean" ? supportModule.active : true;
+}
+
+function ensureSupportPausedMessage() {
+    if (supportPauseMessageShown || !chatMessages) {
+        return;
+    }
+
+    addMessage("bot", SUPPORT_UNAVAILABLE_MESSAGE);
+    supportPauseMessageShown = true;
+}
+
+function applySupportAssistantState() {
+    const supportAssistantActive = isSupportAssistantActive();
+
+    if (supportUnavailableBanner) {
+        supportUnavailableBanner.hidden = supportAssistantActive;
+    }
+
+    if (chatStatus) {
+        chatStatus.classList.toggle("paused", !supportAssistantActive);
+    }
+
+    if (chatStatusLabel) {
+        chatStatusLabel.textContent = supportAssistantActive ? "Online" : "Paused";
+    }
+
+    if (chatStatusDot) {
+        chatStatusDot.setAttribute("aria-hidden", "true");
+    }
+
+    if (chatInput) {
+        chatInput.disabled = !supportAssistantActive;
+        chatInput.placeholder = supportAssistantActive
+            ? "Ask about booking, payment, cancellation, tracking, profile..."
+            : "Right now the Support Assistant is not working";
+    }
+
+    if (sendBtn) {
+        sendBtn.disabled = !supportAssistantActive;
+    }
+
+    if (routeQuickSelect) {
+        routeQuickSelect.disabled = !supportAssistantActive;
+        if (!supportAssistantActive) {
+            routeQuickSelect.value = "";
+        }
+    }
+
+    quickHelpButtons.forEach((button) => {
+        button.disabled = !supportAssistantActive;
+    });
+
+    feedbackButtons.forEach((button) => {
+        button.disabled = !supportAssistantActive;
+    });
+
+    if (speechLanguage) {
+        speechLanguage.disabled = !supportAssistantActive || !speechSupportAvailable;
+    }
+
+    if (speechBtn) {
+        speechBtn.disabled = !supportAssistantActive || !speechSupportAvailable;
+    }
+
+    if (!supportAssistantActive) {
+        stopSpeechRecognition();
+        setSpeechStatus("Support Assistant is paused right now.", true);
+        ensureSupportPausedMessage();
+        return;
+    }
+
+    supportPauseMessageShown = false;
+    if (speechRecognition) {
+        setSpeechStatus("Voice ready");
+    } else if (!speechSupportAvailable) {
+        setSpeechStatus("Voice input is not supported in this browser.", true);
+    }
 }
 
 function syncSpeechButton() {
@@ -1076,7 +1183,7 @@ function getSupportReply(query) {
 
     if (hasIntent(preparedText, "login")) {
         return buildChatReply(
-            "Use the login page for user sign-in, sign-up, and OTP verification. If OTP or profile save fails, confirm the Java backend is running on `http://localhost:8081`.",
+            "Use the login page for user sign-in, sign-up, and OTP verification. If OTP or profile save fails, confirm the Java backend is running on `http://localhost:8000`.",
             [{ label: "Go to Login", href: "login.html" }]
         );
     }
@@ -1146,6 +1253,11 @@ function sendBotReply(query) {
 }
 
 function handleQuery(query) {
+    if (!isSupportAssistantActive()) {
+        ensureSupportPausedMessage();
+        return;
+    }
+
     const cleanedQuery = (query || "").trim();
     if (!cleanedQuery) {
         return;
@@ -1157,6 +1269,11 @@ function handleQuery(query) {
 
 chatForm.addEventListener("submit", (event) => {
     event.preventDefault();
+    if (!isSupportAssistantActive()) {
+        ensureSupportPausedMessage();
+        return;
+    }
+
     const query = chatInput.value.trim();
     if (!query) {
         return;
@@ -1168,6 +1285,11 @@ chatForm.addEventListener("submit", (event) => {
 });
 
 quickHelp.addEventListener("click", (event) => {
+    if (!isSupportAssistantActive()) {
+        ensureSupportPausedMessage();
+        return;
+    }
+
     const chip = event.target.closest("[data-query]");
     if (!chip) {
         return;
@@ -1178,6 +1300,12 @@ quickHelp.addEventListener("click", (event) => {
 
 if (routeQuickSelect) {
     routeQuickSelect.addEventListener("change", () => {
+        if (!isSupportAssistantActive()) {
+            ensureSupportPausedMessage();
+            routeQuickSelect.value = "";
+            return;
+        }
+
         const selectedRoute = routeQuickSelect.value;
         if (!selectedRoute) {
             return;
@@ -1211,6 +1339,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const context = getCurrentUserContext();
     const userName = context.name || "traveler";
     initSpeechRecognition();
+    applySupportAssistantState();
 
     if (routeQuickSelect) {
         getAllAvailableRoutes().forEach((route) => {
@@ -1221,10 +1350,22 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    addMessage(
-        "bot",
-        `Hello ${userName}. I can help with booking status, ticket cancellation, payment issues, profile updates, route search, and tracking.
+    if (isSupportAssistantActive()) {
+        addMessage(
+            "bot",
+            `Hello ${userName}. I can help with booking status, ticket cancellation, payment issues, profile updates, route search, and tracking.
 Ask a question or tap one of the quick help options above.
 You can also type something like: book a ticket from Hyderabad to Delhi.`
-    );
+        );
+        return;
+    }
+
+    ensureSupportPausedMessage();
+});
+
+window.addEventListener("focus", applySupportAssistantState);
+window.addEventListener("storage", (event) => {
+    if (!event.key || event.key === ADMIN_FEATURES_KEY) {
+        applySupportAssistantState();
+    }
 });

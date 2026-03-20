@@ -145,6 +145,12 @@ function isPastJourneyDate(value) {
     return normalized < getTodayDate();
 }
 
+function isBookingLoginActive() {
+    return localStorage.getItem("userOTPVerified") === "true"
+        || localStorage.getItem("googleLogin") === "true"
+        || localStorage.getItem("adminLoggedIn") === "true";
+}
+
 function createPrice(base, adjustments) {
     return Math.max(299, base + adjustments);
 }
@@ -322,7 +328,7 @@ function getBookedSeats() {
             && String(booking?.from || "") === from
             && String(booking?.to || "") === to;
         const sameDate = normalizeDate(booking?.journeyDate) === normalizeDate(journeyDate);
-        const isActive = (booking?.status || "Booked") !== "Cancelled";
+        const isActive = (booking?.status || "Booked") === "Booked";
 
         if (!sameBus || !sameDate || !isActive) {
             return;
@@ -591,6 +597,13 @@ function initPage() {
     }
 
     proceedBtn.addEventListener("click", () => {
+        if (!isBookingLoginActive()) {
+            localStorage.setItem("postLoginRedirect", window.location.href);
+            alert("Please log in before proceeding to payment.");
+            window.location.href = "login.html";
+            return;
+        }
+
         if (isPastJourneyDate(journeyDate)) {
             alert("Past travel dates cannot be booked. Please go back and choose a valid date.");
             return;

@@ -1,54 +1,53 @@
 package com.booking.backend.utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import jakarta.mail.Authenticator;
-import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
 import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.Session;
 import jakarta.mail.Transport;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
-
 import java.util.Properties;
 
 public final class EmailUtil {
+    private static final String EMAIL_PAGE_BACKGROUND = "#f7fbff";
 
-    private static final String SMTP_HOST = "smtp.gmail.com";
-    private static final String SMTP_PORT = "587";
-    private static final String ENV_SMTP_USER = "SMTP_USER";
-    private static final String ENV_SMTP_APP_PASSWORD = "SMTP_APP_PASSWORD";
-    private static final String ENV_SMTP_FROM = "SMTP_FROM";
-    private static final String ENV_OTP_DEBUG = "OTP_DEBUG";
-    private static final String ENV_EMAIL_DEBUG = "EMAIL_DEBUG";
+    private static final Logger LOGGER = LoggerFactory.getLogger(EmailUtil.class);
 
     private EmailUtil() {
     }
 
     public static void sendOtpEmail(String toEmail, String otp) throws MessagingException {
+        if (Config.isOtpDebug()) {
+            LOGGER.info("OTP DEBUG MODE: OTP {} for {}", otp, toEmail);
+            throw new MessagingException("OTP debug mode is enabled. Disable OTP_DEBUG to send real emails.");
+        }
         Session session = createSession();
         String fromEmail = getFromEmail();
 
-        Message message = new MimeMessage(session);
+        MimeMessage message = new MimeMessage(session);
         message.setFrom(new InternetAddress(fromEmail));
-        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
+        message.setRecipients(MimeMessage.RecipientType.TO, InternetAddress.parse(toEmail));
         message.setSubject("Yubus OTP Verification");
         message.setText("Your Yubus OTP is: " + otp + "\n\nValid for 5 minutes.");
 
-        Transport.send(message);
+        try {
+            Transport.send(message);
+        } catch (MessagingException e) {
+            LOGGER.error("Email send failed for {}: {}", toEmail, e.getMessage(), e);
+            throw e;
+        }
     }
 
-    public static void sendProfileUpdatedEmail(
-            String toEmail,
-            String name,
-            String email,
-            String mobile
-    ) throws MessagingException {
+    public static void sendProfileUpdatedEmail(String toEmail, String name, String email, String mobile) throws MessagingException {
         Session session = createSession();
         String fromEmail = getFromEmail();
 
-        Message message = new MimeMessage(session);
+        MimeMessage message = new MimeMessage(session);
         message.setFrom(new InternetAddress(fromEmail));
-        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
+        message.setRecipients(MimeMessage.RecipientType.TO, InternetAddress.parse(toEmail));
         message.setSubject("Yubus Profile Updated");
         message.setContent(buildProfileUpdatedHtml(name, email, mobile), "text/html; charset=UTF-8");
 
@@ -56,624 +55,348 @@ public final class EmailUtil {
     }
 
     public static void sendBookingConfirmationEmail(
-            String toEmail,
-            String bookingId,
-            String passengerName,
-            String from,
-            String to,
-            String busName,
-            String departureTime,
-            String journeyDate,
-            String seats,
-            String paymentMethod,
-            int originalAmount,
-            int discountAmount,
-            int paidAmount,
-            String transactionId
-    ) throws MessagingException {
+            String toEmail, String bookingId, String passengerName, String passengerMobile, String passengerEmail, String from, String to,
+            String busName, String departureTime, String journeyDate, String seats,
+            String paymentMethod, int originalAmount, int discountAmount, int paidAmount,
+            String transactionId) throws MessagingException {
         Session session = createSession();
         String fromEmail = getFromEmail();
 
-        Message message = new MimeMessage(session);
+        MimeMessage message = new MimeMessage(session);
         message.setFrom(new InternetAddress(fromEmail));
-        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
+        message.setRecipients(MimeMessage.RecipientType.TO, InternetAddress.parse(toEmail));
         message.setSubject("Yubus Booking Confirmation - " + bookingId);
-        message.setContent(buildBookingConfirmationHtml(
-                passengerName,
-                bookingId,
-                from,
-                to,
-                busName,
-                journeyDate,
-                departureTime,
-                seats,
-                paymentMethod,
-                originalAmount,
-                discountAmount,
-                paidAmount,
-                transactionId
-        ), "text/html; charset=UTF-8");
+        message.setContent(buildBookingConfirmationHtml(passengerName, passengerMobile, passengerEmail, bookingId, from, to, busName, journeyDate, departureTime, seats, paymentMethod, originalAmount, discountAmount, paidAmount, transactionId), "text/html; charset=UTF-8");
 
         Transport.send(message);
     }
 
-    public static void sendTicketCancellationEmail(
-            String toEmail,
-            String passengerName,
-            String bookingId,
-            String from,
-            String to,
-            String busName,
-            String departureTime,
-            String journeyDate,
-            String seats,
-            String paymentMethod,
-            int amount,
-            int discountAmount,
-            String transactionId
-    ) throws MessagingException {
+    public static void sendTicketCancellationEmail(String toEmail, String name, String bookingId, String fromCity, String toCity, String busName, String departureTime, String journeyDate, String seats, String paymentMethod, int amount, int discountAmount, String transactionId) throws MessagingException {
         Session session = createSession();
         String fromEmail = getFromEmail();
 
-        Message message = new MimeMessage(session);
+        MimeMessage message = new MimeMessage(session);
         message.setFrom(new InternetAddress(fromEmail));
-        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
-        message.setSubject("Yubus Ticket Cancelled - " + safe(bookingId));
-        message.setContent(buildTicketCancellationHtml(
-                passengerName,
-                bookingId,
-                from,
-                to,
-                busName,
-                departureTime,
-                journeyDate,
-                seats,
-                paymentMethod,
-                amount,
-                discountAmount,
-                transactionId
-        ), "text/html; charset=UTF-8");
-
+        message.setRecipients(MimeMessage.RecipientType.TO, InternetAddress.parse(toEmail));
+        message.setSubject("Yubus - Ticket Cancellation Notice - " + bookingId);
+        message.setContent(buildCancellationHtml(name, bookingId, fromCity, toCity, busName, journeyDate, departureTime, seats, paymentMethod, amount, discountAmount, transactionId), "text/html; charset=UTF-8");
         Transport.send(message);
     }
 
-    public static void sendForgotPasswordEmail(
-            String toEmail,
-            String name,
-            String password
-    ) throws MessagingException {
+    public static void sendForgotPasswordEmail(String toEmail, String name, String password) throws MessagingException {
         Session session = createSession();
         String fromEmail = getFromEmail();
 
-        Message message = new MimeMessage(session);
+        MimeMessage message = new MimeMessage(session);
         message.setFrom(new InternetAddress(fromEmail));
-        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
-        message.setSubject("Yubus Password Information");
-        message.setContent(buildForgotPasswordHtml(name, password), "text/html; charset=UTF-8");
-
+        message.setRecipients(MimeMessage.RecipientType.TO, InternetAddress.parse(toEmail));
+        message.setSubject("Yubus - Password Reset");
+        message.setText("Dear " + name + ",\n\nYour new password is: " + password + "\n\nPlease change it after login.");
         Transport.send(message);
     }
 
-    public static void sendRefundSuccessEmail(
-            String toEmail,
-            String passengerName,
-            String bookingId,
-            String from,
-            String to,
-            String busName,
-            String departureTime,
-            String journeyDate,
-            String seats,
-            String paymentMethod,
-            int refundAmount,
-            String transactionId
-    ) throws MessagingException {
+    public static void sendRefundSuccessEmail(String toEmail, String name, String bookingId, String from, String to, String busName, String departureTime, String journeyDate, String seats, String paymentMethod, int amount, String transactionId) throws MessagingException {
         Session session = createSession();
         String fromEmail = getFromEmail();
 
-        Message message = new MimeMessage(session);
+        MimeMessage message = new MimeMessage(session);
         message.setFrom(new InternetAddress(fromEmail));
-        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
-        message.setSubject("Yubus Refund Successful - " + safe(bookingId));
-        message.setContent(buildRefundSuccessHtml(
-                passengerName,
-                bookingId,
-                from,
-                to,
-                busName,
-                departureTime,
-                journeyDate,
-                seats,
-                paymentMethod,
-                refundAmount,
-                transactionId
-        ), "text/html; charset=UTF-8");
-
+        message.setRecipients(MimeMessage.RecipientType.TO, InternetAddress.parse(toEmail));
+        message.setSubject("Yubus - Refund Processed - " + bookingId);
+        message.setContent(buildRefundHtml(name, bookingId, from, to, busName, journeyDate, departureTime, seats, paymentMethod, amount, transactionId), "text/html; charset=UTF-8");
         Transport.send(message);
+    }
+
+    private static String buildProfileUpdatedHtml(String name, String email, String mobile) {
+        return "<html><body style=\"margin:0;padding:24px;background:" + EMAIL_PAGE_BACKGROUND + ";font-family:'Segoe UI',Arial,Helvetica,sans-serif;color:#1b1b1b;\">"
+                + "<div style=\"max-width:640px;margin:0 auto;background:#ffffff;border-radius:18px;padding:24px;box-shadow:0 8px 20px rgba(28,89,132,0.08);\">"
+                + "<h2 style=\"margin:0 0 12px;color:#1f4e9a;\">Profile Updated</h2>"
+                + "<p style=\"margin:0 0 8px;\">Name: " + escapeHtml(name) + "</p>"
+                + "<p style=\"margin:0 0 8px;\">Email: " + escapeHtml(email) + "</p>"
+                + "<p style=\"margin:0;\">Mobile: " + escapeHtml(mobile) + "</p>"
+                + "</div></body></html>";
+    }
+
+    private static String buildCancellationHtml(String passengerName, String bookingId, String from, String to, String busName,
+            String journeyDate, String departureTime, String seats, String paymentMethod, int amount, int discountAmount, String transactionId) {
+        String safePassenger = escapeHtml(passengerName);
+        String safeBookingId = escapeHtml(bookingId);
+        String safeFrom = escapeHtml(from);
+        String safeTo = escapeHtml(to);
+        String safeBus = escapeHtml(busName);
+        String safeJourneyDate = escapeHtml(journeyDate);
+        String safeDeparture = escapeHtml(departureTime);
+        String safeSeats = escapeHtml(seats);
+        String safePayment = escapeHtml(paymentMethod);
+        String safeTransaction = escapeHtml(transactionId);
+
+        StringBuilder html = new StringBuilder();
+        html.append("<html><body style=\"margin:0;padding:0;background:").append(EMAIL_PAGE_BACKGROUND).append(";font-family:'Segoe UI',Arial,Helvetica,sans-serif;color:#1b1b1b;\">");
+        html.append("<div style=\"max-width:640px;margin:20px auto;padding:18px;\">");
+        html.append("<div style=\"font-size:26px;font-weight:700;color:#d25b5b;letter-spacing:0.4px;\">Yubus</div>");
+        html.append("<div style=\"color:#6b6b6b;margin-top:4px;font-size:14px;\">Your cancelled ticket details.</div>");
+        html.append("<div style=\"margin-top:16px;background:#ffffff;border-radius:22px;box-shadow:0 8px 20px rgba(60,27,27,0.08);overflow:hidden;\">");
+        html.append(colourLine("#e24b4b", "#f39c3d", "#f39c3d"));
+        html.append("<div style=\"padding:22px 24px;\">");
+        html.append("<div style=\"color:#8a8a8a;font-size:13px;margin-bottom:6px;\">Hello ").append(safePassenger).append(",</div>");
+        html.append("<div style=\"font-size:26px;font-weight:800;margin-bottom:12px;\">Ticket Cancelled</div>");
+        html.append("<div style=\"display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;\">");
+        html.append("<div style=\"font-weight:700;color:#b13434;\">").append(safeBookingId).append("</div>");
+        html.append("<div style=\"padding:6px 14px;border-radius:999px;background:#fde9e9;color:#b13434;font-weight:700;font-size:12px;letter-spacing:0.5px;\">CANCELLED</div>");
+        html.append("</div>");
+        html.append("<div style=\"margin-top:12px;font-size:18px;font-weight:700;\">").append(safeFrom).append(" -> ").append(safeTo).append("</div>");
+        html.append("<div style=\"margin-top:4px;color:#6c6c6c;font-size:14px;\">").append(safeBus).append("</div>");
+        html.append("<table style=\"width:100%;border-collapse:separate;border-spacing:12px 12px;margin-top:14px;\">");
+        html.append("<tr>");
+        html.append(cardCell("JOURNEY DATE", safeJourneyDate, "#f9fafb", "#1f1f1f"));
+        html.append(cardCell("SEAT NUMBER", safeSeats, "#f9fafb", "#1f1f1f"));
+        html.append("</tr>");
+        html.append("<tr>");
+        html.append(cardCell("DEPARTURE TIME", safeDeparture, "#f9fafb", "#1f1f1f"));
+        html.append(cardCell("TRANSACTION TYPE", safePayment, "#f9fafb", "#1f1f1f"));
+        html.append("</tr>");
+        html.append("<tr>");
+        html.append(cardCell("PAID AMOUNT", "Rs." + amount, "#fff3f2", "#b13434"));
+        html.append(cardCell("DISCOUNT", "Rs." + discountAmount, "#ecfaf1", "#1f7a4b"));
+        html.append("</tr>");
+        html.append("<tr>");
+        html.append(wideCardCell("TRANSACTION ID", safeTransaction));
+        html.append("</tr>");
+        html.append("</table>");
+        html.append("</div>");
+        html.append("</div>");
+        html.append("</div>");
+        html.append("</body></html>");
+        return html.toString();
+    }
+
+    private static String buildRefundHtml(String passengerName, String bookingId, String from, String to, String busName,
+            String journeyDate, String departureTime, String seats, String paymentMethod, int refundAmount, String transactionId) {
+        String safePassenger = escapeHtml(passengerName);
+        String safeBookingId = escapeHtml(bookingId);
+        String safeFrom = escapeHtml(from);
+        String safeTo = escapeHtml(to);
+        String safeBus = escapeHtml(busName);
+        String safeJourneyDate = escapeHtml(journeyDate);
+        String safeDeparture = escapeHtml(departureTime);
+        String safeSeats = escapeHtml(seats);
+        String safePayment = escapeHtml(paymentMethod);
+        String safeTransaction = escapeHtml(transactionId);
+
+        StringBuilder html = new StringBuilder();
+        html.append("<html><body style=\"margin:0;padding:0;background:").append(EMAIL_PAGE_BACKGROUND).append(";font-family:'Segoe UI',Arial,Helvetica,sans-serif;color:#1b1b1b;\">");
+        html.append("<div style=\"max-width:640px;margin:20px auto;padding:18px;\">");
+        html.append("<div style=\"font-size:26px;font-weight:700;color:#d25b5b;letter-spacing:0.4px;\">Yubus</div>");
+        html.append("<div style=\"color:#6b6b6b;margin-top:4px;font-size:14px;\">Your refund has been processed.</div>");
+        html.append("<div style=\"margin-top:16px;background:#ffffff;border-radius:22px;box-shadow:0 8px 20px rgba(60,27,27,0.08);overflow:hidden;\">");
+        html.append(colourLine("#2a5bd7", "#6db7ff", "#9bd3ff"));
+        html.append("<div style=\"padding:22px 24px;\">");
+        html.append("<div style=\"color:#8a8a8a;font-size:13px;margin-bottom:6px;\">Hello ").append(safePassenger).append(",</div>");
+        html.append("<div style=\"font-size:26px;font-weight:800;margin-bottom:12px;\">Refund Successful</div>");
+        html.append("<div style=\"display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;\">");
+        html.append("<div style=\"font-weight:700;color:#1f4e9a;\">").append(safeBookingId).append("</div>");
+        html.append("<div style=\"padding:6px 14px;border-radius:999px;background:#e9f1ff;color:#1f4e9a;font-weight:700;font-size:12px;letter-spacing:0.5px;\">REFUNDED</div>");
+        html.append("</div>");
+        html.append("<div style=\"margin-top:12px;font-size:18px;font-weight:700;\">").append(safeFrom).append(" -> ").append(safeTo).append("</div>");
+        html.append("<div style=\"margin-top:4px;color:#6c6c6c;font-size:14px;\">").append(safeBus).append("</div>");
+        html.append("<table style=\"width:100%;border-collapse:separate;border-spacing:12px 12px;margin-top:14px;\">");
+        html.append("<tr>");
+        html.append(cardCell("JOURNEY DATE", safeJourneyDate, "#f9fafb", "#1f1f1f"));
+        html.append(cardCell("SEAT NUMBER", safeSeats, "#f9fafb", "#1f1f1f"));
+        html.append("</tr>");
+        html.append("<tr>");
+        html.append(cardCell("DEPARTURE TIME", safeDeparture, "#f9fafb", "#1f1f1f"));
+        html.append(cardCell("TRANSACTION TYPE", safePayment, "#f9fafb", "#1f1f1f"));
+        html.append("</tr>");
+        html.append("<tr>");
+        html.append(cardCell("REFUND AMOUNT", "Rs." + refundAmount, "#edf4ff", "#1f4e9a"));
+        html.append(cardCell("PASSENGER", safePassenger, "#f9fafb", "#1f1f1f"));
+        html.append("</tr>");
+        html.append("<tr>");
+        html.append(wideCardCell("TRANSACTION ID", safeTransaction));
+        html.append("</tr>");
+        html.append("</table>");
+        html.append("</div>");
+        html.append("</div>");
+        html.append("</div>");
+        html.append("</body></html>");
+        return html.toString();
+    }
+
+    private static String buildBookingConfirmationHtml(String passengerName, String passengerMobile, String passengerEmail, String bookingId, String from, String to, String busName,
+            String journeyDate, String departureTime, String seats, String paymentMethod, int originalAmount, int discountAmount,
+            int paidAmount, String transactionId) {
+        String safePassenger = escapeHtml(passengerName);
+        String safeBookingId = escapeHtml(bookingId);
+        String safeFrom = escapeHtml(from);
+        String safeTo = escapeHtml(to);
+        String safeBus = escapeHtml(busName);
+        String safeJourneyDate = escapeHtml(journeyDate);
+        String safeDeparture = escapeHtml(departureTime);
+        String safeSeats = escapeHtml(seats);
+        String safePayment = escapeHtml(paymentMethod);
+        String safeTransaction = escapeHtml(transactionId);
+
+        StringBuilder html = new StringBuilder();
+        html.append("<html><body style=\"margin:0;padding:0;background:").append(EMAIL_PAGE_BACKGROUND).append(";font-family:'Segoe UI',Arial,Helvetica,sans-serif;color:#1b1b1b;\">");
+        html.append("<div style=\"max-width:640px;margin:20px auto;padding:18px;\">");
+        html.append("<div style=\"font-size:26px;font-weight:700;color:#d25b5b;letter-spacing:0.4px;\">Yubus</div>");
+        html.append("<div style=\"color:#6b6b6b;margin-top:4px;font-size:14px;\">Your booking card is ready.</div>");
+        html.append("<div style=\"margin-top:16px;background:#ffffff;border-radius:22px;box-shadow:0 8px 20px rgba(60,27,27,0.08);overflow:hidden;\">");
+        html.append(colourLine("#e24b4b", "#f39c3d", "#f39c3d"));
+        html.append("<div style=\"padding:22px 24px;\">");
+        html.append("<div style=\"color:#8a8a8a;font-size:13px;margin-bottom:6px;\">Hello ").append(safePassenger).append(",</div>");
+        html.append("<div style=\"font-size:26px;font-weight:800;margin-bottom:12px;\">Booking Details</div>");
+        html.append("<div style=\"display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;\">");
+        html.append("<div style=\"font-weight:700;color:#b13434;\">").append(safeBookingId).append("</div>");
+        html.append("<div style=\"padding:6px 14px;border-radius:999px;background:#e9f8ef;color:#1f7a4b;font-weight:700;font-size:12px;letter-spacing:0.5px;\">BOOKED</div>");
+        html.append("</div>");
+        html.append("<div style=\"margin-top:12px;font-size:18px;font-weight:700;\">").append(safeFrom).append(" -> ").append(safeTo).append("</div>");
+        html.append("<div style=\"margin-top:4px;color:#6c6c6c;font-size:14px;\">").append(safeBus).append("</div>");
+        html.append("<table style=\"width:100%;border-collapse:separate;border-spacing:12px 12px;margin-top:14px;\">");
+        html.append("<tr>");
+        html.append(cardCell("JOURNEY DATE", safeJourneyDate, "#f9fafb", "#1f1f1f"));
+        html.append(cardCell("SEAT NUMBER", safeSeats, "#f9fafb", "#1f1f1f"));
+        html.append("</tr>");
+        html.append("<tr>");
+        html.append(cardCell("DEPARTURE TIME", safeDeparture, "#f9fafb", "#1f1f1f"));
+        html.append(cardCell("TRANSACTION TYPE", safePayment, "#f9fafb", "#1f1f1f"));
+        html.append("</tr>");
+        html.append("<tr>");
+        html.append(cardCell("ORIGINAL AMOUNT", "Rs." + originalAmount, "#fff3f2", "#b13434"));
+        html.append(cardCell("DISCOUNT", "Rs." + discountAmount, "#ecfaf1", "#1f7a4b"));
+        html.append("</tr>");
+        html.append("<tr>");
+        html.append(cardCell("PAID AMOUNT", "Rs." + paidAmount, "#edf4ff", "#1f4e9a"));
+        html.append(cardCell("PASSENGER", safePassenger, "#f9fafb", "#1f1f1f"));
+        html.append("</tr>");
+        html.append("<tr>");
+        html.append(wideCardCell("TRANSACTION ID", safeTransaction));
+        html.append("</tr>");
+        html.append("</table>");
+        html.append("</div>");
+        html.append("</div>");
+        html.append("</div>");
+        html.append("</body></html>");
+        return html.toString();
+    }
+
+    private static String cardCell(String label, String value, String background, String valueColor) {
+        StringBuilder cell = new StringBuilder();
+        cell.append("<td style=\"width:50%;padding:14px 16px;background:").append(background).append(";border-radius:14px;\">");
+        cell.append("<div style=\"font-size:11px;color:#8c8c8c;text-transform:uppercase;letter-spacing:1px;font-weight:700;\">").append(label).append("</div>");
+        cell.append("<div style=\"margin-top:6px;font-size:16px;font-weight:800;color:").append(valueColor).append(";\">").append(value).append("</div>");
+        cell.append("</td>");
+        return cell.toString();
+    }
+
+    private static String wideCardCell(String label, String value) {
+        StringBuilder cell = new StringBuilder();
+        cell.append("<td colspan=\"2\" style=\"padding:14px 16px;background:#f9fafb;border-radius:14px;\">");
+        cell.append("<div style=\"font-size:11px;color:#8c8c8c;text-transform:uppercase;letter-spacing:1px;font-weight:700;\">").append(label).append("</div>");
+        cell.append("<div style=\"margin-top:6px;font-size:14px;font-weight:700;word-break:break-all;\">").append(value).append("</div>");
+        cell.append("</td>");
+        return cell.toString();
+    }
+
+    private static String colourLine(String start, String middle, String end) {
+        return "<div style=\"height:4px;background-color:" + start +
+                ";background-image:linear-gradient(90deg," + start + "," + middle + "," + end + ");" +
+                "border-radius:18px 18px 0 0;\"></div>";
+    }
+
+    private static String escapeHtml(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
     }
 
     private static Session createSession() throws MessagingException {
-        String smtpUser = requireEnv(ENV_SMTP_USER);
-        String smtpPassword = requireEnv(ENV_SMTP_APP_PASSWORD);
+        String smtpUser = Config.getSmtpUser();
+        String smtpPassword = Config.getSmtpPassword();
+
+        if (smtpUser.isEmpty() || smtpPassword.isEmpty()) {
+            throw new MessagingException("SMTP_USER or SMTP_APP_PASSWORD is not configured");
+        }
 
         Properties props = new Properties();
-        props.put("mail.smtp.host", SMTP_HOST);
-        props.put("mail.smtp.port", SMTP_PORT);
+        props.put("mail.smtp.host", Config.getSmtpHost());
+        props.put("mail.smtp.port", Config.getSmtpPort());
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
 
-        Session session = Session.getInstance(props, new Authenticator() {
+        return Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(smtpUser, smtpPassword);
             }
         });
-        return session;
     }
 
     private static String getFromEmail() {
-        String smtpUser = System.getenv(ENV_SMTP_USER);
-        return System.getenv().getOrDefault(ENV_SMTP_FROM, smtpUser);
+        return Config.getSmtpFrom();
     }
 
     public static boolean isSmtpConfigured() {
-        return !isBlankEnv(ENV_SMTP_USER) && !isBlankEnv(ENV_SMTP_APP_PASSWORD);
-    }
-
-    public static boolean isOtpDebugEnabled() {
-        return isTruthyEnv(ENV_OTP_DEBUG);
+        String user = Config.getSmtpUser();
+        String pass = Config.getSmtpPassword();
+        return !user.isEmpty() && !pass.isEmpty() && !hasPlaceholderSmtpConfig();
     }
 
     public static boolean isEmailDebugEnabled() {
-        return isTruthyEnv(ENV_EMAIL_DEBUG);
+        return Config.isEmailDebug();
+    }
+
+    public static boolean isEmailDeliveryEnabled() {
+        return isSmtpConfigured() && !isEmailDebugEnabled();
+    }
+
+    public static boolean shouldSkipEmail() {
+        return isEmailDebugEnabled() || hasPlaceholderSmtpConfig();
+    }
+
+    public static boolean hasPlaceholderSmtpConfig() {
+        String user = Config.getSmtpUser();
+        String pass = Config.getSmtpPassword();
+        return isPlaceholderValue(user) || isPlaceholderValue(pass);
     }
 
     public static String smtpMissingMessage() {
-        return "SMTP is not configured. Set SMTP_USER and SMTP_APP_PASSWORD.";
+        return "SMTP is not configured (or still using placeholder values). " +
+                "Set SMTP_USER and SMTP_APP_PASSWORD in backend-java/smtp.env.bat " +
+                "or enable OTP_DEBUG/EMAIL_DEBUG for local testing.";
     }
 
-    private static String requireEnv(String name) throws MessagingException {
-        String value = System.getenv(name);
-        if (value == null || value.isBlank()) {
-            throw new MessagingException(name + " is not configured");
+    public static String smtpFailureMessage(Exception e) {
+        String message = e == null ? "" : String.valueOf(e.getMessage()).trim();
+        if (message.contains("Username and Password not accepted") || message.contains("BadCredentials")) {
+            return "SMTP login failed. Gmail rejected the SMTP username or app password. " +
+                    "Generate a fresh Gmail App Password, update backend-java/smtp.env.bat, and restart the backend.";
         }
-        return value.trim();
+        if (message.contains("Could not connect to SMTP host") || message.contains("ConnectException")) {
+            return "SMTP connection failed. Check internet access, SMTP host/port, and firewall settings.";
+        }
+        if (message.isBlank()) {
+            return "Failed to send OTP email.";
+        }
+        return "Failed to send OTP email: " + message.replace('\n', ' ').replace('\r', ' ');
     }
 
-    private static boolean isBlankEnv(String name) {
-        String value = System.getenv(name);
-        return value == null || value.isBlank();
+    public static boolean isOtpDebugEnabled() {
+        return Config.isOtpDebug();
     }
 
-    private static boolean isTruthyEnv(String name) {
-        return "true".equalsIgnoreCase(System.getenv().getOrDefault(name, "false"));
-    }
-
-    private static String buildBookingConfirmationHtml(
-            String passengerName,
-            String bookingId,
-            String from,
-            String to,
-            String busName,
-            String journeyDate,
-            String departureTime,
-            String seats,
-            String paymentMethod,
-            int originalAmount,
-            int discountAmount,
-            int paidAmount,
-            String transactionId
-    ) {
-        String greetingName = safe(passengerName).equals("-") ? "Customer" : safe(passengerName);
-        String route = safe(from) + " -> " + safe(to);
-
-        return """
-                <html>
-                <body style="margin:0;padding:24px;background:#f5f7fb;font-family:Arial,sans-serif;color:#1f2937;">
-                  <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" style="max-width:720px;margin:0 auto;">
-                    <tr>
-                      <td style="padding:0 0 18px 0;">
-                        <div style="font-size:28px;font-weight:800;color:#d94f45;letter-spacing:0.4px;">Yubus</div>
-                        <div style="font-size:14px;color:#6b7280;margin-top:6px;">Your booking card is ready.</div>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td style="background:#ffffff;border:1px solid #ececf1;border-radius:18px;box-shadow:0 14px 30px rgba(16,24,40,0.07);overflow:hidden;">
-                        <div style="height:4px;background:linear-gradient(90deg,#b7184a,#f97316,#f4b400);line-height:4px;font-size:4px;">&nbsp;</div>
-                        <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" style="padding:0;margin:0;">
-                          <tr>
-                            <td style="padding:22px 24px 10px 24px;">
-                              <div style="font-size:16px;color:#6b7280;margin-bottom:10px;">Hello %s,</div>
-                              <div style="font-size:32px;font-weight:800;line-height:1.2;color:#111827;margin-bottom:16px;">Booking Details</div>
-                              <table role="presentation" width="100%%" cellspacing="0" cellpadding="0">
-                                <tr>
-                                  <td style="font-weight:700;color:#b7184a;letter-spacing:0.04em;font-size:14px;">%s</td>
-                                  <td align="right">%s</td>
-                                </tr>
-                              </table>
-                              <div style="margin:14px 0 0 0;">
-                                <div style="font-size:18px;font-weight:800;color:#172033;line-height:1.35;">%s</div>
-                                <div style="font-size:14px;font-weight:600;color:#667085;margin-top:4px;">%s</div>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td style="padding:0 24px 24px 24px;">
-                              <table role="presentation" width="100%%" cellspacing="0" cellpadding="0">
-                                <tr>
-                                  <td width="50%%" style="padding:0 6px 12px 0;vertical-align:top;">%s</td>
-                                  <td width="50%%" style="padding:0 0 12px 6px;vertical-align:top;">%s</td>
-                                </tr>
-                                <tr>
-                                  <td width="50%%" style="padding:0 6px 12px 0;vertical-align:top;">%s</td>
-                                  <td width="50%%" style="padding:0 0 12px 6px;vertical-align:top;">%s</td>
-                                </tr>
-                                <tr>
-                                  <td width="50%%" style="padding:0 6px 12px 0;vertical-align:top;">%s</td>
-                                  <td width="50%%" style="padding:0 0 12px 6px;vertical-align:top;">%s</td>
-                                </tr>
-                                <tr>
-                                  <td colspan="2" style="padding:0 0 12px 0;vertical-align:top;">%s</td>
-                                </tr>
-                                <tr>
-                                  <td width="50%%" style="padding:0 6px 0 0;vertical-align:top;">%s</td>
-                                  <td width="50%%" style="padding:0 0 0 6px;vertical-align:top;">%s</td>
-                                </tr>
-                              </table>
-                              <div style="margin-top:20px;padding-top:16px;border-top:1px solid #f0e5e9;font-size:13px;line-height:1.7;color:#6b7280;">
-                                Thank you for booking with Yubus.
-                              </div>
-                            </td>
-                          </tr>
-                        </table>
-                      </td>
-                    </tr>
-                  </table>
-                </body>
-                </html>
-                """.formatted(
-                escapeHtml(greetingName),
-                escapeHtml(safe(bookingId)),
-                buildStatusBadge(),
-                escapeHtml(route),
-                escapeHtml(safe(busName)),
-                buildDetailCard("Journey Date", safe(journeyDate), "default", false),
-                buildDetailCard("Seat Number", safe(seats), "default", false),
-                buildDetailCard("Departure Time", safe(departureTime), "default", false),
-                buildDetailCard("Transaction Type", safe(paymentMethod), "default", false),
-                buildDetailCard("Original Amount", formatMoney(originalAmount), "strong", false),
-                buildDetailCard("Discount", formatMoney(discountAmount), "accent", false),
-                buildDetailCard("Transaction ID", safe(transactionId), "default", true),
-                buildDetailCard("Paid Amount", formatMoney(paidAmount), "strong", false),
-                buildDetailCard("Passenger", safe(passengerName), "default", false)
-        );
-    }
-
-    private static String buildTicketCancellationHtml(
-            String passengerName,
-            String bookingId,
-            String from,
-            String to,
-            String busName,
-            String departureTime,
-            String journeyDate,
-            String seats,
-            String paymentMethod,
-            int amount,
-            int discountAmount,
-            String transactionId
-    ) {
-        String greetingName = safe(passengerName).equals("-") ? "Customer" : safe(passengerName);
-        String route = safe(from) + " -> " + safe(to);
-
-        return """
-                <html>
-                <body style="margin:0;padding:24px;background:#f8fafc;font-family:Arial,sans-serif;color:#1f2937;">
-                  <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" style="max-width:720px;margin:0 auto;">
-                    <tr>
-                      <td style="padding:0 0 18px 0;">
-                        <div style="font-size:28px;font-weight:800;color:#d94f45;">Yubus</div>
-                        <div style="font-size:14px;color:#6b7280;margin-top:6px;">Your cancelled ticket details.</div>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td style="background:#ffffff;border:1px solid #ececf1;border-radius:18px;box-shadow:0 14px 30px rgba(16,24,40,0.07);overflow:hidden;">
-                        <div style="height:4px;background:linear-gradient(90deg,#b42343,#ef4444,#f59e0b);line-height:4px;font-size:4px;">&nbsp;</div>
-                        <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" style="padding:0;margin:0;">
-                          <tr>
-                            <td style="padding:22px 24px 10px 24px;">
-                              <div style="font-size:16px;color:#6b7280;margin-bottom:10px;">Hello %s,</div>
-                              <div style="font-size:32px;font-weight:800;line-height:1.2;color:#111827;margin-bottom:16px;">Ticket Cancelled</div>
-                              <table role="presentation" width="100%%" cellspacing="0" cellpadding="0">
-                                <tr>
-                                  <td style="font-weight:700;color:#b42343;letter-spacing:0.04em;font-size:14px;">%s</td>
-                                  <td align="right">%s</td>
-                                </tr>
-                              </table>
-                              <div style="margin:14px 0 0 0;">
-                                <div style="font-size:18px;font-weight:800;color:#172033;line-height:1.35;">%s</div>
-                                <div style="font-size:14px;font-weight:600;color:#667085;margin-top:4px;">%s</div>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td style="padding:0 24px 24px 24px;">
-                              <table role="presentation" width="100%%" cellspacing="0" cellpadding="0">
-                                <tr>
-                                  <td width="50%%" style="padding:0 6px 12px 0;vertical-align:top;">%s</td>
-                                  <td width="50%%" style="padding:0 0 12px 6px;vertical-align:top;">%s</td>
-                                </tr>
-                                <tr>
-                                  <td width="50%%" style="padding:0 6px 12px 0;vertical-align:top;">%s</td>
-                                  <td width="50%%" style="padding:0 0 12px 6px;vertical-align:top;">%s</td>
-                                </tr>
-                                <tr>
-                                  <td width="50%%" style="padding:0 6px 12px 0;vertical-align:top;">%s</td>
-                                  <td width="50%%" style="padding:0 0 12px 6px;vertical-align:top;">%s</td>
-                                </tr>
-                                <tr>
-                                  <td colspan="2" style="padding:0 0 12px 0;vertical-align:top;">%s</td>
-                                </tr>
-                              </table>
-                              <div style="margin-top:20px;padding-top:16px;border-top:1px solid #f0e5e9;font-size:13px;line-height:1.7;color:#6b7280;">
-                                This ticket is now marked as cancelled in your Yubus account.
-                              </div>
-                            </td>
-                          </tr>
-                        </table>
-                      </td>
-                    </tr>
-                  </table>
-                </body>
-                </html>
-                """.formatted(
-                escapeHtml(greetingName),
-                escapeHtml(safe(bookingId)),
-                buildCancelledStatusBadge(),
-                escapeHtml(route),
-                escapeHtml(safe(busName)),
-                buildDetailCard("Journey Date", safe(journeyDate), "default", false),
-                buildDetailCard("Seat Number", safe(seats), "default", false),
-                buildDetailCard("Departure Time", safe(departureTime), "default", false),
-                buildDetailCard("Transaction Type", safe(paymentMethod), "default", false),
-                buildDetailCard("Paid Amount", formatMoney(amount), "strong", false),
-                buildDetailCard("Discount", formatMoney(discountAmount), "accent", false),
-                buildDetailCard("Transaction ID", safe(transactionId), "default", true)
-        );
-    }
-
-    private static String buildProfileUpdatedHtml(String name, String email, String mobile) {
-        return """
-                <html>
-                <body style="margin:0;padding:24px;background:#f8fafc;font-family:Arial,sans-serif;color:#1f2937;">
-                  <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" style="max-width:640px;margin:0 auto;">
-                    <tr>
-                      <td style="padding:0 0 18px 0;">
-                        <div style="font-size:28px;font-weight:800;color:#d94f45;">Yubus</div>
-                        <div style="font-size:14px;color:#6b7280;margin-top:6px;">Your profile details were updated.</div>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td style="background:#ffffff;border:1px solid #ececf1;border-radius:18px;box-shadow:0 14px 30px rgba(16,24,40,0.07);overflow:hidden;">
-                        <div style="height:4px;background:linear-gradient(90deg,#b7184a,#f97316,#f4b400);line-height:4px;font-size:4px;">&nbsp;</div>
-                        <div style="padding:22px 24px 24px 24px;">
-                          <div style="font-size:16px;color:#6b7280;margin-bottom:10px;">Hello %s,</div>
-                          <div style="font-size:32px;font-weight:800;color:#111827;margin-bottom:16px;">Profile Updated</div>
-                          <div style="display:block;border-radius:14px;padding:12px 14px;background:#ffffff;border:1px solid #edf0f5;margin-bottom:12px;">
-                            <div style="font-size:11px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#98a2b3;margin-bottom:8px;">Name</div>
-                            <div style="font-size:18px;font-weight:800;color:#101828;line-height:1.4;">%s</div>
-                          </div>
-                          <div style="display:block;border-radius:14px;padding:12px 14px;background:#ffffff;border:1px solid #edf0f5;margin-bottom:12px;">
-                            <div style="font-size:11px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#98a2b3;margin-bottom:8px;">Email</div>
-                            <div style="font-size:18px;font-weight:800;color:#101828;line-height:1.4;word-break:break-word;overflow-wrap:anywhere;">%s</div>
-                          </div>
-                          <div style="display:block;border-radius:14px;padding:12px 14px;background:linear-gradient(180deg,#fff5f3,#fff0ee);border:1px solid #f4d2ca;">
-                            <div style="font-size:11px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#98a2b3;margin-bottom:8px;">Mobile Number</div>
-                            <div style="font-size:18px;font-weight:800;color:#101828;line-height:1.4;">%s</div>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  </table>
-                </body>
-                </html>
-                """.formatted(
-                escapeHtml(safe(name).equals("-") ? "Customer" : safe(name)),
-                escapeHtml(safe(name)),
-                escapeHtml(safe(email)),
-                escapeHtml(safe(mobile))
-        );
-    }
-
-    private static String buildForgotPasswordHtml(String name, String password) {
-        return """
-                <html>
-                <body style="margin:0;padding:24px;background:#f8fafc;font-family:Arial,sans-serif;color:#1f2937;">
-                  <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" style="max-width:640px;margin:0 auto;">
-                    <tr>
-                      <td style="padding:0 0 18px 0;">
-                        <div style="font-size:28px;font-weight:800;color:#d94f45;">Yubus</div>
-                        <div style="font-size:14px;color:#6b7280;margin-top:6px;">Your requested password information.</div>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td style="background:#ffffff;border:1px solid #ececf1;border-radius:18px;box-shadow:0 14px 30px rgba(16,24,40,0.07);overflow:hidden;">
-                        <div style="height:4px;background:linear-gradient(90deg,#1f3da9,#3b82f6,#38bdf8);line-height:4px;font-size:4px;">&nbsp;</div>
-                        <div style="padding:22px 24px 24px 24px;">
-                          <div style="font-size:16px;color:#6b7280;margin-bottom:10px;">Hello %s,</div>
-                          <div style="font-size:32px;font-weight:800;color:#111827;margin-bottom:16px;">Password Details</div>
-                          <div style="display:block;border-radius:14px;padding:12px 14px;background:#ffffff;border:1px solid #edf0f5;">
-                            <div style="font-size:11px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#98a2b3;margin-bottom:8px;">Password</div>
-                            <div style="font-size:20px;font-weight:800;color:#101828;line-height:1.4;word-break:break-word;overflow-wrap:anywhere;">%s</div>
-                          </div>
-                          <div style="margin-top:16px;font-size:13px;line-height:1.7;color:#6b7280;">
-                            If you did not request this email, please update your password and review your account access.
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  </table>
-                </body>
-                </html>
-                """.formatted(
-                escapeHtml(safe(name).equals("-") ? "Customer" : safe(name)),
-                escapeHtml(safe(password))
-        );
-    }
-
-    private static String buildRefundSuccessHtml(
-            String passengerName,
-            String bookingId,
-            String from,
-            String to,
-            String busName,
-            String departureTime,
-            String journeyDate,
-            String seats,
-            String paymentMethod,
-            int refundAmount,
-            String transactionId
-    ) {
-        String greetingName = safe(passengerName).equals("-") ? "Customer" : safe(passengerName);
-        String route = safe(from) + " -> " + safe(to);
-
-        return """
-                <html>
-                <body style="margin:0;padding:24px;background:#f8fafc;font-family:Arial,sans-serif;color:#1f2937;">
-                  <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" style="max-width:720px;margin:0 auto;">
-                    <tr>
-                      <td style="padding:0 0 18px 0;">
-                        <div style="font-size:28px;font-weight:800;color:#d94f45;">Yubus</div>
-                        <div style="font-size:14px;color:#6b7280;margin-top:6px;">Your refund has been processed.</div>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td style="background:#ffffff;border:1px solid #ececf1;border-radius:18px;box-shadow:0 14px 30px rgba(16,24,40,0.07);overflow:hidden;">
-                        <div style="height:4px;background:linear-gradient(90deg,#1f3da9,#3b82f6,#38bdf8);line-height:4px;font-size:4px;">&nbsp;</div>
-                        <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" style="padding:0;margin:0;">
-                          <tr>
-                            <td style="padding:22px 24px 10px 24px;">
-                              <div style="font-size:16px;color:#6b7280;margin-bottom:10px;">Hello %s,</div>
-                              <div style="font-size:32px;font-weight:800;line-height:1.2;color:#111827;margin-bottom:16px;">Refund Successful</div>
-                              <table role="presentation" width="100%%" cellspacing="0" cellpadding="0">
-                                <tr>
-                                  <td style="font-weight:700;color:#1f3da9;letter-spacing:0.04em;font-size:14px;">%s</td>
-                                  <td align="right">%s</td>
-                                </tr>
-                              </table>
-                              <div style="margin:14px 0 0 0;">
-                                <div style="font-size:18px;font-weight:800;color:#172033;line-height:1.35;">%s</div>
-                                <div style="font-size:14px;font-weight:600;color:#667085;margin-top:4px;">%s</div>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td style="padding:0 24px 24px 24px;">
-                              <table role="presentation" width="100%%" cellspacing="0" cellpadding="0">
-                                <tr>
-                                  <td width="50%%" style="padding:0 6px 12px 0;vertical-align:top;">%s</td>
-                                  <td width="50%%" style="padding:0 0 12px 6px;vertical-align:top;">%s</td>
-                                </tr>
-                                <tr>
-                                  <td width="50%%" style="padding:0 6px 12px 0;vertical-align:top;">%s</td>
-                                  <td width="50%%" style="padding:0 0 12px 6px;vertical-align:top;">%s</td>
-                                </tr>
-                                <tr>
-                                  <td colspan="2" style="padding:0 0 12px 0;vertical-align:top;">%s</td>
-                                </tr>
-                              </table>
-                              <div style="margin-top:20px;padding-top:16px;border-top:1px solid #f0e5e9;font-size:13px;line-height:1.7;color:#6b7280;">
-                                The refund amount has been marked successful for this ticket.
-                              </div>
-                            </td>
-                          </tr>
-                        </table>
-                      </td>
-                    </tr>
-                  </table>
-                </body>
-                </html>
-                """.formatted(
-                escapeHtml(greetingName),
-                escapeHtml(safe(bookingId)),
-                buildRefundedStatusBadge(),
-                escapeHtml(route),
-                escapeHtml(safe(busName)),
-                buildDetailCard("Journey Date", safe(journeyDate), "default", false),
-                buildDetailCard("Seat Number", safe(seats), "default", false),
-                buildDetailCard("Departure Time", safe(departureTime), "default", false),
-                buildDetailCard("Transaction Type", safe(paymentMethod), "default", false),
-                buildDetailCard("Refund Amount", formatMoney(refundAmount), "refund", false),
-                buildDetailCard("Transaction ID", safe(transactionId), "default", true)
-        );
-    }
-
-    private static String buildStatusBadge() {
-        return """
-                <span style="display:inline-block;padding:4px 10px;border-radius:999px;background:#e7f8ef;color:#0f8a4b;font-size:12px;font-weight:700;letter-spacing:0.03em;text-transform:uppercase;">
-                  Booked
-                </span>
-                """;
-    }
-
-    private static String buildCancelledStatusBadge() {
-        return """
-                <span style="display:inline-block;padding:4px 10px;border-radius:999px;background:#ffe6ea;color:#b42343;font-size:12px;font-weight:700;letter-spacing:0.03em;text-transform:uppercase;">
-                  Cancelled
-                </span>
-                """;
-    }
-
-    private static String buildRefundedStatusBadge() {
-        return """
-                <span style="display:inline-block;padding:4px 10px;border-radius:999px;background:#eef4ff;color:#1f3da9;font-size:12px;font-weight:700;letter-spacing:0.03em;text-transform:uppercase;">
-                  Refunded
-                </span>
-                """;
-    }
-
-    private static String buildDetailCard(String label, String value, String variant, boolean wideValue) {
-        String backgroundStyle = switch (variant) {
-            case "strong" -> "background:linear-gradient(180deg,#fff5f3,#fff0ee);border:1px solid #f4d2ca;";
-            case "accent" -> "background:linear-gradient(180deg,#f2fff7,#ebfbf1);border:1px solid #cbead6;";
-            case "refund" -> "background:linear-gradient(180deg,#eef4ff,#e8f0ff);border:1px solid #cfdcff;";
-            default -> "background:#ffffff;border:1px solid #edf0f5;";
-        };
-        String valueStyle = wideValue
-                ? "font-size:16px;font-weight:700;color:#111827;line-height:1.5;word-break:break-word;overflow-wrap:anywhere;"
-                : ("accent".equals(variant)
-                ? "font-size:18px;font-weight:800;color:#137a45;line-height:1.4;"
-                : ("refund".equals(variant)
-                ? "font-size:18px;font-weight:800;color:#1f3da9;line-height:1.4;"
-                : "font-size:18px;font-weight:800;color:#101828;line-height:1.4;"));
-
-        return """
-                <div style="display:block;border-radius:14px;padding:12px 14px;min-height:84px;box-sizing:border-box;%s">
-                  <div style="font-size:11px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#98a2b3;margin-bottom:8px;">%s</div>
-                  <div style="%s">%s</div>
-                </div>
-                """.formatted(
-                backgroundStyle,
-                escapeHtml(label),
-                valueStyle,
-                escapeHtml(value)
-        );
-    }
-
-    private static String formatMoney(int amount) {
-        return "Rs." + amount;
-    }
-
-    private static String safe(String value) {
-        return value == null || value.isBlank() ? "-" : value.trim();
-    }
-
-    private static String escapeHtml(String value) {
-        return safe(value)
-                .replace("&", "&amp;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;")
-                .replace("\"", "&quot;")
-                .replace("'", "&#39;");
+    private static boolean isPlaceholderValue(String value) {
+        if (value == null) return false;
+        String v = value.trim();
+        return "your.email@gmail.com".equalsIgnoreCase(v)
+                || "your_gmail_app_password".equals(v)
+                || "REPLACE_WITH_NEW_APP_PASSWORD".equalsIgnoreCase(v)
+                || "REPLACE_ME".equalsIgnoreCase(v);
     }
 }

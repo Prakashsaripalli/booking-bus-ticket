@@ -4,26 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yubus | Profile</title>
-    <link rel="stylesheet" href="profile.css">
+    <link rel="stylesheet" href="profile.css?v=20260319-user-db-v5">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 </head>
 <body>
 <div class="profile-page">
     <header class="profile-header">
-        <h1><i class="fa-solid fa-circle-user"></i> My Profile</h1>
+        <div class="profile-intro">
+            <h1 id="profilePageTitle"><i class="fa-solid fa-circle-user"></i> My Profile</h1>
+            <p id="profilePageSubtitle" class="profile-page-subtitle">Manage your account details and keep track of your bookings in one place.</p>
+        </div>
         <div class="profile-actions">
             <button id="backBtn" class="btn btn-back"><i class="fa-solid fa-arrow-left"></i> Back</button>
             <button id="logoutBtn" class="btn btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
         </div>
     </header>
 
-    <section class="card">
-        <h2>User Details</h2>
+    <section id="profileSummaryCard" class="card profile-summary-card">
+        <div class="section-heading">
+            <div>
+                <h2 id="profileSummaryTitle">User Details</h2>
+                <p id="profileSummarySubtitle" class="section-subtitle">Your saved login identity and contact information.</p>
+            </div>
+        </div>
         <div class="details-grid">
-            <div class="detail-row"><span class="label">Role</span><span id="profileRole">-</span></div>
-            <div class="detail-row"><span class="label">Name / Email</span><span id="profileIdentity">-</span></div>
-            <div class="detail-row"><span class="label">Email</span><span id="profileEmail">-</span></div>
-            <div class="detail-row"><span class="label">Mobile</span><span id="profileMobile">-</span></div>
+            <div class="detail-row"><span id="profileRoleLabel" class="label">Role</span><span id="profileRole">-</span></div>
+            <div class="detail-row"><span id="profileIdentityLabel" class="label">Name / Email</span><span id="profileIdentity">-</span></div>
+            <div class="detail-row"><span id="profileEmailLabel" class="label">Email</span><span id="profileEmail">-</span></div>
+            <div class="detail-row"><span id="profileMobileLabel" class="label">Mobile</span><span id="profileMobile">-</span></div>
         </div>
         <div class="profile-edit-footer">
             <button id="editProfileBtn" class="btn btn-inline" type="button">Edit Details</button>
@@ -51,12 +59,164 @@
         </form>
     </section>
 
-    <section class="card">
+    <section id="userDashboardPanel" class="user-dashboard hidden">
+        <div class="user-hero">
+            <div class="user-hero-copy">
+                <span class="user-kicker">Traveller Dashboard</span>
+                <h2 id="userDashboardTitle">Your Travel Dashboard</h2>
+                <p id="userDashboardSubtitle">Track your bookings, upcoming trips, and account details from one place.</p>
+            </div>
+            <div class="user-hero-badge">
+                <span>Passenger</span>
+                <strong id="userDashboardIdentity">-</strong>
+            </div>
+        </div>
+        <div id="userStatsGrid" class="user-stats-grid"></div>
+        <div class="user-panels">
+            <article class="user-panel">
+                <div class="section-heading">
+                    <div>
+                        <h3>Journey Snapshot</h3>
+                        <p class="section-subtitle">Quick look at your current trip status and latest route activity.</p>
+                    </div>
+                </div>
+                <div id="userJourneySnapshot" class="user-summary-list"></div>
+            </article>
+            <article class="user-panel">
+                <div class="section-heading">
+                    <div>
+                        <h3>Travel Highlights</h3>
+                        <p class="section-subtitle">Your recent booking behavior and saved profile summary.</p>
+                    </div>
+                </div>
+                <div id="userAccountHighlights" class="user-summary-list"></div>
+            </article>
+        </div>
+    </section>
+
+    <section id="adminDashboardPanel" class="admin-dashboard hidden">
+        <div class="admin-hero">
+            <div class="admin-hero-copy">
+                <span class="admin-kicker">Operations Overview</span>
+                <h2>Admin Control Center</h2>
+                <p id="adminDashboardSubtitle">Track routes, buses, bookings, cancellations, and refunds from one dashboard.</p>
+            </div>
+            <div class="admin-hero-badges">
+                <div class="admin-badge">
+                    <span>Admin</span>
+                    <strong id="adminDashboardIdentity">-</strong>
+                </div>
+                <div class="admin-badge">
+                    <span>Current View</span>
+                    <strong id="adminCurrentView">All Routes</strong>
+                </div>
+            </div>
+        </div>
+        <div id="adminStatsGrid" class="admin-stats-grid"></div>
+        <div class="admin-action-ribbon">
+            <button class="btn btn-admin-primary" type="button" data-admin-action="toggle-bus-form">
+                <i class="fa-solid fa-bus"></i> Add Bus
+            </button>
+            <button class="btn btn-admin-soft" type="button" data-admin-action="scroll-fleet">
+                <i class="fa-solid fa-garage"></i> Manage Fleet
+            </button>
+            <button class="btn btn-admin-soft" type="button" data-admin-action="scroll-routes">
+                <i class="fa-solid fa-route"></i> Route Explorer
+            </button>
+            <button class="btn btn-admin-soft" type="button" data-admin-action="refresh-dashboard">
+                <i class="fa-solid fa-rotate-right"></i> Refresh
+            </button>
+        </div>
+        <div class="admin-panels">
+            <article class="admin-panel">
+                <div class="section-heading">
+                    <div>
+                        <h3>Recent Activity</h3>
+                        <p class="section-subtitle">Latest booking operations across the system.</p>
+                    </div>
+                </div>
+                <div id="adminRecentActivity" class="admin-activity-list"></div>
+            </article>
+            <article class="admin-panel">
+                <div class="section-heading">
+                    <div>
+                        <h3>Operations Snapshot</h3>
+                        <p class="section-subtitle">Quick highlights to spot the busiest routes and refund load.</p>
+                    </div>
+                </div>
+                <div id="adminSnapshot" class="admin-snapshot-list"></div>
+            </article>
+        </div>
+        <div class="admin-workspace">
+            <article id="adminFleetPanel" class="admin-panel admin-panel-wide">
+                <div class="section-heading">
+                    <div>
+                        <h3>Fleet Management</h3>
+                        <p class="section-subtitle">Add new buses, keep custom routes ready, and maintain your visible fleet.</p>
+                    </div>
+                </div>
+                <form id="adminBusForm" class="admin-bus-form hidden">
+                    <div class="form-grid admin-form-grid">
+                        <label class="form-field">
+                            <span>Bus Name</span>
+                            <input id="adminBusName" type="text" maxlength="120" placeholder="Yubus Elite" required>
+                        </label>
+                        <label class="form-field">
+                            <span>From City</span>
+                            <input id="adminBusFrom" type="text" list="adminCityOptions" maxlength="80" placeholder="Hyderabad" required>
+                        </label>
+                        <label class="form-field">
+                            <span>To City</span>
+                            <input id="adminBusTo" type="text" list="adminCityOptions" maxlength="80" placeholder="Vijayawada" required>
+                        </label>
+                        <label class="form-field">
+                            <span>Departure Time</span>
+                            <input id="adminBusDeparture" type="text" maxlength="20" placeholder="09:30 PM" required>
+                        </label>
+                        <label class="form-field">
+                            <span>Fare</span>
+                            <input id="adminBusPrice" type="number" min="100" step="10" placeholder="899" required>
+                        </label>
+                        <label class="form-field">
+                            <span>Coach Type</span>
+                            <select id="adminBusType" required>
+                                <option value="AC Sleeper">AC Sleeper</option>
+                                <option value="AC Seater">AC Seater</option>
+                                <option value="Sleeper">Sleeper</option>
+                                <option value="Non-AC Seater">Non-AC Seater</option>
+                                <option value="AC Volvo">AC Volvo</option>
+                                <option value="Standard">Standard</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="form-actions">
+                        <button id="adminBusCancelBtn" class="btn btn-ghost" type="button">Close</button>
+                        <button class="btn btn-admin-primary" type="submit">Save Bus</button>
+                    </div>
+                    <p id="adminBusStatus" class="profile-edit-status" aria-live="polite"></p>
+                </form>
+                <div id="adminBusList" class="admin-bus-list"></div>
+            </article>
+            <article class="admin-panel">
+                <div class="section-heading">
+                    <div>
+                        <h3>Feature Modules</h3>
+                        <p class="section-subtitle">Quick controls for common admin features and operational tools.</p>
+                    </div>
+                </div>
+                <div id="adminFeatureGrid" class="admin-feature-grid"></div>
+            </article>
+        </div>
+    </section>
+
+    <section class="card booking-shell">
         <h2 id="bookingSectionTitle">Booking Details</h2>
         <div id="bookingList" class="booking-list"></div>
     </section>
 </div>
 
-<script src="profile.js"></script>
+<datalist id="adminCityOptions"></datalist>
+<script src="busData.js?v=20260319-route-images-v4"></script>
+<script src="profile.js?v=20260319-user-db-v5"></script>
 </body>
 </html>

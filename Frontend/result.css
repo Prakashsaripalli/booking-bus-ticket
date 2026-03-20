@@ -233,6 +233,13 @@ body {
     line-height: 1.6;
 }
 
+.bus-route-trace {
+    color: #475467;
+    font-size: 13px;
+    line-height: 1.55;
+    word-break: break-word;
+}
+
 .bus-tags {
     display: flex;
     gap: 10px;

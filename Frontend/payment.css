@@ -77,6 +77,19 @@ body {
     background: #c0392b;
 }
 
+#applyCoupon:disabled {
+    background: #a7afb9;
+    cursor: not-allowed;
+}
+
+.offer-status-message {
+    margin: 12px 0 0;
+    color: #b42318;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
 #submitPassenger {
     padding: 10px 12px;
     border: none;

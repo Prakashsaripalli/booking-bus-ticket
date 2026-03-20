@@ -1,25 +1,13 @@
 package com.booking.backend.model;
 
 public class PopularRoute {
-    private final String fromCity;
-    private final String toCity;
-    private final int busCount;
+    public String from;
+    public String to;
+    public int bookingCount;
 
-    public PopularRoute(String fromCity, String toCity, int busCount) {
-        this.fromCity = fromCity;
-        this.toCity = toCity;
-        this.busCount = busCount;
-    }
-
-    public String getFromCity() {
-        return fromCity;
-    }
-
-    public String getToCity() {
-        return toCity;
-    }
-
-    public int getBusCount() {
-        return busCount;
+    public PopularRoute(String from, String to, int bookingCount) {
+        this.from = from;
+        this.to = to;
+        this.bookingCount = bookingCount;
     }
 }

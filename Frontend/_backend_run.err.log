@@ -1,0 +1,5 @@
+[main] INFO org.eclipse.jetty.server.Server - jetty-11.0.20; built: 2024-01-29T21:04:22.394Z; git: 922f8dc188f7011e60d0361de585fd4ac4d63064; jvm 17.0.16+12-LTS-247
+[main] INFO org.eclipse.jetty.server.session.DefaultSessionIdManager - Session workerName=node0
+[main] INFO org.eclipse.jetty.server.handler.ContextHandler - Started o.e.j.s.ServletContextHandler@53976f5c{/,file:///C:/Users/kumar/Downloads/java%20yubus%20booking/Frontend/,AVAILABLE}
+[main] INFO org.eclipse.jetty.server.AbstractConnector - Started ServerConnector@64cee07{HTTP/1.1, (http/1.1)}{0.0.0.0:8000}
+[main] INFO org.eclipse.jetty.server.Server - Started Server@62ddbd7e{STARTING}[11.0.20,sto=0] @1524ms

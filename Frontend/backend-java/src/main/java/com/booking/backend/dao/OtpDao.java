@@ -57,6 +57,14 @@ public class OtpDao {
         }
     }
 
+    public void deleteOtp(String mobile) {
+        try (Connection conn = JdbcUtil.getConnection()) {
+            deleteOtp(conn, mobile);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to delete OTP", e);
+        }
+    }
+
     private void deleteOtp(Connection conn, String mobile) throws SQLException {
         try (PreparedStatement deletePs = conn.prepareStatement("DELETE FROM otps WHERE mobile = ?")) {
             deletePs.setString(1, mobile);

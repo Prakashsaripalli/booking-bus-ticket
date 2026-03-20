@@ -1,11 +1,72 @@
 (function () {
     const routeImages = {
-        "Hyderabad-Vijayawada": "https://images.unsplash.com/photo-1625225233840-695456021cde",
-        "Hyderabad-Bengaluru": "https://images.unsplash.com/photo-1593693397690-362cb9666fc2",
-        "Bengaluru-Chennai": "https://images.unsplash.com/photo-1589394815804-964ed0be2eb5",
+        "Hyderabad-Vijayawada": "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944",
+        "Hyderabad-Visakhapatnam": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+        "Hyderabad-Tirupati": "https://images.unsplash.com/photo-1524492412937-b28074a5d7da",
+        "Hyderabad-Bengaluru": "https://images.unsplash.com/photo-1596176530529-78163a4f7af2",
+        "Hyderabad-Chennai": "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df",
+        "Warangal-Vijayawada": "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944",
+        "Vijayawada-Visakhapatnam": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+        "Vijayawada-Guntur": "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944",
+        "Guntur-Tirupati": "https://images.unsplash.com/photo-1524492412937-b28074a5d7da",
+        "Nellore-Chennai": "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df",
+        "Kurnool-Bengaluru": "https://images.unsplash.com/photo-1548013146-72479768bada",
+        "Bengaluru-Chennai": "Assets/bus-banner1.jpg",
+        "Chennai-Bengaluru": "Assets/bus-banner1.jpg",
+        "Bengaluru-Mysuru": "https://images.unsplash.com/photo-1599661046289-e31897846e41",
+        "Bengaluru-Mangaluru": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+        "Bengaluru-Kochi": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+        "Chennai-Madurai": "https://images.unsplash.com/photo-1566552881560-0be862a7c445",
+        "Chennai-Coimbatore": "https://images.unsplash.com/photo-1521295121783-8a321d551ad2",
+        "Chennai-Tiruchirappalli": "https://images.unsplash.com/photo-1566552881560-0be862a7c445",
+        "Chennai-Salem": "https://images.unsplash.com/photo-1521295121783-8a321d551ad2",
         "Chennai-Kochi": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
-        "Bhubaneswar-Visakhapatnam": "https://images.unsplash.com/photo-1519046904884-53103b34b206"
+        "Coimbatore-Madurai": "https://images.unsplash.com/photo-1566552881560-0be862a7c445",
+        "Madurai-Kochi": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+        "Bhubaneswar-Visakhapatnam": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+        "Bhubaneswar-Brahmapur": "https://images.unsplash.com/photo-1519046904884-53103b34b206",
+        "Visakhapatnam-Brahmapur": "https://images.unsplash.com/photo-1519046904884-53103b34b206"
     };
+
+    const cityAliases = {
+        Bangalore: "Bengaluru",
+        Bengaluru: "Bengaluru",
+        Mysore: "Mysuru",
+        Mysuru: "Mysuru",
+        Mangalore: "Mangaluru",
+        Mangaluru: "Mangaluru",
+        Hubli: "Hubballi",
+        Hubballi: "Hubballi",
+        Belgaum: "Belagavi",
+        Belagavi: "Belagavi",
+        Berhampur: "Brahmapur",
+        Brahmapur: "Brahmapur",
+        Vizag: "Visakhapatnam",
+        Visakhapatnam: "Visakhapatnam"
+    };
+
+    function normalizeRouteCity(city) {
+        const value = String(city || "").trim();
+        return cityAliases[value] || value;
+    }
+
+    function getRouteImageFallback(from, to) {
+        const joined = `${from} ${to}`.toLowerCase();
+
+        if (joined.includes("tirupati") || joined.includes("madurai")) {
+            return "https://images.unsplash.com/photo-1524492412937-b28074a5d7da";
+        }
+
+        if (joined.includes("visakhapatnam") || joined.includes("kochi") || joined.includes("brahmapur") || joined.includes("bhubaneswar")) {
+            return "https://images.unsplash.com/photo-1507525428034-b723cf961d3e";
+        }
+
+        if (joined.includes("bengaluru") || joined.includes("chennai") || joined.includes("hyderabad")) {
+            return "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df";
+        }
+
+        return "https://images.unsplash.com/photo-1597047084897-51e81819a499";
+    }
 
     const apCities = [
         "Visakhapatnam",
@@ -501,6 +562,66 @@
         };
     }
 
+    const ADMIN_BUSES_KEY = "adminManagedBuses";
+
+    function readManagedAdminBuses() {
+        try {
+            const parsed = JSON.parse(localStorage.getItem(ADMIN_BUSES_KEY) || "[]");
+            if (!Array.isArray(parsed)) {
+                return [];
+            }
+
+            return parsed
+                .filter((bus) => bus && typeof bus === "object")
+                .map((bus) => ({
+                    id: Number(bus.id) || createStableHash([
+                        bus.name,
+                        bus.fromCity,
+                        bus.toCity,
+                        bus.departureTime,
+                        bus.price
+                    ].join("|")),
+                    name: String(bus.name || "").trim(),
+                    fromCity: normalizeRouteCity(bus.fromCity),
+                    toCity: normalizeRouteCity(bus.toCity),
+                    departureTime: String(bus.departureTime || "").trim() || "09:00 PM",
+                    price: Math.max(100, Number(bus.price || 0)),
+                    busType: String(bus.busType || "").trim() || "AC Sleeper",
+                    managedByAdmin: true,
+                    createdAt: String(bus.createdAt || "")
+                }))
+                .filter((bus) => bus.name && bus.fromCity && bus.toCity);
+        } catch (error) {
+            return [];
+        }
+    }
+
+    function writeManagedAdminBuses(buses) {
+        const normalizedList = Array.isArray(buses)
+            ? buses.map((bus) => ({
+                id: Number(bus.id) || createStableHash([
+                    bus.name,
+                    bus.fromCity,
+                    bus.toCity,
+                    bus.departureTime,
+                    bus.price
+                ].join("|")),
+                name: String(bus.name || "").trim(),
+                fromCity: normalizeRouteCity(bus.fromCity),
+                toCity: normalizeRouteCity(bus.toCity),
+                departureTime: String(bus.departureTime || "").trim() || "09:00 PM",
+                price: Math.max(100, Number(bus.price || 0)),
+                busType: String(bus.busType || "").trim() || "AC Sleeper",
+                managedByAdmin: true,
+                createdAt: String(bus.createdAt || new Date().toISOString())
+            })).filter((bus) => bus.name && bus.fromCity && bus.toCity)
+            : [];
+
+        localStorage.setItem(ADMIN_BUSES_KEY, JSON.stringify(normalizedList));
+        refreshGlobalCatalog();
+        return normalizedList;
+    }
+
     const busNameSeeds = [
         "Express",
         "Swift",
@@ -600,21 +721,52 @@
 
     const catalogBuses = buses.map(normalizeBusRecord);
 
+    function getMergedCatalogBuses() {
+        return [
+            ...catalogBuses,
+            ...readManagedAdminBuses().map(normalizeBusRecord)
+        ];
+    }
+
+    function refreshGlobalCatalog() {
+        window.BUS_CATALOG = getMergedCatalogBuses();
+    }
+
     function getRouteImage(from, to) {
-        return routeImages[`${from}-${to}`] || "https://images.unsplash.com/photo-1593693397690-362cb9666fc2";
+        const normalizedFrom = normalizeRouteCity(from);
+        const normalizedTo = normalizeRouteCity(to);
+        const directKey = `${normalizedFrom}-${normalizedTo}`;
+        const reverseKey = `${normalizedTo}-${normalizedFrom}`;
+
+        return routeImages[directKey]
+            || routeImages[reverseKey]
+            || getRouteImageFallback(normalizedFrom, normalizedTo);
     }
 
     function getBusesByRoute(from, to) {
-        return catalogBuses.filter((bus) =>
+        return getMergedCatalogBuses().filter((bus) =>
             normalize(bus.fromCity) === normalize(from) &&
             normalize(bus.toCity) === normalize(to)
         );
     }
 
+    function getRouteDistanceKm(from, to) {
+        const matchedRoute = baseRoutes.find((route) =>
+            getRouteKey(route.from, route.to) === getRouteKey(normalizeRouteCity(from), normalizeRouteCity(to))
+        );
+
+        if (matchedRoute?.distanceKm) {
+            return matchedRoute.distanceKm;
+        }
+
+        const routeMarker = `${normalizeRouteCity(from)}-${normalizeRouteCity(to)}`;
+        return 180 + (createStableHash(routeMarker) % 420);
+    }
+
     function getPopularRoutes(limit) {
         const routeMap = new Map();
 
-        catalogBuses.forEach((bus) => {
+        getMergedCatalogBuses().forEach((bus) => {
             const key = `${bus.fromCity}-${bus.toCity}`;
             if (!routeMap.has(key)) {
                 routeMap.set(key, {
@@ -689,15 +841,19 @@
         "Odisha"
     ];
 
-    window.BUS_CATALOG = catalogBuses;
+    refreshGlobalCatalog();
     window.BUS_ROUTE_IMAGES = routeImages;
     window.CITY_CATALOG = cityCatalog;
     window.CITY_POINTS = cityPoints;
     window.CITY_STATE_ORDER = stateOrder;
     window.getCatalogRouteImage = getRouteImage;
     window.getCatalogBusesByRoute = getBusesByRoute;
+    window.getCatalogRouteDistanceKm = getRouteDistanceKm;
     window.getCatalogPopularRoutes = getPopularRoutes;
     window.normalizeCatalogBus = normalizeBusRecord;
     window.resolveBusCoachType = resolveBusCoachType;
+    window.getManagedAdminBuses = readManagedAdminBuses;
+    window.saveManagedAdminBuses = writeManagedAdminBuses;
+    window.refreshBusCatalog = refreshGlobalCatalog;
     window.CITY_CATALOG = cityCatalog;
 })();

@@ -1,8 +1,8 @@
 const OTP_API_BASES = window.YUBUS_API?.getBases?.() || [
-    "http://localhost:8081",
-    "http://127.0.0.1:8081",
-    "http://localhost:8080",
-    "http://127.0.0.1:8080"
+    "http://localhost:8001",
+    "http://127.0.0.1:8001",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000"
 ];
 
 function buildOtpUrl(path, base) {
@@ -20,6 +20,21 @@ const otpBackBtn = document.getElementById("otpBackBtn");
 const RESEND_COOLDOWN_MS = 15000;
 let resendCooldownUntil = 0;
 let resendCooldownTimer = null;
+
+function clearAdminSessionFlags() {
+    localStorage.removeItem("adminLoggedIn");
+    localStorage.removeItem("adminIdentity");
+}
+
+function getPostLoginRedirect() {
+    const redirect = localStorage.getItem("postLoginRedirect") || "";
+    if (!redirect) {
+        return "index.html";
+    }
+
+    localStorage.removeItem("postLoginRedirect");
+    return redirect;
+}
 
 function setResendStatus(message, variant = "") {
     if (!resendOtpStatus) {
@@ -139,25 +154,15 @@ async function resendOTP() {
         localStorage.removeItem("userOTPVerified");
         localStorage.removeItem("mockOTP");
         localStorage.removeItem("mockOTPExpiry");
-
-        if (data.otp) {
-            const expiresAt = Date.now() + 5 * 60 * 1000;
-            localStorage.setItem("otpMode", "debug");
-            localStorage.setItem("mockOTP", data.otp);
-            localStorage.setItem("mockOTPExpiry", String(expiresAt));
-            alert(`OTP (dev): ${data.otp}. Use it within 5 minutes.`);
-            setResendStatus("New OTP generated for testing.", "success");
-        } else {
-            localStorage.setItem("otpMode", "api");
-            setResendStatus("New OTP sent. Please check your inbox or SMS.", "success");
-        }
+        localStorage.removeItem("otpMode");
+        setResendStatus("New OTP sent. Please check your inbox.", "success");
 
         clearOtpInputs();
         resendSucceeded = true;
         startResendCooldown();
     } catch (error) {
         setResendStatus(
-            `OTP send API error. Check backend availability at ${window.YUBUS_API?.describeTarget?.() || "http://localhost:8081"}.`,
+            `OTP send API error. Check backend availability at ${window.YUBUS_API?.describeTarget?.() || "http://localhost:8000"}.`,
             "error"
         );
     } finally {
@@ -220,27 +225,6 @@ async function verifyOTP() {
         return;
     }
 
-    const otpMode = localStorage.getItem("otpMode");
-    if (otpMode === "debug") {
-        const mockOtp = localStorage.getItem("mockOTP") || "";
-        const expiry = Number(localStorage.getItem("mockOTPExpiry") || "0");
-        if (!mockOtp || !expiry || Date.now() > expiry) {
-            alert("OTP expired. Please request a new OTP.");
-            return;
-        }
-        if (otp !== mockOtp) {
-            alert("Invalid OTP. Please try again.");
-            return;
-        }
-        localStorage.setItem("userOTPVerified", "true");
-        localStorage.removeItem("otpMode");
-        localStorage.removeItem("mockOTP");
-        localStorage.removeItem("mockOTPExpiry");
-        alert("OTP Verified Successfully");
-        window.location.href = "index.html";
-        return;
-    }
-
     const loginType = localStorage.getItem("loginType") || "phone";
     const mobile = localStorage.getItem("mobile") || "";
     const userEmail = localStorage.getItem("userEmail") || "";
@@ -290,11 +274,14 @@ async function verifyOTP() {
             return;
         }
 
+        clearAdminSessionFlags();
         localStorage.setItem("userOTPVerified", "true");
         localStorage.removeItem("otpMode");
+        localStorage.removeItem("mockOTP");
+        localStorage.removeItem("mockOTPExpiry");
         alert("OTP Verified Successfully");
-        window.location.href = "index.html";
+        window.location.href = getPostLoginRedirect();
     } catch (error) {
-        alert(`OTP verification API error. Check backend availability at ${window.YUBUS_API?.describeTarget?.() || "http://localhost:8081"}.`);
+        alert(`OTP verification API error. Check backend availability at ${window.YUBUS_API?.describeTarget?.() || "http://localhost:8000"}.`);
     }
 }

@@ -33,6 +33,14 @@
                         <span>Bus</span>
                         <strong id="trackBusName">-</strong>
                     </div>
+                    <div class="route-stat">
+                        <span>Route Distance</span>
+                        <strong id="trackDistance">-</strong>
+                    </div>
+                    <div class="route-stat">
+                        <span>Live Speed</span>
+                        <strong id="trackSpeed">-</strong>
+                    </div>
                 </div>
 
                 <div class="map-card">
@@ -185,6 +193,20 @@
                             <strong id="mapUpdatedAt">2 mins ago</strong>
                         </div>
                     </div>
+
+                    <div class="tracking-progress-card">
+                        <div class="tracking-progress-head">
+                            <span>Journey Progress</span>
+                            <strong id="progressPercent">0%</strong>
+                        </div>
+                        <div class="tracking-progress-bar">
+                            <span id="progressFill"></span>
+                        </div>
+                        <div class="tracking-progress-meta">
+                            <span id="progressCovered">0 km covered</span>
+                            <span id="progressRemaining">0 km remaining</span>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -210,6 +232,30 @@
                     </div>
                 </div>
 
+                <div class="live-metrics-grid">
+                    <div class="metric-card">
+                        <span>Covered</span>
+                        <strong id="liveCovered">-</strong>
+                    </div>
+                    <div class="metric-card">
+                        <span>Remaining</span>
+                        <strong id="liveRemaining">-</strong>
+                    </div>
+                    <div class="metric-card">
+                        <span>Progress</span>
+                        <strong id="liveProgress">-</strong>
+                    </div>
+                    <div class="metric-card">
+                        <span>Last Ping</span>
+                        <strong id="liveLastPing">-</strong>
+                    </div>
+                </div>
+
+                <div class="timeline-card">
+                    <h3>Route Stop Timeline</h3>
+                    <div class="stop-timeline" id="stopTimeline"></div>
+                </div>
+
                 <div class="tips-card">
                     <h3>Travel Tip</h3>
                     <p id="trackTip">Arrive at your boarding point a little early and keep your booking details ready for quick boarding.</p>
@@ -218,6 +264,7 @@
         </div>
     </div>
 
+    <script src="busData.js"></script>
     <script src="track.js"></script>
 </body>
 </html>

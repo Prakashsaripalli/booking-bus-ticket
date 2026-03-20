@@ -2,14 +2,10 @@ package com.booking.backend.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public final class JsonUtil {
-
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-
-    private JsonUtil() {
-    }
+public class JsonUtil {
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     public static ObjectMapper mapper() {
-        return MAPPER;
+        return mapper;
     }
 }

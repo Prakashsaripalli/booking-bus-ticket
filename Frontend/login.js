@@ -1,8 +1,8 @@
 const API_BASES = window.YUBUS_API?.getBases?.() || [
-    "http://localhost:8081",
-    "http://127.0.0.1:8081",
-    "http://localhost:8080",
-    "http://127.0.0.1:8080"
+    "http://localhost:8001",
+    "http://127.0.0.1:8001",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000"
 ];
 const REGISTERED_USERS_KEY = "registeredUsers";
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -38,23 +38,38 @@ async function sendNotificationEmail(payload) {
 }
 
 function switchRole(role) {
-    const adminTab = document.getElementById("adminTab");
-    const userTab = document.getElementById("userTab");
-    const adminForm = document.getElementById("adminForm");
-    const userForm = document.getElementById("userForm");
+    const adminShell = document.getElementById("adminLoginShell");
+    const userShell = document.getElementById("userLoginShell");
     const roleTitle = document.getElementById("roleTitle");
     const statusMsg = document.getElementById("statusMsg");
+    const adminStatusMsg = document.getElementById("adminStatusMsg");
 
     const isAdmin = role === "admin";
 
-    adminTab.classList.toggle("active", isAdmin);
-    userTab.classList.toggle("active", !isAdmin);
-    adminForm.classList.toggle("hidden", !isAdmin);
-    userForm.classList.toggle("hidden", isAdmin);
-    roleTitle.textContent = isAdmin ? "Admin Login" : "User Login";
-    statusMsg.textContent = isAdmin
-        ? "You have been logged out."
-        : "Login with your registered email and password.";
+    if (adminShell) {
+        adminShell.classList.toggle("hidden", !isAdmin);
+    }
+
+    if (userShell) {
+        userShell.classList.toggle("hidden", isAdmin);
+    }
+
+    if (roleTitle) {
+        roleTitle.textContent = "Admin Login";
+    }
+
+    if (statusMsg) {
+        statusMsg.textContent = "Login with your registered email and password.";
+    }
+
+    if (adminStatusMsg) {
+        adminStatusMsg.textContent = "Authorized admins only.";
+    }
+
+    if (window.history?.replaceState) {
+        const nextUrl = isAdmin ? "login.html?role=admin" : "login.html";
+        window.history.replaceState({}, "", nextUrl);
+    }
 
     if (isAdmin) {
         closeSignup();
@@ -91,7 +106,7 @@ async function adminLogin(event) {
         alert("Admin login successful");
         window.location.href = "index.html";
     } catch (error) {
-        alert(`Admin login API error. Check backend availability at ${window.YUBUS_API?.describeTarget?.() || "http://localhost:8081"}.`);
+        alert(`Admin login API error. Check backend availability at ${window.YUBUS_API?.describeTarget?.() || "http://localhost:8000"}.`);
     }
 }
 
@@ -168,21 +183,13 @@ async function sendEmailOtpAndNavigate(email) {
         localStorage.removeItem("userOTPVerified");
         localStorage.removeItem("mockOTP");
         localStorage.removeItem("mockOTPExpiry");
+        localStorage.removeItem("otpMode");
         localStorage.setItem("loginType", "email");
-        if (data.otp) {
-            const expiresAt = Date.now() + 5 * 60 * 1000;
-            localStorage.setItem("otpMode", "debug");
-            localStorage.setItem("mockOTP", data.otp);
-            localStorage.setItem("mockOTPExpiry", String(expiresAt));
-            alert(`OTP (dev): ${data.otp}. Use it within 5 minutes.`);
-        } else {
-            localStorage.setItem("otpMode", "api");
-            alert(`OTP sent to ${email}. Please check your email inbox/spam.`);
-        }
+        alert(`OTP sent to ${email}. Please check your email inbox/spam.`);
         window.location.href = "otp.html";
         return true;
     } catch (error) {
-        alert(`Backend not reachable. Check backend availability at ${window.YUBUS_API?.describeTarget?.() || "http://localhost:8081"}.`);
+        alert(`Backend not reachable. Check backend availability at ${window.YUBUS_API?.describeTarget?.() || "http://localhost:8000"}.`);
         return false;
     }
 }
@@ -264,75 +271,47 @@ async function signupUser(event) {
         return;
     }
 
-    const users = getRegisteredUsers();
-    const alreadyRegistered = users.some((user) => user.email === email);
-    if (alreadyRegistered) {
-        alert("This email is already registered. Please login.");
-        return;
-    }
-
-    if (isMobileRegistered(mobile, email)) {
-        alert("This mobile number is already registered. Please use a different mobile number.");
-        return;
-    }
-
-    users.push({ name, mobile, email, password });
-    saveRegisteredUsers(users);
-
-    localStorage.removeItem("adminLoggedIn");
-    localStorage.removeItem("adminIdentity");
-    localStorage.removeItem("googleLogin");
-    localStorage.setItem("userPassword", password);
-    storeCurrentUserProfile({ name, mobile, email });
-
-    closeSignup();
-    await sendEmailOtpAndNavigate(email);
-}
-
-function forgotPassword() {
-    void forgotPasswordByEmail();
-}
-
-async function forgotPasswordByEmail() {
-    const typedEmail = normalizeEmail(document.getElementById("userIdentity").value);
-    let email = typedEmail;
-    if (!EMAIL_REGEX.test(email)) {
-        const emailInput = prompt("Enter your registered email:");
-        if (emailInput === null) {
-            return;
-        }
-        email = normalizeEmail(emailInput);
-    }
-    if (!EMAIL_REGEX.test(email)) {
-        alert("Please enter a valid email.");
-        return;
-    }
-
-    const users = getRegisteredUsers();
-    const matchedUser = users.find((user) => user.email === email);
-
-    if (!matchedUser) {
-        alert("Email not found. Please sign up first.");
-        return;
-    }
-
     try {
-        const { response, data } = await sendNotificationEmail({
-            type: "forgot_password",
-            email,
-            name: matchedUser.name,
-            password: matchedUser.password
+        const { response, data } = await postWithFallback("/api/login", {
+            action: "signup",
+            role: "user",
+            identity: email,
+            password: password
         });
 
         if (!response.ok || data.success === false) {
-            alert(data.message || "Failed to send password email.");
+            alert(data.message || "Signup failed on the backend");
             return;
         }
 
-        alert(`Password details were sent to ${email}. Please check your email inbox/spam.`);
+        const users = getRegisteredUsers();
+        const alreadyRegistered = users.some((user) => user.email === email);
+        if (!alreadyRegistered) {
+            users.push({ name, mobile, email, password });
+            saveRegisteredUsers(users);
+        }
+
+        localStorage.removeItem("adminLoggedIn");
+        localStorage.removeItem("adminIdentity");
+        localStorage.removeItem("googleLogin");
+        localStorage.setItem("userPassword", password);
+        storeCurrentUserProfile({ name, mobile, email });
+
+        closeSignup();
+        await sendEmailOtpAndNavigate(email);
     } catch (error) {
-        alert(`Backend not reachable. Check backend availability at ${window.YUBUS_API?.describeTarget?.() || "http://localhost:8081"}.`);
+        alert(`Signup error. Backend not reachable.`);
     }
+}
+
+function forgotPassword() {
+    const typedEmail = normalizeEmail(document.getElementById("userIdentity").value);
+    if (EMAIL_REGEX.test(typedEmail)) {
+        window.location.href = `reset-password.html?email=${encodeURIComponent(typedEmail)}`;
+        return;
+    }
+
+    window.location.href = "reset-password.html";
 }
 
 async function loginUser(event) {
@@ -352,25 +331,37 @@ async function loginUser(event) {
         return;
     }
 
-    const users = getRegisteredUsers();
-    if (!users.length) {
-        alert("No user data found. Please sign up first.");
-        return;
-    }
+    try {
+        const { response, data } = await postWithFallback("/api/login", {
+            action: "login",
+            role: "user",
+            identity: email,
+            password: userPassword
+        });
 
-    const matchedUser = users.find((user) => user.email === email && user.password === userPassword);
-    if (!matchedUser) {
-        const emailExists = users.some((user) => user.email === email);
-        alert(emailExists ? "Incorrect password." : "Email not found. Please sign up first.");
-        return;
-    }
+        if (!response.ok || data.success === false) {
+            alert(data.message || "Login failed on the backend");
+            return;
+        }
 
-    localStorage.removeItem("adminLoggedIn");
-    localStorage.removeItem("adminIdentity");
-    localStorage.removeItem("googleLogin");
-    localStorage.setItem("userPassword", userPassword);
-    storeCurrentUserProfile(matchedUser);
-    await sendEmailOtpAndNavigate(email);
+        const users = getRegisteredUsers();
+        let matchedUser = users.find((user) => user.email === email);
+        if (!matchedUser) {
+            // Seed local storage with backend data if missing
+            matchedUser = { name: "", mobile: "", email, password: userPassword };
+            users.push(matchedUser);
+            saveRegisteredUsers(users);
+        }
+
+        localStorage.removeItem("adminLoggedIn");
+        localStorage.removeItem("adminIdentity");
+        localStorage.removeItem("googleLogin");
+        localStorage.setItem("userPassword", userPassword);
+        storeCurrentUserProfile(matchedUser);
+        await sendEmailOtpAndNavigate(email);
+    } catch (error) {
+        alert(`Login error. Backend not reachable.`);
+    }
 }
 
 function googleLogin() {
@@ -384,5 +375,15 @@ function googleLogin() {
 
 document.addEventListener("DOMContentLoaded", () => {
     seedLegacyUser();
-    switchRole("user");
+    const params = new URLSearchParams(window.location.search);
+    const role = params.get("role") === "admin" ? "admin" : "user";
+    switchRole(role);
+
+    const resetEmail = normalizeEmail(params.get("email"));
+    if (EMAIL_REGEX.test(resetEmail)) {
+        const userIdentityInput = document.getElementById("userIdentity");
+        if (userIdentityInput) {
+            userIdentityInput.value = resetEmail;
+        }
+    }
 });

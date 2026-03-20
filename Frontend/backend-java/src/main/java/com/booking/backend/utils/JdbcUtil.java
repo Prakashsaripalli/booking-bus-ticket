@@ -8,19 +8,11 @@ import java.sql.Statement;
 
 public final class JdbcUtil {
 
-    private static final String DEFAULT_DB_URL =
-            "jdbc:mysql://localhost:3306/booking?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
-    private static final String DEFAULT_DB_USER = "root";
-    private static final String DEFAULT_DB_PASSWORD = "root123";
-
     private JdbcUtil() {
     }
 
     public static Connection getConnection() throws SQLException {
-        String url = System.getenv().getOrDefault("DB_URL", DEFAULT_DB_URL);
-        String user = System.getenv().getOrDefault("DB_USER", DEFAULT_DB_USER);
-        String password = System.getenv().getOrDefault("DB_PASSWORD", DEFAULT_DB_PASSWORD);
-        return DriverManager.getConnection(url, user, password);
+        return DriverManager.getConnection(Config.getDbUrl(), Config.getDbUser(), Config.getDbPassword());
     }
 
     public static void initSchema() throws SQLException {
@@ -43,6 +35,7 @@ public final class JdbcUtil {
                         name VARCHAR(120) DEFAULT '',
                         email VARCHAR(255) DEFAULT '',
                         mobile VARCHAR(20) DEFAULT '',
+                        password_hash VARCHAR(64) DEFAULT '',
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )
                     """);
@@ -58,6 +51,11 @@ public final class JdbcUtil {
             }
             try {
                 stmt.execute("ALTER TABLE users ADD COLUMN mobile VARCHAR(20) DEFAULT ''");
+            } catch (SQLException ignored) {
+                // Column may already exist.
+            }
+            try {
+                stmt.execute("ALTER TABLE users ADD COLUMN password_hash VARCHAR(64) DEFAULT ''");
             } catch (SQLException ignored) {
                 // Column may already exist.
             }
@@ -86,6 +84,34 @@ public final class JdbcUtil {
                         transaction_id VARCHAR(120) NOT NULL,
                         status VARCHAR(20) NOT NULL,
                         created_at VARCHAR(50) NOT NULL
+                    )
+                    """);
+
+            stmt.execute("""
+                    CREATE TABLE IF NOT EXISTS bookings (
+                        booking_id VARCHAR(64) PRIMARY KEY,
+                        from_city VARCHAR(80) NOT NULL,
+                        to_city VARCHAR(80) NOT NULL,
+                        bus_name VARCHAR(120) NOT NULL,
+                        seats VARCHAR(255) NOT NULL,
+                        journey_date VARCHAR(20) NOT NULL,
+                        departure_time VARCHAR(20) NOT NULL,
+                        original_amount INT NOT NULL,
+                        amount INT NOT NULL,
+                        discount_amount INT NOT NULL,
+                        passenger_name VARCHAR(120) NOT NULL,
+                        passenger_mobile VARCHAR(20) NOT NULL,
+                        passenger_email VARCHAR(255) NOT NULL,
+                        owner_email VARCHAR(255) DEFAULT '',
+                        owner_mobile VARCHAR(20) DEFAULT '',
+                        payment_method VARCHAR(60) NOT NULL,
+                        transaction_id VARCHAR(120) NOT NULL,
+                        status VARCHAR(40) NOT NULL,
+                        booked_at VARCHAR(50) NOT NULL,
+                        cancelled_at VARCHAR(50),
+                        refund_status VARCHAR(40),
+                        refund_amount INT DEFAULT 0,
+                        refunded_at VARCHAR(50)
                     )
                     """);
 

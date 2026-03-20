@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yubus | Share Review</title>
+    <link rel="stylesheet" href="review.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+</head>
+<body>
+    <main class="review-page">
+        <section class="review-shell">
+            <div class="review-hero">
+                <a href="index.html" class="review-back"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+                <span class="review-kicker">Passenger Review</span>
+                <h1>Tell us about your Yubus trip</h1>
+                <p>Share how your booking, boarding, comfort, and support experience felt. Your review will be saved and shown in the live review feed on the homepage.</p>
+            </div>
+
+            <section class="review-card">
+                <div class="review-card-head">
+                    <h2>Write Your Review</h2>
+                    <p>It takes less than a minute.</p>
+                </div>
+
+                <form id="reviewForm" class="review-form">
+                    <div class="review-grid">
+                        <label class="review-field">
+                            <span>Your Name</span>
+                            <input type="text" id="reviewName" placeholder="Enter your name" required>
+                        </label>
+
+                        <label class="review-field">
+                            <span>Email</span>
+                            <input type="email" id="reviewEmail" placeholder="Enter your email">
+                        </label>
+                    </div>
+
+                    <div class="review-grid">
+                        <label class="review-field">
+                            <span>Route</span>
+                            <input type="text" id="reviewRoute" placeholder="Example: Hyderabad -> Vijayawada" required>
+                        </label>
+
+                        <label class="review-field">
+                            <span>Review Type</span>
+                            <select id="reviewTag">
+                                <option value="On-time service">On-time service</option>
+                                <option value="Comfortable ride">Comfortable ride</option>
+                                <option value="Helpful support">Helpful support</option>
+                                <option value="Clean bus">Clean bus</option>
+                                <option value="Easy booking">Easy booking</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div class="review-rating">
+                        <span class="review-label">Rate Your Experience</span>
+                        <div id="reviewStars" class="review-stars" aria-label="Choose a rating from 1 to 5">
+                            <button type="button" class="review-star active" data-rating="1" aria-label="1 star"><i class="fa-solid fa-star"></i></button>
+                            <button type="button" class="review-star active" data-rating="2" aria-label="2 stars"><i class="fa-solid fa-star"></i></button>
+                            <button type="button" class="review-star active" data-rating="3" aria-label="3 stars"><i class="fa-solid fa-star"></i></button>
+                            <button type="button" class="review-star active" data-rating="4" aria-label="4 stars"><i class="fa-solid fa-star"></i></button>
+                            <button type="button" class="review-star active" data-rating="5" aria-label="5 stars"><i class="fa-solid fa-star"></i></button>
+                        </div>
+                    </div>
+
+                    <label class="review-field">
+                        <span>Your Review</span>
+                        <textarea id="reviewMessage" rows="6" placeholder="Tell us what went well or what can be improved." required></textarea>
+                    </label>
+
+                    <div class="review-actions">
+                        <button type="submit" class="review-submit">Submit Review</button>
+                        <a href="index.html" class="review-secondary">Cancel</a>
+                    </div>
+
+                    <p id="reviewStatus" class="review-status" aria-live="polite"></p>
+                </form>
+            </section>
+        </section>
+    </main>
+
+    <script src="review.js"></script>
+</body>
+</html>

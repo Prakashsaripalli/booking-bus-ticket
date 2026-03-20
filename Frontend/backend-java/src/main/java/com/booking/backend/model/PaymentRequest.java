@@ -2,6 +2,9 @@ package com.booking.backend.model;
 
 public class PaymentRequest {
     public String bookingId;
+    public String transactionId;
+    public int amount;
+    public String paymentMethod;
     public String passengerName;
     public String mobile;
     public String email;
@@ -14,7 +17,4 @@ public class PaymentRequest {
     public String departureTime;
     public int originalAmount;
     public int discountAmount;
-    public String paymentMethod;
-    public int amount;
-    public String transactionId;
 }

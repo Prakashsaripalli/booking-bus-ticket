@@ -1,9 +1,7 @@
 ﻿const params = new URLSearchParams(window.location.search);
 const PAYMENT_API_BASES = window.YUBUS_API?.getBases?.() || [
-    "http://localhost:8081",
-    "http://127.0.0.1:8081",
-    "http://localhost:8080",
-    "http://127.0.0.1:8080"
+    "http://localhost:8000",
+    "http://127.0.0.1:8000"
 ];
 
 function buildPaymentApiUrl(path, base) {
@@ -25,6 +23,7 @@ const mobile = params.get("mobile") || "";
 const email = params.get("email") || "";
 const total = parseInt(params.get("total"), 10) || 0;
 const storedUserEmail = (localStorage.getItem("userEmail") || localStorage.getItem("userIdentity") || "").trim();
+const ADMIN_FEATURES_KEY = "adminFeatureModules";
 
 let discount = 0;
 let finalAmount = total;
@@ -50,6 +49,9 @@ const upiSection = document.getElementById("upiSection");
 const paymentSuccessOverlay = document.getElementById("paymentSuccessOverlay");
 const coinLane = document.getElementById("coinLane");
 const goHomeBtn = document.getElementById("goHomeBtn");
+const couponCodeInput = document.getElementById("couponCode");
+const applyCouponBtn = document.getElementById("applyCoupon");
+const offerStatusMessage = document.getElementById("offerStatusMessage");
 let activeUpiMode = "upi-id";
 let activePaymentMethod = "upi";
 let walletGeneratedOtp = "";
@@ -66,11 +68,75 @@ document.getElementById("passengerEmail").value = email || storedUserEmail;
 qrImage.src = "Assets/qr.jpeg";
 
 updateAmount();
+applyOfferEngineState();
 
 function updateAmount() {
     document.getElementById("finalAmount").innerText = finalAmount;
     document.getElementById("discountAmount").innerText = discount;
     document.getElementById("btnAmount").innerText = finalAmount;
+}
+
+function getAdminFeatureModules() {
+    try {
+        const parsedModules = JSON.parse(localStorage.getItem(ADMIN_FEATURES_KEY) || "[]");
+        return Array.isArray(parsedModules) ? parsedModules : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+function isOfferEngineActive() {
+    const adminModules = getAdminFeatureModules();
+
+    if (adminModules.length === 0) {
+        return true;
+    }
+
+    const offerModule = adminModules.find((module) => module?.id === "offers");
+    return typeof offerModule?.active === "boolean" ? offerModule.active : true;
+}
+
+function setOfferStatusMessage(message) {
+    if (!offerStatusMessage) {
+        return;
+    }
+
+    offerStatusMessage.textContent = message;
+    offerStatusMessage.hidden = !message;
+}
+
+function applyOfferEngineState() {
+    const offerEngineActive = isOfferEngineActive();
+
+    if (!offerEngineActive) {
+        discount = 0;
+        finalAmount = total;
+        updateAmount();
+
+        if (couponCodeInput) {
+            couponCodeInput.value = "";
+            couponCodeInput.disabled = true;
+            couponCodeInput.placeholder = "Offers are not available now";
+        }
+
+        if (applyCouponBtn) {
+            applyCouponBtn.disabled = true;
+        }
+
+        setOfferStatusMessage("Offers are not available now. Activate Offer Engine to use coupons.");
+        return;
+    }
+
+    if (couponCodeInput) {
+        couponCodeInput.disabled = false;
+        couponCodeInput.placeholder = "Have a coupon?";
+    }
+
+    if (applyCouponBtn) {
+        applyCouponBtn.disabled = false;
+    }
+
+    setOfferStatusMessage("");
 }
 
 async function postPayment(payload) {
@@ -483,6 +549,12 @@ generateQrBtn.addEventListener("click", function () {
 
 // Coupon
 document.getElementById("applyCoupon").addEventListener("click", function () {
+    if (!isOfferEngineActive()) {
+        applyOfferEngineState();
+        alert("Offers are not available now");
+        return;
+    }
+
     const code = document.getElementById("couponCode").value.trim().toUpperCase();
 
     if (code === "UPIBUS" || code === "JET20") {
@@ -730,7 +802,7 @@ document.getElementById("payBtn").addEventListener("click", async function () {
             paymentMethodLabel
         );
     } catch (error) {
-        alert(`Payment API error. Backend was not reachable at ${window.YUBUS_API?.describeTarget?.() || "http://localhost:8081"}.\n${error?.message || "Unknown network error"}`);
+        alert(`Payment API error. Backend was not reachable at ${window.YUBUS_API?.describeTarget?.() || "http://localhost:8000"}.\n${error?.message || "Unknown network error"}`);
         resetPayButton(this);
         return;
     }
@@ -742,3 +814,9 @@ document.getElementById("payBtn").addEventListener("click", async function () {
 
 setUpiMode("upi-id");
 resetWalletOtpState();
+window.addEventListener("focus", applyOfferEngineState);
+window.addEventListener("storage", (event) => {
+    if (!event.key || event.key === ADMIN_FEATURES_KEY) {
+        applyOfferEngineState();
+    }
+});

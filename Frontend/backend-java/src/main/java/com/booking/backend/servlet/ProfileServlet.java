@@ -1,6 +1,6 @@
 package com.booking.backend.servlet;
 
-import com.booking.backend.dao.LoginDao;
+import com.booking.backend.dao.UserDao;
 import com.booking.backend.model.ProfileUpdateRequest;
 import com.booking.backend.model.User;
 import com.booking.backend.utils.EmailUtil;
@@ -17,10 +17,10 @@ import java.util.Map;
 
 public class ProfileServlet extends HttpServlet {
 
-    private final LoginDao loginDao;
+    private final UserDao userDao;
 
-    public ProfileServlet(LoginDao loginDao) {
-        this.loginDao = loginDao;
+    public ProfileServlet(UserDao userDao) {
+        this.userDao = userDao;
     }
 
     @Override
@@ -39,7 +39,7 @@ public class ProfileServlet extends HttpServlet {
             return;
         }
 
-        User user = loginDao.getUserByIdentity(identity);
+        User user = userDao.getUserByIdentity(identity);
         if (user == null) {
             ResponseUtil.json(resp, HttpServletResponse.SC_NOT_FOUND, Map.of(
                     "success", false,
@@ -95,7 +95,7 @@ public class ProfileServlet extends HttpServlet {
 
         User updatedUser;
         try {
-            updatedUser = loginDao.updateUserProfile(currentIdentity, name, email, mobile);
+            updatedUser = userDao.updateUserProfile(currentIdentity, name, email, mobile);
         } catch (IllegalStateException e) {
             response.put("success", false);
             response.put("message", e.getMessage());
@@ -107,17 +107,24 @@ public class ProfileServlet extends HttpServlet {
         response.put("profile", toProfileMap(updatedUser));
 
         if (ValidationUtil.isValidEmail(updatedUser.getEmail())) {
-            try {
-                EmailUtil.sendProfileUpdatedEmail(
-                        updatedUser.getEmail(),
-                        updatedUser.getName(),
-                        updatedUser.getEmail(),
-                        updatedUser.getMobile()
-                );
-                response.put("emailSent", true);
-            } catch (Exception e) {
+            if (!EmailUtil.isEmailDeliveryEnabled()) {
                 response.put("emailSent", false);
-                response.put("emailMessage", "Profile updated, but email delivery failed");
+                response.put("emailMessage", EmailUtil.shouldSkipEmail()
+                        ? "Profile updated, but email delivery skipped for local testing."
+                        : EmailUtil.smtpMissingMessage());
+            } else {
+                try {
+                    EmailUtil.sendProfileUpdatedEmail(
+                            updatedUser.getEmail(),
+                            updatedUser.getName(),
+                            updatedUser.getEmail(),
+                            updatedUser.getMobile()
+                    );
+                    response.put("emailSent", true);
+                } catch (Exception e) {
+                    response.put("emailSent", false);
+                    response.put("emailMessage", "Profile updated, but email delivery failed");
+                }
             }
         } else {
             response.put("emailSent", false);
