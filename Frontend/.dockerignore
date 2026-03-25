@@ -1,0 +1,15 @@
+.git
+.github
+.m2
+.tools
+.vscode
+dump
+HTML
+backend-java/target
+backend-java/.env.bat
+backend-java/db.env.bat
+backend-java/smtp.env.bat
+backend-java/*.log
+_backend_run.err.log
+_backend_run.out.log
+*.log

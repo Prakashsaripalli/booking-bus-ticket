@@ -11,6 +11,7 @@ const adminBookingState = {
 };
 
 const ADMIN_FEATURES_KEY = "adminFeatureModules";
+const ADMIN_CONTACT_EMAIL = "yubusservices@gmail.com";
 const DEFAULT_ADMIN_FEATURES = [
     {
         id: "offers",
@@ -108,7 +109,7 @@ function fillProfile() {
         ? (localStorage.getItem("adminIdentity") || "Admin")
         : (userProfile?.name || userProfile?.email || "User");
     const email = isAdmin
-        ? (localStorage.getItem("adminIdentity") || "-")
+        ? ADMIN_CONTACT_EMAIL
         : (userProfile?.email || "-");
     const mobile = isAdmin ? "-" : (userProfile?.mobile || "-");
 
@@ -1837,7 +1838,7 @@ function fillProfile() {
         ? (localStorage.getItem("adminIdentity") || "Admin")
         : (profile?.name || profile?.email || "User");
     document.getElementById("profileEmail").textContent = isAdmin
-        ? (localStorage.getItem("adminIdentity") || "-")
+        ? ADMIN_CONTACT_EMAIL
         : (profile?.email || "-");
     document.getElementById("profileMobile").textContent = isAdmin ? "Routes, bookings, refunds" : (profile?.mobile || "-");
 }
