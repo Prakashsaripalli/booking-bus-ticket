@@ -1,66 +1,81 @@
-﻿# Backend Java (Servlet + DAO + Utils + JDBC)
+# Backend Java
 
-This backend is fully Java-based and split by concern and feature:
+Embedded Jetty + Servlet + JDBC backend for the Yubus booking project.
 
-- `servlet/` -> API endpoints (`login`, `otp`, `payment`)
-- `dao/` -> JDBC database access
-- `utils/` -> JSON, validation, response, OTP, JDBC helpers
-- `model/` -> request and entity models
+## What is production-ready now
 
-## Database (JDBC)
+- Static frontend can be served by the same Java process
+- User login now requires password + OTP and creates a server-side session
+- Admin login now uses environment variables instead of hardcoded credentials
+- Profile, booking, payment, and notification APIs now require authenticated sessions
+- Booking ownership is enforced on the backend
 
-Default is MySQL JDBC:
+## What is still demo/mock behavior
 
-- `DB_URL=jdbc:mysql://localhost:3306/booking?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC`
-- `DB_USER=root`
-- `DB_PASSWORD=root123`
+- Payment collection is simulated; no Razorpay/Stripe/Paytm gateway is integrated yet
+- Google login is not configured; the frontend now blocks the fake bypass flow
+- Admin-created buses and feature toggles still live in browser storage, not the database
 
-Runtime configuration:
+## Required environment variables
 
-- `PORT=8000`
-- `ALLOWED_ORIGIN=*`
+```text
+PORT=8000
+FRONTEND_DIR=/absolute/path/to/Frontend
 
-Tables are auto-created on startup: `users`, `otps`, `payments`.
+DB_URL=jdbc:mysql://<host>:3306/booking?useSSL=true&serverTimezone=UTC
+DB_USER=<database-user>
+DB_PASSWORD=<database-password>
 
-### Email OTP (Gmail SMTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=<smtp-username>
+SMTP_APP_PASSWORD=<smtp-app-password>
+SMTP_FROM=<from-email>
 
-For email OTP delivery, set:
+ADMIN_USERNAME=<admin-login-name>
+ADMIN_EMAIL=<admin-email>
+ADMIN_PASSWORD=<strong-admin-password>
 
-- `SMTP_USER=prakashsaripalli1198@gmail.com`
-- `SMTP_APP_PASSWORD=<vcfwwdbmzascrhad>`
-- `SMTP_FROM=prakashsaripalli1198@gmail.com` (optional)
+SESSION_TIMEOUT_MINUTES=30
+ALLOWED_ORIGIN=https://your-frontend-domain.example
+OTP_DEBUG=false
+EMAIL_DEBUG=false
+```
 
-Windows local setup:
-
-1. Copy `Frontend/backend-java/.env.bat.example` to `Frontend/backend-java/.env.bat`
-2. Fill in your real Gmail address + app password
-3. Start the backend with `Frontend/start-backend.bat` (it loads `.env.bat`)
-
-If you run `java -jar ...` directly (or from an IDE), you must set the same
-environment variables in that shell/run configuration or the backend will
-respond with “SMTP_USER is not configured”.
-
-Optional local-dev flags:
-
-- `OTP_DEBUG=true` (returns the OTP in API response if SMTP is missing or delivery fails)
-- `EMAIL_DEBUG=true` (skips notification email delivery and returns success for local testing)
-
-## Run
+## Local run
 
 ```bash
 mvn clean package
 java -jar target/backend-java-1.0.0.jar
 ```
 
-Server starts on: `http://localhost:8000`
+If you run from `Frontend/backend-java`, the app can automatically serve the parent `Frontend` directory. You can also set `FRONTEND_DIR` explicitly.
 
-For production hosting, set `PORT` from your hosting platform and set `ALLOWED_ORIGIN` to your frontend domain.
+## Docker
 
-## APIs
+From the repository root:
 
-- `GET /api/buses/search?from=<source>&to=<destination>`
-- `GET /api/buses/routes`
-- `POST /api/login`
-- `POST /api/auth/send-otp`
-- `POST /api/auth/verify-otp`
-- `POST /api/payment/process`
+```bash
+docker build -t yubus-app .
+docker run --rm -p 8000:8000 \
+  -e PORT=8000 \
+  -e FRONTEND_DIR=/app/Frontend \
+  -e DB_URL=jdbc:mysql://host.docker.internal:3306/booking?useSSL=false&serverTimezone=UTC \
+  -e DB_USER=youruser \
+  -e DB_PASSWORD=yourpassword \
+  -e SMTP_USER=your-smtp-user \
+  -e SMTP_APP_PASSWORD=your-smtp-password \
+  -e ADMIN_USERNAME=admin \
+  -e ADMIN_EMAIL=admin@example.com \
+  -e ADMIN_PASSWORD=change-me \
+  yubus-app
+```
+
+## Deployment checklist
+
+1. Use a managed MySQL instance.
+2. Set real SMTP credentials in host environment variables.
+3. Set `ADMIN_PASSWORD`; admin login is disabled if it is blank.
+4. Serve the app over HTTPS.
+5. Keep `OTP_DEBUG=false` and `EMAIL_DEBUG=false` in production.
+6. Integrate a real payment gateway before accepting live payments.

@@ -42,6 +42,8 @@ const DEFAULT_ADMIN_FEATURES = [
 const adminUiState = {
     busFormOpen: false
 };
+const REALTIME_REFRESH_MS = 10000;
+let realtimeRefreshTimer = null;
 
 function normalizeEmail(email) {
     return (email || "").trim().toLowerCase();
@@ -786,9 +788,19 @@ function renderBookings() {
 }
 
 function attachActions() {
-    document.getElementById("backBtn").addEventListener("click", () => {
-        window.location.href = "index.html";
-    });
+    const backBtn = document.getElementById("backBtn");
+    const isAdmin = isAdminSession();
+
+    if (backBtn) {
+        if (isAdmin) {
+            backBtn.classList.add("hidden");
+            backBtn.hidden = true;
+        } else {
+            backBtn.addEventListener("click", () => {
+                window.location.href = "index.html";
+            });
+        }
+    }
 
     document.getElementById("logoutBtn").addEventListener("click", () => {
         [
@@ -808,7 +820,7 @@ function attachActions() {
             "userPassword"
         ].forEach((k) => localStorage.removeItem(k));
 
-        window.location.href = "index.html";
+        window.location.href = isAdmin ? "login.html?role=admin" : "index.html";
     });
 
     document.getElementById("bookingList").addEventListener("click", async (event) => {
@@ -914,7 +926,10 @@ async function profileRequest(path, options = {}) {
     let lastError;
     for (const base of PROFILE_API_BASES) {
         try {
-            const response = await fetch(buildProfileApiUrl(path, base), options);
+            const response = await fetch(buildProfileApiUrl(path, base), {
+                credentials: "include",
+                ...options
+            });
             const data = await response.json().catch(() => ({}));
             return { response, data };
         } catch (error) {
@@ -1070,6 +1085,40 @@ async function loadAdminBookingsFromBackend() {
 
     try {
         const { response, data } = await profileRequest("/api/bookings?admin=true");
+        if (!response.ok || data.success === false || !Array.isArray(data.data)) {
+            return;
+        }
+
+        setBookingHistoryStore(data.data.map(normalizeBookingRecord), { persistLocal: true });
+    } catch (error) {
+        currentBookingCache = getLocalBookingHistory();
+    }
+}
+
+async function loadUserBookingsFromBackend() {
+    if (isAdminSession()) {
+        return;
+    }
+
+    const profile = currentProfileCache || getCurrentUserProfile();
+    const ownerEmail = normalizeEmail(profile?.email);
+    const ownerMobile = profileMobile(profile?.mobile);
+
+    if (!ownerEmail && !ownerMobile) {
+        currentBookingCache = getLocalBookingHistory();
+        return;
+    }
+
+    const query = new URLSearchParams();
+    if (ownerEmail) {
+        query.set("ownerEmail", ownerEmail);
+    }
+    if (ownerMobile) {
+        query.set("ownerMobile", ownerMobile);
+    }
+
+    try {
+        const { response, data } = await profileRequest(`/api/bookings?${query.toString()}`);
         if (!response.ok || data.success === false || !Array.isArray(data.data)) {
             return;
         }
@@ -1756,6 +1805,7 @@ async function runAdminRefresh(triggerButton = null) {
         } else {
             currentProfileCache = getCurrentUserProfile();
             await loadProfileFromBackend();
+            await loadUserBookingsFromBackend();
         }
 
         fillProfile();
@@ -1864,9 +1914,24 @@ function setEditStatus(message, tone = "") {
 
 function populateEditForm() {
     const profile = currentProfileCache || getCurrentUserProfile();
-    document.getElementById("editName").value = profile?.name || "";
-    document.getElementById("editEmail").value = profile?.email || "";
-    document.getElementById("editMobile").value = profile?.mobile || "";
+    const form = document.getElementById("profileEditForm");
+    if (!form) {
+        return;
+    }
+
+    const nameInput = form.elements.namedItem("name") || document.getElementById("editName");
+    const emailInput = form.elements.namedItem("email") || document.getElementById("editEmail");
+    const mobileInput = form.elements.namedItem("mobile") || document.getElementById("editMobile");
+
+    if (nameInput) {
+        nameInput.value = profile?.name || "";
+    }
+    if (emailInput) {
+        emailInput.value = profile?.email || "";
+    }
+    if (mobileInput) {
+        mobileInput.value = profile?.mobile || "";
+    }
     setEditStatus("");
 }
 
@@ -1885,8 +1950,7 @@ function syncRegisteredUsers(previousProfile, nextProfile) {
         updated.push({
             name: nextProfile.name,
             email: nextProfile.email,
-            mobile: nextProfile.mobile,
-            password: localStorage.getItem("userPassword") || ""
+            mobile: nextProfile.mobile
         });
     }
 
@@ -1984,9 +2048,11 @@ async function submitProfileEdit(event) {
     event.preventDefault();
 
     const previousProfile = currentProfileCache || getCurrentUserProfile();
-    const name = document.getElementById("editName").value.trim();
-    const email = normalizeEmail(document.getElementById("editEmail").value);
-    const mobile = profileMobile(document.getElementById("editMobile").value);
+    const form = event?.currentTarget || document.getElementById("profileEditForm");
+    const formData = new FormData(form);
+    const name = String(formData.get("name") || document.getElementById("editName")?.value || "").trim();
+    const email = normalizeEmail(formData.get("email") || document.getElementById("editEmail")?.value || "");
+    const mobile = profileMobile(formData.get("mobile") || document.getElementById("editMobile")?.value || "");
     const currentIdentity = normalizeEmail(localStorage.getItem("userIdentity") || previousProfile.email || email);
 
     if (!name) {
@@ -2046,11 +2112,27 @@ async function submitProfileEdit(event) {
 }
 
 function attachActions() {
-    document.getElementById("backBtn").addEventListener("click", () => {
-        window.location.href = "index.html";
-    });
+    const backBtn = document.getElementById("backBtn");
+    const isAdmin = isAdminSession();
 
-    document.getElementById("logoutBtn").addEventListener("click", () => {
+    if (backBtn) {
+        if (isAdmin) {
+            backBtn.classList.add("hidden");
+            backBtn.hidden = true;
+        } else {
+            backBtn.addEventListener("click", () => {
+                window.location.href = "index.html";
+            });
+        }
+    }
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+        try {
+            await profileRequest("/api/logout", { method: "POST" });
+        } catch (error) {
+            // Clear local state even when the backend session is already unavailable.
+        }
+
         [
             "adminLoggedIn",
             "adminIdentity",
@@ -2068,7 +2150,7 @@ function attachActions() {
             "userPassword"
         ].forEach((k) => localStorage.removeItem(k));
 
-        window.location.href = "index.html";
+        window.location.href = isAdmin ? "login.html?role=admin" : "index.html";
     });
 
     const editBtn = document.getElementById("editProfileBtn");
@@ -2077,7 +2159,6 @@ function attachActions() {
     const adminBusForm = document.getElementById("adminBusForm");
     const adminBusCancelBtn = document.getElementById("adminBusCancelBtn");
     const adminDashboardPanel = document.getElementById("adminDashboardPanel");
-    const isAdmin = isAdminSession();
 
     if (editBtn) {
         editBtn.classList.toggle("hidden", isAdmin);
@@ -2182,5 +2263,28 @@ function attachActions() {
 }
 
 async function refreshProfilePage() {
+    if (document.hidden) {
+        return;
+    }
+
     await runAdminRefresh();
 }
+
+function startRealtimeProfileRefresh() {
+    if (realtimeRefreshTimer) {
+        clearInterval(realtimeRefreshTimer);
+    }
+
+    realtimeRefreshTimer = window.setInterval(() => {
+        void refreshProfilePage();
+    }, REALTIME_REFRESH_MS);
+}
+
+window.addEventListener("beforeunload", () => {
+    if (realtimeRefreshTimer) {
+        clearInterval(realtimeRefreshTimer);
+        realtimeRefreshTimer = null;
+    }
+});
+
+startRealtimeProfileRefresh();

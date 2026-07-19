@@ -1,6 +1,8 @@
 package com.booking.backend.servlet;
 
+import com.booking.backend.model.AuthenticatedUser;
 import com.booking.backend.model.NotificationEmailRequest;
+import com.booking.backend.utils.AuthUtil;
 import com.booking.backend.utils.EmailUtil;
 import com.booking.backend.utils.JsonUtil;
 import com.booking.backend.utils.ResponseUtil;
@@ -21,11 +23,35 @@ public class NotificationEmailServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        AuthenticatedUser actor = AuthUtil.getAuthenticatedUser(req);
+        if (actor == null) {
+            ResponseUtil.json(resp, HttpServletResponse.SC_UNAUTHORIZED, Map.of(
+                    "success", false,
+                    "message", "Please log in before sending notifications"
+            ));
+            return;
+        }
+
         NotificationEmailRequest payload = JsonUtil.mapper().readValue(req.getInputStream(), NotificationEmailRequest.class);
 
         String type = payload.type == null ? "" : payload.type.trim().toLowerCase();
         String email = payload.email == null ? "" : payload.email.trim().toLowerCase();
         String name = payload.name == null ? "" : payload.name.trim();
+
+        if (!actor.isAdmin()) {
+            if ("booking_refunded".equals(type) || "forgot_password".equals(type)) {
+                ResponseUtil.json(resp, HttpServletResponse.SC_FORBIDDEN, Map.of(
+                        "success", false,
+                        "message", "Only admins can send this notification"
+                ));
+                return;
+            }
+
+            email = actor.loginIdentity();
+            if (name.isBlank()) {
+                name = actor.name();
+            }
+        }
 
         if (!ValidationUtil.isValidEmail(email)) {
             ResponseUtil.json(resp, HttpServletResponse.SC_BAD_REQUEST, Map.of(

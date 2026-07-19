@@ -21,6 +21,7 @@ async function postWithFallback(path, payload) {
         try {
             const response = await fetch(buildApiUrl(path, base), {
                 method: "POST",
+                credentials: "include",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             });
@@ -104,7 +105,7 @@ async function adminLogin(event) {
             localStorage.removeItem(key);
         });
         alert("Admin login successful");
-        window.location.href = "index.html";
+        window.location.href = "profile.html";
     } catch (error) {
         alert(`Admin login API error. Check backend availability at ${window.YUBUS_API?.describeTarget?.() || "http://localhost:8000"}.`);
     }
@@ -125,12 +126,11 @@ function getRegisteredUsers() {
             return [];
         }
         return parsedUsers
-            .filter((user) => user && typeof user.email === "string" && typeof user.password === "string")
+            .filter((user) => user && typeof user.email === "string")
             .map((user) => ({
                 name: typeof user.name === "string" ? user.name.trim() : "",
                 mobile: typeof user.mobile === "string" ? user.mobile.replace(/\D/g, "").slice(-10) : "",
-                email: normalizeEmail(user.email),
-                password: user.password
+                email: normalizeEmail(user.email)
             }));
     } catch (error) {
         return [];
@@ -208,7 +208,7 @@ function seedLegacyUser() {
         return;
     }
 
-    users.push({ name: "", mobile: "", email: legacyEmail, password: legacyPassword });
+    users.push({ name: "", mobile: "", email: legacyEmail });
     saveRegisteredUsers(users);
 }
 
@@ -243,11 +243,13 @@ function closeSignup() {
 async function signupUser(event) {
     event.preventDefault();
 
-    const name = document.getElementById("signupName").value.trim();
-    const email = normalizeEmail(document.getElementById("signupEmail").value);
-    const mobile = document.getElementById("signupMobile").value.replace(/\D/g, "").slice(-10);
-    const password = document.getElementById("signupPassword").value.trim();
-    const confirmPassword = document.getElementById("signupConfirmPassword").value.trim();
+    const form = event?.currentTarget || document.getElementById("signupForm");
+    const formData = new FormData(form);
+    const name = String(formData.get("name") || document.getElementById("signupName")?.value || "").trim();
+    const email = normalizeEmail(formData.get("email") || document.getElementById("signupEmail")?.value || "");
+    const mobile = String(formData.get("mobile") || document.getElementById("signupMobile")?.value || "").replace(/\D/g, "").slice(-10);
+    const password = String(formData.get("password") || document.getElementById("signupPassword")?.value || "").trim();
+    const confirmPassword = String(formData.get("confirmPassword") || document.getElementById("signupConfirmPassword")?.value || "").trim();
     const mobileRegex = /^[6-9]\d{9}$/;
 
     if (!name) {
@@ -276,7 +278,9 @@ async function signupUser(event) {
             action: "signup",
             role: "user",
             identity: email,
-            password: password
+            password: password,
+            name,
+            mobile
         });
 
         if (!response.ok || data.success === false) {
@@ -284,18 +288,23 @@ async function signupUser(event) {
             return;
         }
 
+        const backendProfile = {
+            name: (data.profile?.name || name).trim(),
+            email: normalizeEmail(data.profile?.email || email),
+            mobile: String(data.profile?.mobile || mobile).replace(/\D/g, "").slice(-10)
+        };
+
         const users = getRegisteredUsers();
         const alreadyRegistered = users.some((user) => user.email === email);
         if (!alreadyRegistered) {
-            users.push({ name, mobile, email, password });
+            users.push({ ...backendProfile });
             saveRegisteredUsers(users);
         }
 
         localStorage.removeItem("adminLoggedIn");
         localStorage.removeItem("adminIdentity");
         localStorage.removeItem("googleLogin");
-        localStorage.setItem("userPassword", password);
-        storeCurrentUserProfile({ name, mobile, email });
+        storeCurrentUserProfile(backendProfile);
 
         closeSignup();
         await sendEmailOtpAndNavigate(email);
@@ -332,11 +341,16 @@ async function loginUser(event) {
     }
 
     try {
+        const users = getRegisteredUsers();
+        const knownUser = users.find((user) => user.email === email);
+
         const { response, data } = await postWithFallback("/api/login", {
             action: "login",
             role: "user",
             identity: email,
-            password: userPassword
+            password: userPassword,
+            name: knownUser?.name || "",
+            mobile: knownUser?.mobile || ""
         });
 
         if (!response.ok || data.success === false) {
@@ -344,20 +358,32 @@ async function loginUser(event) {
             return;
         }
 
-        const users = getRegisteredUsers();
         let matchedUser = users.find((user) => user.email === email);
         if (!matchedUser) {
             // Seed local storage with backend data if missing
-            matchedUser = { name: "", mobile: "", email, password: userPassword };
+            matchedUser = { name: "", mobile: "", email };
             users.push(matchedUser);
-            saveRegisteredUsers(users);
         }
+
+        const backendProfile = {
+            name: (data.profile?.name || matchedUser.name || "").trim(),
+            email: normalizeEmail(data.profile?.email || email),
+            mobile: String(data.profile?.mobile || matchedUser.mobile || "").replace(/\D/g, "").slice(-10)
+        };
+
+        const updatedUsers = users.map((user) =>
+            user.email === email ? { ...user, ...backendProfile } : user
+        );
+
+        if (!updatedUsers.some((user) => user.email === email)) {
+            updatedUsers.push(backendProfile);
+        }
+        saveRegisteredUsers(updatedUsers);
 
         localStorage.removeItem("adminLoggedIn");
         localStorage.removeItem("adminIdentity");
         localStorage.removeItem("googleLogin");
-        localStorage.setItem("userPassword", userPassword);
-        storeCurrentUserProfile(matchedUser);
+        storeCurrentUserProfile(backendProfile);
         await sendEmailOtpAndNavigate(email);
     } catch (error) {
         alert(`Login error. Backend not reachable.`);
@@ -365,12 +391,7 @@ async function loginUser(event) {
 }
 
 function googleLogin() {
-    localStorage.setItem("googleLogin", "true");
-    localStorage.setItem("userOTPVerified", "true");
-    localStorage.removeItem("userName");
-    localStorage.removeItem("userMobile");
-    localStorage.removeItem("mobile");
-    window.location.href = "index.html";
+    alert("Google login is not configured for production yet. Use email login until OAuth is integrated.");
 }
 
 document.addEventListener("DOMContentLoaded", () => {

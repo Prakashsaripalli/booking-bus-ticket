@@ -28,11 +28,15 @@ public final class Config {
     public static final String SMTP_USER = "SMTP_USER";
     public static final String SMTP_APP_PASSWORD = "SMTP_APP_PASSWORD";
     public static final String SMTP_FROM = "SMTP_FROM";
-    
+
     // Debug Flags
     public static final String OTP_DEBUG = "OTP_DEBUG";
     public static final String EMAIL_DEBUG = "EMAIL_DEBUG";
     public static final String ALLOWED_ORIGIN = "ALLOWED_ORIGIN";
+    public static final String ADMIN_USERNAME = "ADMIN_USERNAME";
+    public static final String ADMIN_EMAIL = "ADMIN_EMAIL";
+    public static final String ADMIN_PASSWORD = "ADMIN_PASSWORD";
+    public static final String SESSION_TIMEOUT_MINUTES = "SESSION_TIMEOUT_MINUTES";
 
     // Default Values
     private static final String DEFAULT_DB_URL = "jdbc:mysql://localhost:3306/booking?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
@@ -41,6 +45,9 @@ public final class Config {
     private static final String DEFAULT_SMTP_HOST = "smtp.gmail.com";
     private static final String DEFAULT_SMTP_PORT = "587";
     private static final String DEFAULT_ALLOWED_ORIGIN = "*";
+    private static final String DEFAULT_ADMIN_USERNAME = "admin";
+    private static final String DEFAULT_ADMIN_EMAIL = "";
+    private static final int DEFAULT_SESSION_TIMEOUT_MINUTES = 30;
 
     public static String getDbUrl() {
         return get(DB_URL, DEFAULT_DB_URL);
@@ -90,6 +97,22 @@ public final class Config {
         return get(ALLOWED_ORIGIN, DEFAULT_ALLOWED_ORIGIN);
     }
 
+    public static String getAdminUsername() {
+        return get(ADMIN_USERNAME, DEFAULT_ADMIN_USERNAME);
+    }
+
+    public static String getAdminEmail() {
+        return get(ADMIN_EMAIL, DEFAULT_ADMIN_EMAIL);
+    }
+
+    public static String getAdminPassword() {
+        return get(ADMIN_PASSWORD, "");
+    }
+
+    public static int getSessionTimeoutMinutes() {
+        return getInt(SESSION_TIMEOUT_MINUTES, DEFAULT_SESSION_TIMEOUT_MINUTES);
+    }
+
     private static String get(String key, String defaultValue) {
         String value = System.getenv(key);
         if (value != null && !value.isBlank()) {
@@ -102,6 +125,15 @@ public final class Config {
         }
 
         return defaultValue;
+    }
+
+    private static int getInt(String key, int defaultValue) {
+        String raw = get(key, String.valueOf(defaultValue));
+        try {
+            return Integer.parseInt(raw);
+        } catch (NumberFormatException ignored) {
+            return defaultValue;
+        }
     }
 
     private static Map<String, String> loadBatchOverrides() {

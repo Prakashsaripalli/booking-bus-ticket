@@ -151,8 +151,8 @@ function isBookingLoginActive() {
         || localStorage.getItem("adminLoggedIn") === "true";
 }
 
-function createPrice(base, adjustments) {
-    return Math.max(299, base + adjustments);
+function createPrice(base) {
+    return Math.max(299, Number(base) || 299);
 }
 
 function buildSleeperUnits(base) {
@@ -431,7 +431,7 @@ function createUnitButton(unit, bookedSeats) {
     button.innerHTML = `
         <span class="layout-unit-inner">
             <span class="unit-label">${unit.label}</span>
-            <span class="unit-price">₹${unit.price}</span>
+            <span class="unit-price">Rs.${unit.price}</span>
         </span>
     `;
 

@@ -5,4 +5,6 @@ public class LoginRequest {
     public String role;
     public String identity;
     public String password;
+    public String name;
+    public String mobile;
 }

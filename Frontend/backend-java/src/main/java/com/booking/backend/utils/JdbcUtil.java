@@ -114,6 +114,36 @@ public final class JdbcUtil {
                         refunded_at VARCHAR(50)
                     )
                     """);
+            try {
+                stmt.execute("ALTER TABLE bookings ADD COLUMN owner_email VARCHAR(255) DEFAULT ''");
+            } catch (SQLException ignored) {
+                // Column may already exist.
+            }
+            try {
+                stmt.execute("ALTER TABLE bookings ADD COLUMN owner_mobile VARCHAR(20) DEFAULT ''");
+            } catch (SQLException ignored) {
+                // Column may already exist.
+            }
+            try {
+                stmt.execute("ALTER TABLE bookings ADD COLUMN cancelled_at VARCHAR(50)");
+            } catch (SQLException ignored) {
+                // Column may already exist.
+            }
+            try {
+                stmt.execute("ALTER TABLE bookings ADD COLUMN refund_status VARCHAR(40)");
+            } catch (SQLException ignored) {
+                // Column may already exist.
+            }
+            try {
+                stmt.execute("ALTER TABLE bookings ADD COLUMN refund_amount INT DEFAULT 0");
+            } catch (SQLException ignored) {
+                // Column may already exist.
+            }
+            try {
+                stmt.execute("ALTER TABLE bookings ADD COLUMN refunded_at VARCHAR(50)");
+            } catch (SQLException ignored) {
+                // Column may already exist.
+            }
 
             seedBuses(conn);
         }

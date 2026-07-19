@@ -850,6 +850,7 @@
     window.getCatalogBusesByRoute = getBusesByRoute;
     window.getCatalogRouteDistanceKm = getRouteDistanceKm;
     window.getCatalogPopularRoutes = getPopularRoutes;
+    window.normalizeCatalogRouteCity = normalizeRouteCity;
     window.normalizeCatalogBus = normalizeBusRecord;
     window.resolveBusCoachType = resolveBusCoachType;
     window.getManagedAdminBuses = readManagedAdminBuses;

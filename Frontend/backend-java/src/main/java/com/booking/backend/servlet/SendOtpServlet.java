@@ -2,6 +2,7 @@ package com.booking.backend.servlet;
 
 import com.booking.backend.dao.OtpDao;
 import com.booking.backend.model.SendOtpRequest;
+import com.booking.backend.utils.Config;
 import com.booking.backend.utils.EmailUtil;
 import com.booking.backend.utils.JsonUtil;
 import com.booking.backend.utils.OtpGenerator;
@@ -15,6 +16,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.mail.MessagingException;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 public class SendOtpServlet extends HttpServlet {
@@ -47,6 +49,7 @@ public class SendOtpServlet extends HttpServlet {
         String email = payload.email == null ? "" : payload.email.trim().toLowerCase();
 
         boolean smtpConfigured = EmailUtil.isSmtpConfigured();
+        boolean otpDebugEnabled = Config.isOtpDebug();
 
         if (mobile.isEmpty() && email.isEmpty()) {
             ResponseUtil.json(resp, HttpServletResponse.SC_BAD_REQUEST, Map.of(
@@ -68,16 +71,27 @@ public class SendOtpServlet extends HttpServlet {
                 return;
             }
 
-            if (!smtpConfigured) {
-                ResponseUtil.json(resp, HttpServletResponse.SC_SERVICE_UNAVAILABLE, Map.of(
-                        "success", false,
-                        "message", EmailUtil.smtpMissingMessage()
-                ));
-                return;
-            }
-
             try {
                 otpDao.saveOtp(email, otp, expiry);
+
+                if (otpDebugEnabled) {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("success", true);
+                    response.put("message", "OTP saved to database in debug mode.");
+                    response.put("otp", otp);
+                    response.put("target", email);
+                    ResponseUtil.json(resp, HttpServletResponse.SC_OK, response);
+                    return;
+                }
+
+                if (!smtpConfigured) {
+                    ResponseUtil.json(resp, HttpServletResponse.SC_SERVICE_UNAVAILABLE, Map.of(
+                            "success", false,
+                            "message", EmailUtil.smtpMissingMessage() + " OTP was still saved in the database."
+                    ));
+                    return;
+                }
+
                 EmailUtil.sendOtpEmail(email, otp);
 
                 ResponseUtil.json(resp, HttpServletResponse.SC_OK, Map.of(
@@ -85,10 +99,9 @@ public class SendOtpServlet extends HttpServlet {
                         "message", "OTP sent to email. Check Inbox/Spam/Promotions."
                 ));
             } catch (MessagingException e) {
-                otpDao.deleteOtp(email);
                 ResponseUtil.json(resp, HttpServletResponse.SC_BAD_GATEWAY, Map.of(
                         "success", false,
-                        "message", EmailUtil.smtpFailureMessage(e)
+                        "message", EmailUtil.smtpFailureMessage(e) + " OTP remains saved in the database."
                 ));
             } catch (RuntimeException e) {
                 e.printStackTrace();

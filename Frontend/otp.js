@@ -92,6 +92,7 @@ async function postOtpWithFallback(path, payload) {
         try {
             const response = await fetch(buildOtpUrl(path, base), {
                 method: "POST",
+                credentials: "include",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             });
@@ -255,6 +256,7 @@ async function verifyOTP() {
             try {
                 response = await fetch(buildOtpUrl("/api/auth/verify-otp", base), {
                     method: "POST",
+                    credentials: "include",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
                 });
@@ -276,6 +278,20 @@ async function verifyOTP() {
 
         clearAdminSessionFlags();
         localStorage.setItem("userOTPVerified", "true");
+        if (data.profile?.email) {
+            localStorage.setItem("userEmail", String(data.profile.email).trim().toLowerCase());
+            localStorage.setItem("userIdentity", String(data.profile.email).trim().toLowerCase());
+        }
+        if (typeof data.profile?.name === "string") {
+            localStorage.setItem("userName", data.profile.name.trim());
+        }
+        if (typeof data.profile?.mobile === "string") {
+            const mobileValue = data.profile.mobile.replace(/\D/g, "").slice(-10);
+            localStorage.setItem("userMobile", mobileValue);
+            if (mobileValue) {
+                localStorage.setItem("mobile", mobileValue);
+            }
+        }
         localStorage.removeItem("otpMode");
         localStorage.removeItem("mockOTP");
         localStorage.removeItem("mockOTPExpiry");

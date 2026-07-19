@@ -1,0 +1,8 @@
+.git
+.github
+.vscode
+Frontend/backend-java/target
+Frontend/_backend_run.err.log
+Frontend/_backend_run.log
+Frontend/_backend_run.out.log
+Frontend/yubus.code-workspace

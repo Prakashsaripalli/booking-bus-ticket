@@ -33,13 +33,13 @@ const bookingChatState = {
 const fallbackCities = [
     "Hyderabad",
     "Delhi",
-    "Bangalore",
+    "Bengaluru",
     "Chennai",
     "Goa",
     "Vijayawada",
     "Nellore",
     "Jaipur",
-    "Mangalore",
+    "Mangaluru",
     "Tirupati",
     "Visakhapatnam",
     "Madurai",
@@ -66,15 +66,15 @@ const cityAliases = {
     "ದೆಹಲಿ": "Delhi",
     "ഡൽഹി": "Delhi",
     "দিল্লি": "Delhi",
-    bangalore: "Bangalore",
-    bengaluru: "Bangalore",
-    "बैंगलोर": "Bangalore",
-    "बेंगलुरु": "Bangalore",
-    "బెంగళూరు": "Bangalore",
-    "பெங்களூரு": "Bangalore",
-    "ಬೆಂಗಳೂರು": "Bangalore",
-    "ബെംഗളൂരു": "Bangalore",
-    "বেঙ্গালুরু": "Bangalore",
+    bangalore: "Bengaluru",
+    bengaluru: "Bengaluru",
+    "बैंगलोर": "Bengaluru",
+    "बेंगलुरु": "Bengaluru",
+    "బెంగళూరు": "Bengaluru",
+    "பெங்களூரு": "Bengaluru",
+    "ಬೆಂಗಳೂರು": "Bengaluru",
+    "ബെംഗളൂരു": "Bengaluru",
+    "বেঙ্গালুরু": "Bengaluru",
     chennai: "Chennai",
     "चेन्नई": "Chennai",
     "చెన్నై": "Chennai",
@@ -108,12 +108,15 @@ const cityAliases = {
     "ಜೈಪುರ": "Jaipur",
     "ജയ്പൂർ": "Jaipur",
     "জয়পুর": "Jaipur",
-    mangalore: "Mangalore",
-    "मंगलुरु": "Mangalore",
-    "మಂಗಳೂರು": "Mangalore",
-    "மங்களூர்": "Mangalore",
-    "ಮಂಗಳೂರು": "Mangalore",
-    "മംഗളൂരു": "Mangalore",
+    mangalore: "Mangaluru",
+    mangaluru: "Mangaluru",
+    "मंगलुरु": "Mangaluru",
+    "మಂಗಳೂರು": "Mangaluru",
+    "மங்களூர்": "Mangaluru",
+    "ಮಂಗಳೂರು": "Mangaluru",
+    "മംഗളൂരു": "Mangaluru",
+    berhampur: "Brahmapur",
+    brahmapur: "Brahmapur",
     tirupati: "Tirupati",
     "तिरुपति": "Tirupati",
     "తిరుపతి": "Tirupati",
@@ -167,6 +170,19 @@ const phraseAliases = [
 
 function normalizeText(value) {
     return (value || "").trim().toLowerCase();
+}
+
+function normalizeSupportCityName(value) {
+    const text = String(value || "").trim();
+    if (!text) {
+        return "";
+    }
+
+    if (typeof window.normalizeCatalogRouteCity === "function") {
+        return window.normalizeCatalogRouteCity(text);
+    }
+
+    return text;
 }
 
 function cleanNaturalText(value) {
@@ -254,6 +270,33 @@ function getSpeechRecognitionLang() {
     }
 
     return navigator.languages?.[0] || navigator.language || "en-IN";
+}
+
+function isVoiceSecureContext() {
+    const host = String(window.location.hostname || "").toLowerCase();
+    return window.isSecureContext
+        || host === "localhost"
+        || host === "127.0.0.1";
+}
+
+async function ensureMicrophonePermission() {
+    if (!isVoiceSecureContext()) {
+        setSpeechStatus("Voice input needs HTTPS or localhost.", true);
+        return false;
+    }
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+        return true;
+    }
+
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach((track) => track.stop());
+        return true;
+    } catch (error) {
+        setSpeechStatus("Microphone permission is blocked.", true);
+        return false;
+    }
 }
 
 function getClosestCityToken(token) {
@@ -355,12 +398,14 @@ function applySupportAssistantState() {
         button.disabled = !supportAssistantActive;
     });
 
+    const voiceReady = supportAssistantActive && speechSupportAvailable && isVoiceSecureContext();
+
     if (speechLanguage) {
-        speechLanguage.disabled = !supportAssistantActive || !speechSupportAvailable;
+        speechLanguage.disabled = !voiceReady;
     }
 
     if (speechBtn) {
-        speechBtn.disabled = !supportAssistantActive || !speechSupportAvailable;
+        speechBtn.disabled = !voiceReady;
     }
 
     if (!supportAssistantActive) {
@@ -373,6 +418,8 @@ function applySupportAssistantState() {
     supportPauseMessageShown = false;
     if (speechRecognition) {
         setSpeechStatus("Voice ready");
+    } else if (speechSupportAvailable && !isVoiceSecureContext()) {
+        setSpeechStatus("Voice input needs HTTPS or localhost.", true);
     } else if (!speechSupportAvailable) {
         setSpeechStatus("Voice input is not supported in this browser.", true);
     }
@@ -408,6 +455,13 @@ function initSpeechRecognition() {
         speechBtn.disabled = true;
         speechLanguage.disabled = true;
         setSpeechStatus("Voice input is not supported in this browser.", true);
+        return;
+    }
+
+    if (!isVoiceSecureContext()) {
+        speechBtn.disabled = true;
+        speechLanguage.disabled = true;
+        setSpeechStatus("Voice input needs HTTPS or localhost.", true);
         return;
     }
 
@@ -460,6 +514,11 @@ function initSpeechRecognition() {
             return;
         }
 
+        if (event.error === "audio-capture") {
+            setSpeechStatus("No microphone was detected for voice input.", true);
+            return;
+        }
+
         if (event.error === "no-speech") {
             setSpeechStatus("No speech detected. Try again.");
             return;
@@ -468,13 +527,18 @@ function initSpeechRecognition() {
         setSpeechStatus(`Voice input error: ${event.error}`, true);
     });
 
-    speechBtn.addEventListener("click", () => {
+    speechBtn.addEventListener("click", async () => {
         if (!speechRecognition) {
             return;
         }
 
         if (speechRecognitionActive) {
             stopSpeechRecognition();
+            return;
+        }
+
+        const hasPermission = await ensureMicrophonePermission();
+        if (!hasPermission) {
             return;
         }
 
@@ -673,10 +737,10 @@ function getCatalogCities() {
 
     const unique = new Set();
     window.BUS_CATALOG.forEach((bus) => {
-        unique.add(bus.fromCity);
-        unique.add(bus.toCity);
+        unique.add(normalizeSupportCityName(bus.fromCity));
+        unique.add(normalizeSupportCityName(bus.toCity));
     });
-    return Array.from(unique);
+    return Array.from(unique).filter(Boolean);
 }
 
 function resolveCityName(rawText) {
@@ -686,10 +750,10 @@ function resolveCityName(rawText) {
     }
 
     if (cityAliases[cleaned]) {
-        return cityAliases[cleaned];
+        return normalizeSupportCityName(cityAliases[cleaned]);
     }
 
-    return getCatalogCities().find((city) => normalizeText(city) === cleaned) || "";
+    return normalizeSupportCityName(getCatalogCities().find((city) => normalizeText(city) === cleaned) || "");
 }
 
 function extractCityFromFragment(fragment) {
@@ -823,7 +887,7 @@ function getSeatSelectionHref(bus, dateValue) {
         departureTime: resolvedBus.departureTime || ""
     });
 
-    return `booking.html?layoutRev=20260307-seatlayout-v28&${query.toString()}`;
+    return `booking.html?layoutRev=20260408-flat-seat-price-v2&${query.toString()}`;
 }
 
 function buildBusReply(route, dateValue, buses) {
@@ -853,7 +917,7 @@ function buildBusReply(route, dateValue, buses) {
 
     actions.push({
         label: "Continue to Available Buses",
-        href: `result.html?${query.toString()}`
+        href: `result.html?routeRev=20260407-route-alias-v1&${query.toString()}`
     });
 
     return buildChatReply(lines.join("\n"), actions);
@@ -866,11 +930,13 @@ function getAllAvailableRoutes() {
 
     const routeMap = new Map();
     window.BUS_CATALOG.forEach((bus) => {
-        const key = `${bus.fromCity}|||${bus.toCity}`;
+        const fromCity = normalizeSupportCityName(bus.fromCity);
+        const toCity = normalizeSupportCityName(bus.toCity);
+        const key = `${fromCity}|||${toCity}`;
         if (!routeMap.has(key)) {
             routeMap.set(key, {
-                from: bus.fromCity,
-                to: bus.toCity
+                from: fromCity,
+                to: toCity
             });
         }
     });

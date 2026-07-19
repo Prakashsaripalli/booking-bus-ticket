@@ -95,6 +95,18 @@ public final class EmailUtil {
         Transport.send(message);
     }
 
+    public static void sendPasswordResetConfirmationEmail(String toEmail, String name) throws MessagingException {
+        Session session = createSession();
+        String fromEmail = getFromEmail();
+
+        MimeMessage message = new MimeMessage(session);
+        message.setFrom(new InternetAddress(fromEmail));
+        message.setRecipients(MimeMessage.RecipientType.TO, InternetAddress.parse(toEmail));
+        message.setSubject("Yubus - Password Reset Successful");
+        message.setContent(buildPasswordResetConfirmationHtml(name, toEmail), "text/html; charset=UTF-8");
+        Transport.send(message);
+    }
+
     public static void sendRefundSuccessEmail(String toEmail, String name, String bookingId, String from, String to, String busName, String departureTime, String journeyDate, String seats, String paymentMethod, int amount, String transactionId) throws MessagingException {
         Session session = createSession();
         String fromEmail = getFromEmail();
@@ -114,6 +126,19 @@ public final class EmailUtil {
                 + "<p style=\"margin:0 0 8px;\">Name: " + escapeHtml(name) + "</p>"
                 + "<p style=\"margin:0 0 8px;\">Email: " + escapeHtml(email) + "</p>"
                 + "<p style=\"margin:0;\">Mobile: " + escapeHtml(mobile) + "</p>"
+                + "</div></body></html>";
+    }
+
+    private static String buildPasswordResetConfirmationHtml(String name, String email) {
+        String safeName = escapeHtml((name == null || name.isBlank()) ? "User" : name);
+        String safeEmail = escapeHtml(email);
+
+        return "<html><body style=\"margin:0;padding:24px;background:" + EMAIL_PAGE_BACKGROUND + ";font-family:'Segoe UI',Arial,Helvetica,sans-serif;color:#1b1b1b;\">"
+                + "<div style=\"max-width:640px;margin:0 auto;background:#ffffff;border-radius:18px;padding:24px;box-shadow:0 8px 20px rgba(28,89,132,0.08);\">"
+                + "<h2 style=\"margin:0 0 12px;color:#1f4e9a;\">Password Reset Successful</h2>"
+                + "<p style=\"margin:0 0 10px;\">Hello " + safeName + ",</p>"
+                + "<p style=\"margin:0 0 10px;\">Your Yubus account password was reset successfully for <strong>" + safeEmail + "</strong>.</p>"
+                + "<p style=\"margin:0;\">If you did not reset your password, please change it immediately and contact support.</p>"
                 + "</div></body></html>";
     }
 
@@ -396,6 +421,8 @@ public final class EmailUtil {
         String v = value.trim();
         return "your.email@gmail.com".equalsIgnoreCase(v)
                 || "your_gmail_app_password".equals(v)
+                || "your-smtp-account@example.com".equalsIgnoreCase(v)
+                || "replace-with-your-app-password".equalsIgnoreCase(v)
                 || "REPLACE_WITH_NEW_APP_PASSWORD".equalsIgnoreCase(v)
                 || "REPLACE_ME".equalsIgnoreCase(v);
     }

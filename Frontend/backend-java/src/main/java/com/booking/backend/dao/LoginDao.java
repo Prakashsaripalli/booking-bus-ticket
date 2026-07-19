@@ -1,15 +1,21 @@
 package com.booking.backend.dao;
 
-public class LoginDao {
+import com.booking.backend.utils.Config;
 
-    private static final String ADMIN_USER = "admin";
-    private static final String ADMIN_EMAIL = "yubusadmin@gmail.com";
-    private static final String ADMIN_PASS = "admin123";
+public class LoginDao {
 
     public boolean validateAdmin(String identity, String password) {
         String normalized = identity == null ? "" : identity.trim().toLowerCase();
-        return (ADMIN_USER.equals(normalized)
-                || ADMIN_EMAIL.equals(normalized))
-                && ADMIN_PASS.equals(password);
+        String configuredUser = Config.getAdminUsername().trim().toLowerCase();
+        String configuredEmail = Config.getAdminEmail().trim().toLowerCase();
+        String configuredPassword = Config.getAdminPassword();
+
+        if (configuredPassword.isBlank()) {
+            return false;
+        }
+
+        return (configuredUser.equals(normalized)
+                || (!configuredEmail.isBlank() && configuredEmail.equals(normalized)))
+                && configuredPassword.equals(password);
     }
 }

@@ -13,8 +13,36 @@ const FALLBACK_BUSES = Array.isArray(window.BUS_CATALOG) && window.BUS_CATALOG.l
     ];
 
 const params = new URLSearchParams(window.location.search);
-const from = params.get("from")?.trim();
-const to = params.get("to")?.trim();
+const routeCityAliases = {
+    Bangalore: "Bengaluru",
+    Bengaluru: "Bengaluru",
+    Mysore: "Mysuru",
+    Mysuru: "Mysuru",
+    Mangalore: "Mangaluru",
+    Mangaluru: "Mangaluru",
+    Hubli: "Hubballi",
+    Hubballi: "Hubballi",
+    Belgaum: "Belagavi",
+    Belagavi: "Belagavi",
+    Berhampur: "Brahmapur",
+    Brahmapur: "Brahmapur",
+    Vizag: "Visakhapatnam",
+    Visakhapatnam: "Visakhapatnam"
+};
+const normalizeRouteCityName = (value) => {
+    const text = String(value || "").trim();
+    if (!text) {
+        return "";
+    }
+
+    if (typeof window.normalizeCatalogRouteCity === "function") {
+        return window.normalizeCatalogRouteCity(text);
+    }
+
+    return routeCityAliases[text] || text;
+};
+const from = normalizeRouteCityName(params.get("from"));
+const to = normalizeRouteCityName(params.get("to"));
 const date = params.get("date");
 
 const resultsDiv = document.getElementById("results");
@@ -81,7 +109,7 @@ function formatDateLabel(value) {
 }
 
 function normalizeCityKey(value) {
-    return String(value || "").trim().toLowerCase();
+    return normalizeRouteCityName(value).toLowerCase();
 }
 
 function normalizeDate(value) {
@@ -102,11 +130,18 @@ function getRouteImage(fromCity, toCity) {
 
 function normalizeBusRecord(bus) {
     if (typeof window.normalizeCatalogBus === "function") {
-        return window.normalizeCatalogBus(bus);
+        const normalizedBus = window.normalizeCatalogBus(bus);
+        return {
+            ...normalizedBus,
+            fromCity: normalizeRouteCityName(normalizedBus?.fromCity),
+            toCity: normalizeRouteCityName(normalizedBus?.toCity)
+        };
     }
 
     return {
         ...bus,
+        fromCity: normalizeRouteCityName(bus?.fromCity),
+        toCity: normalizeRouteCityName(bus?.toCity),
         busType: bus?.busType || "Standard"
     };
 }
@@ -515,7 +550,7 @@ function renderBuses(buses) {
                 departureTime: decodeURIComponent(this.dataset.departure || "")
             });
 
-            window.location.href = `booking.html?layoutRev=20260307-seatlayout-v28&${query.toString()}`;
+            window.location.href = `booking.html?layoutRev=20260408-flat-seat-price-v2&${query.toString()}`;
         });
     });
 }

@@ -1,8 +1,10 @@
 package com.booking.backend.servlet;
 
 import com.booking.backend.dao.BookingDao;
+import com.booking.backend.model.AuthenticatedUser;
 import com.booking.backend.model.BookingRecord;
 import com.booking.backend.model.BookingUpdateRequest;
+import com.booking.backend.utils.AuthUtil;
 import com.booking.backend.utils.JsonUtil;
 import com.booking.backend.utils.ResponseUtil;
 import jakarta.servlet.http.HttpServlet;
@@ -28,13 +30,18 @@ public class BookingServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String ownerEmail = req.getParameter("ownerEmail");
-        String ownerMobile = req.getParameter("ownerMobile");
-        String admin = req.getParameter("admin");
+        AuthenticatedUser actor = AuthUtil.getAuthenticatedUser(req);
+        if (actor == null) {
+            ResponseUtil.json(resp, HttpServletResponse.SC_UNAUTHORIZED, Map.of(
+                    "success", false,
+                    "message", "Please log in to view bookings"
+            ));
+            return;
+        }
 
-        List<BookingRecord> bookings = "true".equalsIgnoreCase(admin)
+        List<BookingRecord> bookings = actor.isAdmin()
                 ? bookingDao.listAll()
-                : bookingDao.listByOwner(ownerEmail, ownerMobile);
+                : bookingDao.listByOwner(actor.loginIdentity(), actor.normalizedMobile());
 
         ResponseUtil.json(resp, HttpServletResponse.SC_OK, Map.of(
                 "success", true,
@@ -44,36 +51,95 @@ public class BookingServlet extends HttpServlet {
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        BookingUpdateRequest payload = JsonUtil.mapper().readValue(req.getInputStream(), BookingUpdateRequest.class);
+        try {
+            AuthenticatedUser actor = AuthUtil.getAuthenticatedUser(req);
+            if (actor == null) {
+                ResponseUtil.json(resp, HttpServletResponse.SC_UNAUTHORIZED, Map.of(
+                        "success", false,
+                        "message", "Please log in to update bookings"
+                ));
+                return;
+            }
 
-        if (payload.bookingId == null || payload.bookingId.trim().isEmpty()) {
-            ResponseUtil.json(resp, HttpServletResponse.SC_BAD_REQUEST, Map.of(
-                    "success", false,
-                    "message", "Booking ID is required"
+            BookingUpdateRequest payload = JsonUtil.mapper().readValue(req.getInputStream(), BookingUpdateRequest.class);
+
+            if (payload.bookingId == null || payload.bookingId.trim().isEmpty()) {
+                ResponseUtil.json(resp, HttpServletResponse.SC_BAD_REQUEST, Map.of(
+                        "success", false,
+                        "message", "Booking ID is required"
+                ));
+                return;
+            }
+
+            BookingRecord existingBooking = bookingDao.findByBookingId(payload.bookingId);
+            if (existingBooking == null) {
+                ResponseUtil.json(resp, HttpServletResponse.SC_NOT_FOUND, Map.of(
+                        "success", false,
+                        "message", "Booking not found"
+                ));
+                return;
+            }
+
+            if (!actor.isAdmin() && !ownsBooking(actor, existingBooking)) {
+                ResponseUtil.json(resp, HttpServletResponse.SC_FORBIDDEN, Map.of(
+                        "success", false,
+                        "message", "You can only update your own bookings"
+                ));
+                return;
+            }
+
+            String requestedStatus = payload.status == null ? "" : payload.status.trim();
+            if (!actor.isAdmin() && !"Cancelled".equalsIgnoreCase(requestedStatus)) {
+                ResponseUtil.json(resp, HttpServletResponse.SC_FORBIDDEN, Map.of(
+                        "success", false,
+                        "message", "Passenger accounts can only cancel bookings"
+                ));
+                return;
+            }
+
+            BookingRecord booking = bookingDao.updateStatus(
+                    payload.bookingId,
+                    actor.isAdmin() ? payload.status : "Cancelled",
+                    payload.cancelledAt,
+                    actor.isAdmin() ? payload.refundStatus : "",
+                    actor.isAdmin() ? payload.refundAmount : 0,
+                    actor.isAdmin() ? payload.refundedAt : ""
+            );
+
+            if (booking == null) {
+                ResponseUtil.json(resp, HttpServletResponse.SC_NOT_FOUND, Map.of(
+                        "success", false,
+                        "message", "Booking not found"
+                ));
+                return;
+            }
+
+            ResponseUtil.json(resp, HttpServletResponse.SC_OK, Map.of(
+                    "success", true,
+                    "booking", booking
             ));
-            return;
-        }
-
-        BookingRecord booking = bookingDao.updateStatus(
-                payload.bookingId,
-                payload.status,
-                payload.cancelledAt,
-                payload.refundStatus,
-                payload.refundAmount,
-                payload.refundedAt
-        );
-
-        if (booking == null) {
-            ResponseUtil.json(resp, HttpServletResponse.SC_NOT_FOUND, Map.of(
+        } catch (Exception e) {
+            e.printStackTrace();
+            ResponseUtil.json(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Map.of(
                     "success", false,
-                    "message", "Booking not found"
+                    "message", e.getMessage() == null || e.getMessage().isBlank()
+                            ? "Failed to update booking in database"
+                            : e.getMessage()
             ));
-            return;
         }
+    }
 
-        ResponseUtil.json(resp, HttpServletResponse.SC_OK, Map.of(
-                "success", true,
-                "booking", booking
-        ));
+    private boolean ownsBooking(AuthenticatedUser actor, BookingRecord booking) {
+        String actorEmail = actor.loginIdentity();
+        String actorMobile = actor.normalizedMobile().toLowerCase();
+        String ownerEmail = normalize(booking.getOwnerEmail());
+        String ownerMobile = normalize(booking.getOwnerMobile());
+
+        return (!actorEmail.isBlank() && actorEmail.equals(ownerEmail))
+                || (!actorMobile.isBlank() && actorMobile.equals(ownerMobile));
+    }
+
+    private String normalize(String value) {
+        return value == null ? "" : value.trim().toLowerCase();
     }
 }

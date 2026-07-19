@@ -1,3 +1,6 @@
+if (localStorage.getItem("adminLoggedIn") === "true") {
+    window.location.replace("profile.html");
+}
 
 const tabs = document.querySelectorAll(".tab");
 
@@ -72,7 +75,7 @@ if (searchBtn) {
         }
 
         window.location.href =
-            `result.html?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&date=${date}`;
+            `result.html?routeRev=20260407-route-alias-v1&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&date=${date}`;
     });
 }
 
@@ -913,6 +916,7 @@ function renderPopularRoutes(routes) {
         if (viewButton) {
             viewButton.addEventListener("click", () => {
                 const query = new URLSearchParams({
+                    routeRev: "20260407-route-alias-v1",
                     from,
                     to,
                     date: getPopularRouteDate()

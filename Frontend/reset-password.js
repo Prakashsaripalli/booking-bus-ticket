@@ -40,6 +40,7 @@ async function postWithFallback(path, payload) {
         try {
             const response = await fetch(buildApiUrl(path, base), {
                 method: "POST",
+                credentials: "include",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             });
@@ -125,12 +126,15 @@ async function handleResetPassword(event) {
         return;
     }
 
+    let data = {};
     try {
-        const { response, data } = await postWithFallback("/api/auth/reset-password", {
+        const result = await postWithFallback("/api/auth/reset-password", {
             email,
             otp: enteredOtp,
             newPassword
         });
+        const response = result.response;
+        data = result.data || {};
         if (!response.ok || data.success === false) {
             setResetStatus(data.message || "Failed to reset password.", "error");
             return;
@@ -147,18 +151,12 @@ async function handleResetPassword(event) {
     const userIndex = users.findIndex((user) => normalizeEmail(user?.email) === email);
     if (userIndex >= 0) {
         users[userIndex] = {
-            ...users[userIndex],
-            password: newPassword
+            ...users[userIndex]
         };
         saveRegisteredUsers(users);
     }
 
-    const currentIdentity = normalizeEmail(localStorage.getItem("userIdentity") || localStorage.getItem("userEmail"));
-    if (currentIdentity === email) {
-        localStorage.setItem("userPassword", newPassword);
-    }
-
-    setResetStatus("Password reset successful. Redirecting to login...");
+    setResetStatus(`${data.message || "Password reset successful."} Redirecting to login...`);
     window.setTimeout(() => {
         window.location.href = `login.html?email=${encodeURIComponent(email)}`;
     }, 900);

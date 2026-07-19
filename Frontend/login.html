@@ -50,19 +50,19 @@
 
                 <form id="signupForm" onsubmit="signupUser(event)">
                     <label for="signupName">Full Name</label>
-                    <input id="signupName" type="text" placeholder="Enter full name" required>
+                    <input id="signupName" name="name" type="text" placeholder="Enter full name" required>
 
                     <label for="signupEmail">Email</label>
-                    <input id="signupEmail" type="email" placeholder="Enter email address" required>
+                    <input id="signupEmail" name="email" type="email" placeholder="Enter email address" required>
 
                     <label for="signupMobile">Mobile Number</label>
-                    <input id="signupMobile" type="tel" placeholder="Enter 10-digit mobile number" maxlength="10" required>
+                    <input id="signupMobile" name="mobile" type="tel" placeholder="Enter 10-digit mobile number" maxlength="10" required>
 
                     <label for="signupPassword">Password</label>
-                    <input id="signupPassword" type="password" placeholder="Create password" required>
+                    <input id="signupPassword" name="password" type="password" placeholder="Create password" required>
 
                     <label for="signupConfirmPassword">Confirm Password</label>
-                    <input id="signupConfirmPassword" type="password" placeholder="Confirm password" required>
+                    <input id="signupConfirmPassword" name="confirmPassword" type="password" placeholder="Confirm password" required>
 
                     <button class="login-btn user-login-btn" type="submit">Create Account</button>
                     <button class="link-btn" type="button" onclick="closeSignup()">Back to Login</button>
@@ -112,6 +112,6 @@
 </div>
 
 <script src="api-config.js"></script>
-<script src="login.js?v=20260320-otp-port-fallback-v2"></script>
+<script src="login.js?v=20260408-name-fix-v1"></script>
 </body>
 </html>

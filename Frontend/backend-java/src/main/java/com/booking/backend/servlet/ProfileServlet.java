@@ -1,8 +1,10 @@
 package com.booking.backend.servlet;
 
 import com.booking.backend.dao.UserDao;
+import com.booking.backend.model.AuthenticatedUser;
 import com.booking.backend.model.ProfileUpdateRequest;
 import com.booking.backend.model.User;
+import com.booking.backend.utils.AuthUtil;
 import com.booking.backend.utils.EmailUtil;
 import com.booking.backend.utils.JsonUtil;
 import com.booking.backend.utils.ResponseUtil;
@@ -30,16 +32,34 @@ public class ProfileServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String identity = req.getParameter("identity");
-        if (identity == null || identity.trim().isEmpty()) {
-            ResponseUtil.json(resp, HttpServletResponse.SC_BAD_REQUEST, Map.of(
+        AuthenticatedUser actor = AuthUtil.getAuthenticatedUser(req);
+        if (actor == null) {
+            ResponseUtil.json(resp, HttpServletResponse.SC_UNAUTHORIZED, Map.of(
                     "success", false,
-                    "message", "Identity is required"
+                    "message", "Please log in to view your profile"
             ));
             return;
         }
 
-        User user = userDao.getUserByIdentity(identity);
+        if (actor.isAdmin()) {
+            ResponseUtil.json(resp, HttpServletResponse.SC_FORBIDDEN, Map.of(
+                    "success", false,
+                    "message", "Admin accounts do not use the passenger profile API"
+            ));
+            return;
+        }
+
+        User user;
+        try {
+            user = userDao.getUserByIdentity(actor.loginIdentity());
+        } catch (RuntimeException e) {
+            ResponseUtil.json(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Map.of(
+                    "success", false,
+                    "message", "Failed to load profile from database"
+            ));
+            return;
+        }
+
         if (user == null) {
             ResponseUtil.json(resp, HttpServletResponse.SC_NOT_FOUND, Map.of(
                     "success", false,
@@ -56,21 +76,30 @@ public class ProfileServlet extends HttpServlet {
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        AuthenticatedUser actor = AuthUtil.getAuthenticatedUser(req);
+        if (actor == null) {
+            ResponseUtil.json(resp, HttpServletResponse.SC_UNAUTHORIZED, Map.of(
+                    "success", false,
+                    "message", "Please log in to update your profile"
+            ));
+            return;
+        }
+
+        if (actor.isAdmin()) {
+            ResponseUtil.json(resp, HttpServletResponse.SC_FORBIDDEN, Map.of(
+                    "success", false,
+                    "message", "Admin accounts do not use the passenger profile API"
+            ));
+            return;
+        }
+
         ProfileUpdateRequest payload = JsonUtil.mapper().readValue(req.getInputStream(), ProfileUpdateRequest.class);
 
-        String currentIdentity = payload.currentIdentity == null ? "" : payload.currentIdentity.trim().toLowerCase();
         String name = payload.name == null ? "" : payload.name.trim();
         String email = payload.email == null ? "" : payload.email.trim().toLowerCase();
         String mobile = payload.mobile == null ? "" : payload.mobile.trim();
 
         Map<String, Object> response = new HashMap<>();
-
-        if (currentIdentity.isEmpty()) {
-            response.put("success", false);
-            response.put("message", "Current identity is required");
-            ResponseUtil.json(resp, HttpServletResponse.SC_BAD_REQUEST, response);
-            return;
-        }
 
         if (name.isEmpty()) {
             response.put("success", false);
@@ -95,13 +124,19 @@ public class ProfileServlet extends HttpServlet {
 
         User updatedUser;
         try {
-            updatedUser = userDao.updateUserProfile(currentIdentity, name, email, mobile);
+            updatedUser = userDao.updateUserProfile(actor.loginIdentity(), name, email, mobile);
         } catch (IllegalStateException e) {
             response.put("success", false);
             response.put("message", e.getMessage());
             ResponseUtil.json(resp, HttpServletResponse.SC_CONFLICT, response);
             return;
+        } catch (RuntimeException e) {
+            response.put("success", false);
+            response.put("message", "Failed to update profile in database");
+            ResponseUtil.json(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, response);
+            return;
         }
+        AuthUtil.completeUserLogin(req, updatedUser);
         response.put("success", true);
         response.put("message", "Profile updated successfully");
         response.put("profile", toProfileMap(updatedUser));

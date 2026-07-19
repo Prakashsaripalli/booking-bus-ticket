@@ -2,9 +2,11 @@ package com.booking.backend.servlet;
 
 import com.booking.backend.dao.BookingDao;
 import com.booking.backend.dao.PaymentDao;
+import com.booking.backend.model.AuthenticatedUser;
 import com.booking.backend.model.BookingRecord;
 import com.booking.backend.model.PaymentRecord;
 import com.booking.backend.model.PaymentRequest;
+import com.booking.backend.utils.AuthUtil;
 import com.booking.backend.utils.EmailUtil;
 import com.booking.backend.utils.JsonUtil;
 import com.booking.backend.utils.ResponseUtil;
@@ -36,6 +38,22 @@ public class PaymentServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
+            AuthenticatedUser actor = AuthUtil.getAuthenticatedUser(req);
+            if (actor == null) {
+                ResponseUtil.json(resp, HttpServletResponse.SC_UNAUTHORIZED, Map.of(
+                        "success", false,
+                        "message", "Please log in before completing payment"
+                ));
+                return;
+            }
+            if (actor.isAdmin()) {
+                ResponseUtil.json(resp, HttpServletResponse.SC_FORBIDDEN, Map.of(
+                        "success", false,
+                        "message", "Admin accounts cannot create passenger bookings"
+                ));
+                return;
+            }
+
             PaymentRequest payload = JsonUtil.mapper().readValue(req.getInputStream(), PaymentRequest.class);
 
             String passengerName = payload.passengerName == null ? "" : payload.passengerName.trim();
@@ -102,8 +120,8 @@ public class PaymentServlet extends HttpServlet {
                     passengerName,
                     mobile,
                     email,
-                    resolvedNotificationEmail.isBlank() ? email : resolvedNotificationEmail,
-                    "", // owner_mobile can be empty if not provided
+                    actor.loginIdentity(),
+                    actor.normalizedMobile(),
                     paymentMethod,
                     transactionId,
                     "Booked",

@@ -4,6 +4,7 @@ import com.booking.backend.dao.OtpDao;
 import com.booking.backend.dao.UserDao;
 import com.booking.backend.model.ResetPasswordRequest;
 import com.booking.backend.model.User;
+import com.booking.backend.utils.EmailUtil;
 import com.booking.backend.utils.JsonUtil;
 import com.booking.backend.utils.ResponseUtil;
 import com.booking.backend.utils.ValidationUtil;
@@ -79,9 +80,23 @@ public class ResetPasswordServlet extends HttpServlet {
         }
 
         boolean updated = userDao.updatePassword(email, newPassword);
+        String message = updated ? "Password reset successful" : "Failed to update password";
+
+        if (updated && EmailUtil.isEmailDeliveryEnabled()) {
+            try {
+                EmailUtil.sendPasswordResetConfirmationEmail(
+                        email,
+                        user.getName() == null || user.getName().isBlank() ? user.getIdentity() : user.getName()
+                );
+                message = "Password reset successful. A confirmation email was sent.";
+            } catch (Exception ignored) {
+                message = "Password reset successful. Email notification could not be sent.";
+            }
+        }
+
         ResponseUtil.json(resp, updated ? HttpServletResponse.SC_OK : HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Map.of(
                 "success", updated,
-                "message", updated ? "Password reset successful" : "Failed to update password"
+                "message", message
         ));
     }
 }

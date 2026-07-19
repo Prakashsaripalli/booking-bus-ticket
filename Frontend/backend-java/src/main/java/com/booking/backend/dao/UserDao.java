@@ -32,7 +32,7 @@ public class UserDao {
         }
     }
 
-    public boolean createUserOrInitializePassword(String identity, String password) {
+    public boolean createUserOrInitializePassword(String identity, String password, String name, String mobile) {
         String key = normalizeIdentity(identity);
         if (key.isEmpty()) {
             return false;
@@ -44,13 +44,23 @@ public class UserDao {
         }
 
         String email = ValidationUtil.isValidEmail(key) ? key : "";
+        String normalizedName = name == null ? "" : name.trim();
+        String normalizedMobile = mobile == null ? "" : mobile.trim();
         String sql = """
-                INSERT INTO users(identity, email, password_hash)
-                VALUES (?, ?, ?)
+                INSERT INTO users(identity, name, email, mobile, password_hash)
+                VALUES (?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE
+                    name = CASE
+                        WHEN VALUES(name) IS NOT NULL AND VALUES(name) <> '' THEN VALUES(name)
+                        ELSE name
+                    END,
                     email = CASE
                         WHEN email IS NULL OR email = '' THEN VALUES(email)
                         ELSE email
+                    END,
+                    mobile = CASE
+                        WHEN VALUES(mobile) IS NOT NULL AND VALUES(mobile) <> '' THEN VALUES(mobile)
+                        ELSE mobile
                     END,
                     password_hash = CASE
                         WHEN password_hash IS NULL OR password_hash = '' THEN VALUES(password_hash)
@@ -60,13 +70,46 @@ public class UserDao {
         try (Connection conn = JdbcUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, key);
-            ps.setString(2, email);
-            ps.setString(3, PasswordUtil.hashPassword(password));
+            ps.setString(2, normalizedName);
+            ps.setString(3, email);
+            ps.setString(4, normalizedMobile);
+            ps.setString(5, PasswordUtil.hashPassword(password));
             ps.executeUpdate();
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to save user password", e);
+        }
+    }
+
+    public User mergeUserProfile(String identityOrEmail, String name, String mobile) {
+        String key = normalizeIdentity(identityOrEmail);
+        if (key.isEmpty()) {
+            return null;
+        }
+
+        User existing = getUserByIdentity(key);
+        if (existing == null) {
+            return null;
+        }
+
+        String mergedName = name == null || name.trim().isEmpty() ? existing.getName() : name.trim();
+        String mergedMobile = mobile == null || mobile.trim().isEmpty() ? existing.getMobile() : mobile.trim();
+        String mergedEmail = existing.getEmail() == null || existing.getEmail().trim().isEmpty() ? key : existing.getEmail().trim().toLowerCase();
+
+        String sql = "UPDATE users SET name = ?, email = ?, mobile = ? WHERE identity = ? OR email = ?";
+        try (Connection conn = JdbcUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, mergedName);
+            ps.setString(2, mergedEmail);
+            ps.setString(3, mergedMobile);
+            ps.setString(4, key);
+            ps.setString(5, key);
+            ps.executeUpdate();
+            return getUserByIdentity(mergedEmail);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to merge user profile", e);
         }
     }
 

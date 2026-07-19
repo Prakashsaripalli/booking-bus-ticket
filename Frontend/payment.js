@@ -146,6 +146,7 @@ async function postPayment(payload) {
         try {
             return await fetch(buildPaymentApiUrl("/api/payment/process", base), {
                 method: "POST",
+                credentials: "include",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             });

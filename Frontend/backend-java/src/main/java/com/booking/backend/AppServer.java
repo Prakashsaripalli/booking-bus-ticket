@@ -9,7 +9,9 @@ import com.booking.backend.dao.UserDao;
 import com.booking.backend.servlet.BookingServlet;
 import com.booking.backend.servlet.BusRoutesServlet;
 import com.booking.backend.servlet.BusSearchServlet;
+import com.booking.backend.servlet.HealthServlet;
 import com.booking.backend.servlet.LoginServlet;
+import com.booking.backend.servlet.LogoutServlet;
 import com.booking.backend.servlet.NotificationEmailServlet;
 import com.booking.backend.servlet.PaymentServlet;
 import com.booking.backend.servlet.PopularRoutesServlet;
@@ -99,14 +101,16 @@ public class AppServer {
         context.addServlet(new ServletHolder(new BusSearchServlet(busDao)), "/api/buses/search");
         context.addServlet(new ServletHolder(new BusRoutesServlet(busDao)), "/api/buses/routes");
         context.addServlet(new ServletHolder(new PopularRoutesServlet(busDao)), "/api/routes/popular");
+        context.addServlet(new ServletHolder(new HealthServlet()), "/api/health");
         context.addServlet(new ServletHolder(new LoginServlet(loginDao, userDao)), "/api/login");
         context.addServlet(new ServletHolder(new ProfileServlet(userDao)), "/api/profile");
         context.addServlet(new ServletHolder(new SendOtpServlet(otpDao)), "/api/auth/send-otp");
-        context.addServlet(new ServletHolder(new VerifyOtpServlet(otpDao)), "/api/auth/verify-otp");
+        context.addServlet(new ServletHolder(new VerifyOtpServlet(otpDao, userDao)), "/api/auth/verify-otp");
         context.addServlet(new ServletHolder(new ResetPasswordServlet(userDao, otpDao)), "/api/auth/reset-password");
         context.addServlet(new ServletHolder(new PaymentServlet(paymentDao, bookingDao)), "/api/payment/process");
         context.addServlet(new ServletHolder(new BookingServlet(bookingDao)), "/api/bookings");
         context.addServlet(new ServletHolder(new NotificationEmailServlet()), "/api/notifications/email");
+        context.addServlet(new ServletHolder(new LogoutServlet()), "/api/logout");
 
         Resource frontendBase = resolveFrontendBase();
         if (frontendBase != null) {
